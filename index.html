@@ -534,7 +534,7 @@ body::after{
   <div class="header">
     <div class="header-left">
       <div class="header-logo">POKÉ<span>DEX</span></div>
-      <div class="header-badge">v1.4</div>
+      <div class="header-badge">v1.5</div>
     </div>
     <div class="hbtns">
       <button class="refresh-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ <span>Refresh Prices</span></button>
@@ -928,7 +928,7 @@ async function identifyWithAI(base64){
   $id('aiStatus').style.display='flex';
   $id('suggestions').style.display='none';
   $id('step1Next').disabled=true;
-  const prompt='You are a Pokemon trading card expert. Analyze this card image and identify it. Return ONLY a JSON array (no markdown, no extra text) with up to 3 matches ordered by confidence: [{"name":"Charizard","set":"Base Set","number":"4/102","confidence":"high"}] confidence must be: high, medium, or low. If unidentifiable return [].';
+  const prompt='You are reading text from a Pokemon trading card image. Your job is to READ the printed text on the card, not guess from artwork. Look for: 1) The card name printed at the top (e.g. Charizard EX, Pikachu VMAX) 2) The card number printed at the bottom (e.g. 123/122, 29/83) 3) Any set symbol or set name. Return ONLY a JSON array (no markdown, no preamble): [{"name":"Gyarados EX","set":"BREAKpoint","number":"123/122","confidence":"high"}] Rules: name must include any suffix like EX, GX, V, VMAX, VSTAR. number is the bottom printed number. confidence is high if you can read the name clearly, medium if partial, low if guessing. Return [] only if no text is readable at all.';
   try{
     const res=await fetch(OPENROUTER_URL,{
       method:'POST',
