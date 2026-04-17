@@ -731,7 +731,7 @@ body::after{
   <div class="header">
     <div class="header-left">
       <div class="header-logo">POKÉ<span>DEX</span></div>
-      <div class="header-badge">v1.6</div>
+      <div class="header-badge">v1.7</div>
     </div>
     <div class="hbtns">
       <button class="refresh-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ <span>Refresh Prices</span></button>
@@ -1203,7 +1203,7 @@ async function searchTCG(name,set,number){
   let q=`name:"${name}"`;
   if(set)q+=` set.name:"${set}"`;
   if(number)q+=` number:"${number.split('/')[0]}"`;
-  const res=await fetch(`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&pageSize=16`);
+  const res=await fetch(`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&pageSize=36`);
   const data=await res.json();
   return data.data||[];
 }
