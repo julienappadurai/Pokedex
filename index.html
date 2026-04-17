@@ -512,6 +512,203 @@ body::after{
   font-family:'DM Mono',monospace;
 }
 .refresh-btn:hover{border-color:var(--gb2);color:var(--gb3);}
+
+/* ══════════════════════════════════
+   SHOWCASE
+══════════════════════════════════ */
+#showcase{
+  display:none;position:fixed;inset:0;z-index:500;
+  overflow:hidden;
+}
+#showcase.open{display:flex;flex-direction:column;}
+#showcase-bg{
+  position:absolute;inset:0;
+  transition:background 0.6s ease;
+}
+/* particle canvas */
+#showcase-canvas{position:absolute;inset:0;pointer-events:none;z-index:1;}
+/* card container */
+#showcase-card-wrap{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:10;
+  perspective:800px;
+  width:240px;
+}
+#showcase-card-inner{
+  width:240px;
+  transform-style:preserve-3d;
+  transition:transform 0.1s ease-out;
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.1);
+  overflow:hidden;
+  position:relative;
+}
+#showcase-card-img{
+  width:100%;display:block;border-radius:16px;
+}
+/* holographic overlay */
+#showcase-holo{
+  position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(135deg,
+    rgba(255,0,128,.15) 0%,
+    rgba(255,165,0,.15) 20%,
+    rgba(255,255,0,.15) 40%,
+    rgba(0,255,0,.15) 60%,
+    rgba(0,128,255,.15) 80%,
+    rgba(128,0,255,.15) 100%
+  );
+  mix-blend-mode:screen;
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+#showcase-card-inner:hover #showcase-holo,
+#showcase-card-inner.tilting #showcase-holo{opacity:1;}
+
+/* sprite */
+#showcase-sprite-wrap{
+  position:absolute;bottom:100px;right:24px;
+  z-index:12;
+  width:96px;height:96px;
+  display:flex;align-items:center;justify-content:center;
+}
+#showcase-sprite{
+  width:96px;height:96px;
+  object-fit:contain;
+  image-rendering:pixelated;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));
+  animation:sprite-bounce 1.2s ease-in-out infinite;
+}
+@keyframes sprite-bounce{
+  0%,100%{transform:translateY(0) scale(1);}
+  50%{transform:translateY(-10px) scale(1.05);}
+}
+.sprite-lightning{animation:sprite-shake .3s ease-in-out infinite;}
+@keyframes sprite-shake{
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-4px) rotate(-3deg);}
+  75%{transform:translateX(4px) rotate(3deg);}
+}
+.sprite-fire{animation:sprite-float 1s ease-in-out infinite;}
+@keyframes sprite-float{
+  0%,100%{transform:translateY(0) rotate(-2deg);}
+  50%{transform:translateY(-12px) rotate(2deg);}
+}
+.sprite-water{animation:sprite-wave 1.5s ease-in-out infinite;}
+@keyframes sprite-wave{
+  0%,100%{transform:translateY(0) scaleX(1);}
+  50%{transform:translateY(-8px) scaleX(1.05);}
+}
+.sprite-psychic{animation:sprite-spin 3s linear infinite;}
+@keyframes sprite-spin{
+  0%{transform:rotate(0deg) scale(1);}
+  50%{transform:rotate(180deg) scale(1.1);}
+  100%{transform:rotate(360deg) scale(1);}
+}
+
+/* top bar */
+#showcase-topbar{
+  position:absolute;top:0;left:0;right:0;
+  padding:48px 20px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:20;
+  background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 100%);
+}
+#showcase-name{
+  font-family:'Press Start 2P',monospace;
+  font-size:10px;color:#fff;
+  text-shadow:0 2px 8px rgba(0,0,0,.6);
+  letter-spacing:.5px;
+}
+#showcase-close{
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);
+  border-radius:50%;width:36px;height:36px;
+  color:#fff;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+  transition:all .15s;
+}
+#showcase-close:hover{background:rgba(0,0,0,.6);}
+
+/* stats button */
+#showcase-stats-btn{
+  position:absolute;bottom:32px;left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:24px;
+  padding:10px 24px;
+  color:#fff;font-family:'Press Start 2P',monospace;font-size:7px;
+  cursor:pointer;backdrop-filter:blur(8px);
+  transition:all .2s;
+  white-space:nowrap;
+}
+#showcase-stats-btn:hover{background:rgba(0,0,0,.7);transform:translateX(-50%) scale(1.05);}
+
+/* rarity badge */
+#showcase-rarity{
+  position:absolute;top:48px;left:50%;transform:translateX(-50%);
+  font-family:'Press Start 2P',monospace;font-size:6px;
+  color:rgba(255,255,255,.8);letter-spacing:2px;
+  z-index:20;text-shadow:0 0 8px rgba(255,215,0,.8);
+}
+
+/* stats panel */
+#showcase-stats-panel{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(10,10,10,.92);
+  backdrop-filter:blur(16px);
+  border-radius:24px 24px 0 0;
+  border-top:1px solid rgba(255,255,255,.1);
+  padding:24px 24px 40px;
+  z-index:30;
+  transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+#showcase-stats-panel.open{transform:translateY(0);}
+.sc-stat-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:13px;
+}
+.sc-stat-row:last-child{border-bottom:none;}
+.sc-stat-key{font-family:'Press Start 2P',monospace;font-size:6px;color:rgba(255,255,255,.4);}
+.sc-stat-val{font-family:'DM Mono',monospace;font-size:14px;color:#fff;}
+.sc-pl.pos{color:#39d98a;}
+.sc-pl.neg{color:#ff4d6d;}
+.sc-panel-close{
+  position:absolute;top:16px;right:20px;
+  background:none;border:none;color:rgba(255,255,255,.4);
+  font-size:18px;cursor:pointer;
+}
+.sc-panel-title{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:#fff;margin-bottom:16px;
+}
+.sc-action-row{display:flex;gap:8px;margin-top:16px;}
+.sc-btn{
+  flex:1;padding:10px;border-radius:10px;font-size:11px;
+  font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;border:none;
+  transition:all .15s;text-align:center;
+}
+.sc-btn-outline{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.sc-btn-outline:hover{background:rgba(255,255,255,.2);}
+.sc-btn-red{background:rgba(255,77,109,.15);color:#ff4d6d;border:1px solid rgba(255,77,109,.3);}
+.sc-btn-red:hover{background:rgba(255,77,109,.25);}
+
+/* burst animation */
+@keyframes burst-particle{
+  0%{transform:translate(0,0) scale(1);opacity:1;}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0;}
+}
+.burst-dot{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  animation:burst-particle .8s ease-out forwards;
+  pointer-events:none;
+}
+
 </style>
 </head>
 <body>
@@ -534,7 +731,7 @@ body::after{
   <div class="header">
     <div class="header-left">
       <div class="header-logo">POKÉ<span>DEX</span></div>
-      <div class="header-badge">v1.5</div>
+      <div class="header-badge">v1.6</div>
     </div>
     <div class="hbtns">
       <button class="refresh-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ <span>Refresh Prices</span></button>
@@ -1084,33 +1281,251 @@ function saveCard(){
   D.cards.unshift(entry);saveData();renderAll();closeAddModal();toast('✓ Card added to collection');
 }
 
-// ── DETAIL ──
+// ── SHOWCASE ──
+const TYPE_CONFIG = {
+  fire:      {bg:['#1a0500','#3d0f00','#ff4500'],particles:'#ff6b35',sprite:'fire'},
+  water:     {bg:['#001a3d','#00264d','#0066cc'],particles:'#00aaff',sprite:'water'},
+  lightning: {bg:['#1a1a00','#2d2d00','#666600'],particles:'#ffff00',sprite:'lightning'},
+  electric:  {bg:['#1a1a00','#2d2d00','#666600'],particles:'#ffff00',sprite:'lightning'},
+  grass:     {bg:['#001a00','#003300','#006600'],particles:'#00cc44',sprite:'bounce'},
+  psychic:   {bg:['#1a0033','#2d0055','#6600aa'],particles:'#cc00ff',sprite:'psychic'},
+  dragon:    {bg:['#000033','#000066','#0000aa'],particles:'#6666ff',sprite:'bounce'},
+  dark:      {bg:['#0a0a0a','#111111','#1a1a1a'],particles:'#9900cc',sprite:'bounce'},
+  metal:     {bg:['#1a1a1a','#2d2d2d','#404040'],particles:'#cccccc',sprite:'bounce'},
+  fairy:     {bg:['#1a0011','#330022','#660044'],particles:'#ff66cc',sprite:'bounce'},
+  fighting:  {bg:['#1a0800','#331500','#662900'],particles:'#ff6600',sprite:'bounce'},
+  normal:    {bg:['#111111','#1a1a1a','#222222'],particles:'#ffcc00',sprite:'bounce'},
+};
+
+let showcaseCardId = null;
+let particleAnim = null;
+let particles = [];
+let statsPanelOpen = false;
+
+function getTypeKey(card){
+  const t = (card.types||[])[0]||'normal';
+  return t.toLowerCase();
+}
+
 function openDetail(id){
-  const c=D.cards.find(x=>x.id===id);if(!c)return;
-  $id('detailTitle').textContent=c.name;
+  const c = D.cards.find(x=>x.id===id); if(!c) return;
+  showcaseCardId = id;
+  statsPanelOpen = false;
+  $id('showcase-stats-panel').classList.remove('open');
+
+  // Card image
+  $id('showcase-card-img').src = c.imageLarge||c.imageSmall||'';
+  $id('showcase-name').textContent = c.name.toUpperCase();
+
+  // Rarity badge
+  const isRare = /EX|GX|VMAX|VSTAR|V |V$/i.test(c.name+' '+(c.rarity||''));
+  $id('showcase-rarity').textContent = isRare ? '✦ ' + (c.rarity||'RARE').toUpperCase() + ' ✦' : '';
+
+  // Type colours
+  const typeKey = getTypeKey(c);
+  const cfg = TYPE_CONFIG[typeKey] || TYPE_CONFIG.normal;
+  const bg = $id('showcase-bg');
+  bg.style.background = `radial-gradient(ellipse at 30% 40%, ${cfg.bg[2]}88 0%, ${cfg.bg[1]} 50%, ${cfg.bg[0]} 100%)`;
+
+  // Sprite from PokéAPI
+  const spriteName = c.name.toLowerCase()
+    .replace(/[^a-z0-9]/g,' ').trim()
+    .split(' ')[0]; // first word only e.g. "gyarados" from "gyarados ex"
+  const spriteEl = $id('showcase-sprite');
+  spriteEl.style.display = 'block';
+  spriteEl.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${getPokemonId(spriteName)}.png`;
+  spriteEl.onerror = function(){ this.style.display='none'; };
+
+  // Sprite animation class
+  spriteEl.className = '';
+  if(cfg.sprite !== 'bounce') spriteEl.classList.add('sprite-'+cfg.sprite);
+
+  // Stats panel content
+  populateStatsPanel(c);
+
+  // Burst animation for rares
+  if(isRare) setTimeout(()=>doBurst(cfg.particles), 400);
+
+  // Show showcase
+  $id('showcase').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Start particles
+  startParticles(cfg.particles, typeKey);
+
+  // Tilt effect
+  setupTilt();
+}
+
+// Pokémon name → ID mapping for common ones, fallback to name-based URL
+const POKEMON_IDS = {
+  bulbasaur:1,ivysaur:2,venusaur:3,charmander:4,charmeleon:5,charizard:6,
+  squirtle:7,wartortle:8,blastoise:9,pikachu:25,raichu:26,mewtwo:150,mew:151,
+  zapdos:145,moltres:146,articuno:144,dragonite:149,gyarados:130,lapras:131,
+  snorlax:143,eevee:133,vaporeon:134,jolteon:135,flareon:136,espeon:196,umbreon:197,
+  gengar:94,haunter:93,gastly:92,alakazam:65,machamp:68,golem:76,
+  magikarp:129,ditto:132,jigglypuff:39,clefairy:35,meowth:52,psyduck:54,
+  slowpoke:79,magneton:82,dodrio:85,dewgong:87,muk:89,cloyster:91,
+  hypno:97,electrode:101,exeggutor:103,hitmonlee:106,hitmonchan:107,
+  weezing:110,kangaskhan:115,scyther:123,jynx:124,electabuzz:125,magmar:126,
+  pinsir:127,tauros:128,porygon:137,omanyte:138,omastar:139,kabuto:140,
+  kabutops:141,aerodactyl:142,snorlax:143,dratini:147,dragonair:148,
+  cyndaquil:155,totodile:158,chikorita:152,typhlosion:157,feraligatr:160,
+  meganium:154,lugia:249,hooh:250,celebi:251,
+  treecko:252,torchic:255,mudkip:258,blaziken:257,swampert:259,sceptile:254,
+  rayquaza:384,groudon:383,kyogre:382,deoxys:386,
+  turtwig:387,chimchar:390,piplup:393,lucario:448,garchomp:445,
+  dialga:483,palkia:484,giratina:487,arceus:493,
+  snivy:495,tepig:498,oshawott:501,zoroark:571,reshiram:643,zekrom:644,kyurem:646,
+  chespin:650,fennekin:653,froakie:656,greninja:658,sylveon:700,xerneas:716,yveltal:717,
+  rowlet:722,litten:725,popplio:728,decidueye:724,incineroar:727,primarina:730,
+  solgaleo:791,lunala:792,necrozma:800,
+  grookey:810,scorbunny:813,sobble:816,zacian:888,zamazenta:889,eternatus:890,
+  sprigatito:906,fuecoco:909,quaxly:912,koraidon:1007,miraidon:1008,
+};
+function getPokemonId(name){ return POKEMON_IDS[name] || name; }
+
+function populateStatsPanel(c){
   const mp=c.marketPrice||0,pp=c.purchasePrice||0;
   const pl=(mp-pp)*(c.quantity||1);
   const plPct=pp>0?((mp-pp)/pp*100):0;
   const updated=c.marketPriceUpdated?new Date(c.marketPriceUpdated).toLocaleDateString('en-GB'):'—';
-  $id('detailBody').innerHTML=`
-    <img class="detail-img" src="${c.imageLarge||c.imageSmall||''}" onerror="this.style.display='none'"/>
-    <div class="detail-row"><span class="detail-key">SET</span><span class="detail-val">${esc(c.setName)}</span></div>
-    <div class="detail-row"><span class="detail-key">NUMBER</span><span class="detail-val">${esc(c.number||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">RARITY</span><span class="detail-val">${esc(c.rarity||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">CONDITION</span><span class="detail-val">${esc(c.condition||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">QTY</span><span class="detail-val">×${c.quantity||1}</span></div>
-    <div class="detail-row"><span class="detail-key">PAID</span><span class="detail-val">${fmt(pp)}</span></div>
-    <div class="detail-row"><span class="detail-key">MARKET</span><span class="detail-val" style="color:var(--gb3)">${fmt(mp)} <span style="font-size:10px;color:var(--text3);">${updated}</span></span></div>
-    <div class="detail-row"><span class="detail-key">P&amp;L</span><span class="detail-val"><span class="pl-badge ${pl>=0?'pos':'neg'}">${fmtPL(pl)} (${plPct>=0?'+':''}${plPct.toFixed(1)}%)</span></span></div>
-    <div class="detail-row"><span class="detail-key">TOTAL VALUE</span><span class="detail-val" style="color:var(--gb3)">${fmt(mp*(c.quantity||1))}</span></div>
-    ${c.notes?`<div class="detail-row"><span class="detail-key">NOTES</span><span class="detail-val" style="font-family:'DM Sans';font-size:12px;max-width:200px;text-align:right;">${esc(c.notes)}</span></div>`:''}
-    <div class="btn-row">
-      <button class="btn btn-outline" onclick="refreshOnePrice('${id}')">↻ Refresh Price</button>
-      <button class="btn btn-red" onclick="deleteCard('${id}')">🗑 Remove</button>
-    </div>`;
-  $id('detailModal').classList.add('open');
+  $id('showcase-stats-content').innerHTML=`
+    <div class="sc-stat-row"><span class="sc-stat-key">SET</span><span class="sc-stat-val">${esc(c.setName)}</span></div>
+    <div class="sc-stat-row"><span class="sc-stat-key">NUMBER</span><span class="sc-stat-val">${esc(c.number||'—')}</span></div>
+    <div class="sc-stat-row"><span class="sc-stat-key">CONDITION</span><span class="sc-stat-val">${esc(c.condition||'—')}</span></div>
+    <div class="sc-stat-row"><span class="sc-stat-key">QUANTITY</span><span class="sc-stat-val">×${c.quantity||1}</span></div>
+    <div class="sc-stat-row"><span class="sc-stat-key">PAID</span><span class="sc-stat-val">${fmt(pp)}</span></div>
+    <div class="sc-stat-row"><span class="sc-stat-key">MARKET</span><span class="sc-stat-val" style="color:#9bbc0f">${fmt(mp)} <span style="font-size:10px;opacity:.5">${updated}</span></span></div>
+    <div class="sc-stat-row"><span class="sc-stat-key">P&L</span><span class="sc-stat-val sc-pl ${pl>=0?'pos':'neg'}">${fmtPL(pl)} (${plPct>=0?'+':''}${plPct.toFixed(1)}%)</span></div>
+    <div class="sc-stat-row"><span class="sc-stat-key">TOTAL VALUE</span><span class="sc-stat-val" style="color:#9bbc0f">${fmt(mp*(c.quantity||1))}</span></div>
+    ${c.notes?`<div class="sc-stat-row"><span class="sc-stat-key">NOTES</span><span class="sc-stat-val" style="font-size:12px;max-width:180px;text-align:right;">${esc(c.notes)}</span></div>`:''}
+  `;
 }
-function closeDetail(){$id('detailModal').classList.remove('open');}
+
+function toggleStatsPanel(){
+  statsPanelOpen=!statsPanelOpen;
+  $id('showcase-stats-panel').classList.toggle('open',statsPanelOpen);
+}
+
+function closeShowcase(){
+  $id('showcase').classList.remove('open');
+  document.body.style.overflow='';
+  if(particleAnim){cancelAnimationFrame(particleAnim);particleAnim=null;}
+  particles=[];
+  removeTilt();
+}
+function closeDetail(){closeShowcase();}
+
+// ── PARTICLES ──
+function startParticles(color, typeKey){
+  const canvas=$id('showcase-canvas');
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+  const ctx=canvas.getContext('2d');
+  particles=[];
+  if(particleAnim){cancelAnimationFrame(particleAnim);particleAnim=null;}
+
+  function spawnParticle(){
+    const isLightning = typeKey==='lightning'||typeKey==='electric';
+    const isFire = typeKey==='fire';
+    const isWater = typeKey==='water';
+    return {
+      x: isLightning ? Math.random()*canvas.width : Math.random()*canvas.width,
+      y: isLightning ? 0 : (isFire||isWater) ? canvas.height : Math.random()*canvas.height,
+      vx: (Math.random()-.5)*2,
+      vy: isLightning ? Math.random()*6+2 : isFire ? -(Math.random()*2+1) : isWater ? -(Math.random()*1+.5) : (Math.random()-.5)*1,
+      size: Math.random()*4+1,
+      alpha: Math.random()*.8+.2,
+      color: color,
+      life: 1,
+      decay: Math.random()*.015+.005,
+      isLightning,isFire,isWater,
+    };
+  }
+
+  for(let i=0;i<60;i++) particles.push(spawnParticle());
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach((p,i)=>{
+      p.x+=p.vx; p.y+=p.vy; p.life-=p.decay;
+      if(p.isLightning && Math.random()<.1){ p.vx=(Math.random()-.5)*6; }
+      ctx.save();
+      ctx.globalAlpha=p.life*p.alpha;
+      ctx.fillStyle=p.color;
+      if(p.isLightning){
+        ctx.fillRect(p.x,p.y,2,8+Math.random()*12);
+      } else {
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+      }
+      ctx.restore();
+      if(p.life<=0) particles[i]=spawnParticle();
+    });
+    particleAnim=requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── BURST ──
+function doBurst(color){
+  const wrap=$id('showcase-card-wrap');
+  const rect=wrap.getBoundingClientRect();
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
+  for(let i=0;i<24;i++){
+    const dot=document.createElement('div');
+    dot.className='burst-dot';
+    const angle=Math.random()*Math.PI*2;
+    const dist=80+Math.random()*120;
+    dot.style.cssText=`left:${cx}px;top:${cy}px;background:${color};--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;animation-duration:${.5+Math.random()*.5}s;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;`;
+    document.body.appendChild(dot);
+    setTimeout(()=>dot.remove(),1000);
+  }
+}
+
+// ── TILT ──
+function setupTilt(){
+  const inner=$id('showcase-card-inner');
+  function applyTilt(rx,ry){
+    inner.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+    inner.classList.add('tilting');
+  }
+  // Gyroscope
+  if(window.DeviceOrientationEvent){
+    window._tiltHandler=function(e){
+      const rx=Math.max(-20,Math.min(20,(e.beta||0)-45));
+      const ry=Math.max(-20,Math.min(20,e.gamma||0));
+      applyTilt(-rx*0.5,ry*0.5);
+    };
+    window.addEventListener('deviceorientation',window._tiltHandler);
+  }
+  // Mouse fallback
+  window._mouseTiltHandler=function(e){
+    const cx=window.innerWidth/2, cy=window.innerHeight/2;
+    const rx=((e.clientY-cy)/cy)*-15;
+    const ry=((e.clientX-cx)/cx)*15;
+    applyTilt(rx,ry);
+  };
+  window.addEventListener('mousemove',window._mouseTiltHandler);
+}
+function removeTilt(){
+  if(window._tiltHandler) window.removeEventListener('deviceorientation',window._tiltHandler);
+  if(window._mouseTiltHandler) window.removeEventListener('mousemove',window._mouseTiltHandler);
+  $id('showcase-card-inner').style.transform='';
+}
+
+// ── SHOWCASE ACTIONS ──
+function scRefreshPrice(){
+  if(!showcaseCardId)return;
+  refreshOnePrice(showcaseCardId);
+}
+function scDeleteCard(){
+  if(!showcaseCardId)return;
+  if(!confirm('Remove this card from your collection?'))return;
+  D.cards=D.cards.filter(x=>x.id!==showcaseCardId);
+  saveData();renderAll();closeShowcase();toast('Card removed');
+}
 
 async function refreshOnePrice(id){
   const c=D.cards.find(x=>x.id===id);if(!c)return;
@@ -1119,13 +1534,15 @@ async function refreshOnePrice(id){
     const data=await res.json();
     const mp=getMarketPrice(data.data||{});
     c.marketPrice=mp;c.marketPriceUpdated=new Date().toISOString();
-    saveData();openDetail(id);renderStats();toast('✓ Price updated: '+fmt(mp));
+    saveData();renderStats();
+    populateStatsPanel(c);
+    toast('✓ Price updated: '+fmt(mp));
   }catch(e){toast('Could not fetch price','err');}
 }
 function deleteCard(id){
   if(!confirm('Remove this card from your collection?'))return;
   D.cards=D.cards.filter(x=>x.id!==id);
-  saveData();renderAll();closeDetail();toast('Card removed');
+  saveData();renderAll();closeShowcase();toast('Card removed');
 }
 
 // ── REFRESH ALL ──
@@ -1186,5 +1603,42 @@ document.querySelectorAll('.modal-bg').forEach(bg=>{
   bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');});
 });
 </script>
+
+<!-- ══ SHOWCASE ══ -->
+<div id="showcase">
+  <div id="showcase-bg"></div>
+  <canvas id="showcase-canvas"></canvas>
+
+  <div id="showcase-topbar">
+    <div id="showcase-name"></div>
+    <button id="showcase-close" onclick="closeShowcase()">✕</button>
+  </div>
+
+  <div id="showcase-rarity"></div>
+
+  <div id="showcase-card-wrap">
+    <div id="showcase-card-inner">
+      <img id="showcase-card-img" src=""/>
+      <div id="showcase-holo"></div>
+    </div>
+  </div>
+
+  <div id="showcase-sprite-wrap">
+    <img id="showcase-sprite" src="" onerror="this.style.display='none'"/>
+  </div>
+
+  <button id="showcase-stats-btn" onclick="toggleStatsPanel()">📊 STATS</button>
+
+  <div id="showcase-stats-panel">
+    <button class="sc-panel-close" onclick="toggleStatsPanel()">✕</button>
+    <div class="sc-panel-title">CARD STATS</div>
+    <div id="showcase-stats-content"></div>
+    <div class="sc-action-row">
+      <button class="sc-btn sc-btn-outline" id="sc-refresh-btn" onclick="scRefreshPrice()">↻ Refresh Price</button>
+      <button class="sc-btn sc-btn-red" id="sc-delete-btn" onclick="scDeleteCard()">🗑 Remove</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
