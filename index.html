@@ -446,15 +446,28 @@ body::after{
 .suggestion-badge.low{background:var(--surface2);color:var(--text3);}
 
 /* ── TCG RESULTS ── */
-.tcg-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;max-height:220px;overflow-y:auto;margin-top:10px;}
+
+/* ── SEARCH RESULTS v2 ── */
+.tcg-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;max-height:300px;overflow-y:auto;margin-top:10px;}
 .tcg-result{
-  background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r3);padding:6px;cursor:pointer;
-  transition:all .15s;text-align:center;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);padding:7px;cursor:pointer;
+  transition:all .15s;text-align:center;position:relative;
 }
-.tcg-result:hover,.tcg-result.selected{border-color:var(--gb2);}
-.tcg-result img{width:100%;border-radius:4px;}
-.tcg-result-name{font-size:9px;color:var(--text3);margin-top:4px;line-height:1.3;}
+.tcg-result:hover,.tcg-result.selected{border-color:var(--gb2);box-shadow:0 0 0 2px rgba(139,172,15,.15);}
+.tcg-result img{width:100%;border-radius:4px;display:block;}
+.tcg-result-name{font-size:9px;color:var(--text);margin-top:4px;font-weight:600;line-height:1.3;}
+.tcg-result-set{font-size:8px;color:var(--text3);margin-top:2px;line-height:1.2;}
+.tcg-result-date{font-size:7px;color:var(--gb2);margin-top:1px;font-family:'DM Mono',monospace;}
+.tcg-result-rarity{font-size:7px;color:var(--text3);margin-top:1px;}
+.tcg-result-price{font-size:9px;color:var(--gb3);font-family:'DM Mono',monospace;font-weight:600;margin-top:3px;}
+.tcg-result-badge{
+  position:absolute;top:4px;right:4px;
+  background:var(--gb4);color:var(--gb1);
+  font-size:5px;padding:2px 4px;border-radius:3px;
+  font-family:'Press Start 2P',monospace;
+}
+
 
 /* ── CARD DETAIL ── */
 .detail-img{width:100%;max-height:260px;object-fit:contain;border-radius:var(--r2);background:var(--surface2);margin-bottom:16px;}
@@ -731,7 +744,7 @@ body::after{
   <div class="header">
     <div class="header-left">
       <div class="header-logo">POKÉ<span>DEX</span></div>
-      <div class="header-badge">v1.8</div>
+      <div class="header-badge">v1.9</div>
     </div>
     <div class="hbtns">
       <button class="refresh-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ <span>Refresh Prices</span></button>
@@ -783,39 +796,105 @@ body::after{
 
       <!-- STEP 1 -->
       <div id="addStep1">
-        <div class="scan-area">
-          <span class="scan-icon">📷</span>
-          <div class="scan-txt">Scan your card — AI will identify it for you</div>
-          <img id="scanPreview" class="scan-preview"/>
-        </div>
-        <div class="upload-btns">
-          <button class="btn btn-primary" onclick="document.getElementById('cameraInput').click()">📷 Camera</button>
-          <button class="btn btn-outline" onclick="document.getElementById('galleryInput').click()">🖼 Gallery</button>
-        </div>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleImageUpload(event)" style="display:none;"/>
-        <input type="file" id="galleryInput" accept="image/*" onchange="handleImageUpload(event)" style="display:none;"/>
-
-        <div id="aiStatus" style="display:none;" class="ai-status">
-          <span class="spinner"></span> Identifying card with Gemini AI…
-        </div>
-
-        <div id="suggestions" style="display:none;">
-          <div class="suggestions-lbl">AI SUGGESTIONS — tap to select</div>
-          <div id="suggestionList"></div>
-        </div>
-
-        <hr class="px-divider"/>
-
-        <div class="form-group">
-          <label class="form-label">MANUAL SEARCH</label>
+        <!-- Search bar -->
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">SEARCH CARDS</label>
           <div style="display:flex;gap:8px;">
-            <input class="form-input" id="manualSearchInput" placeholder="Card name…" onkeydown="if(event.key==='Enter')manualSearch()" style="flex:1;"/>
-            <button class="btn btn-outline" onclick="manualSearch()" style="white-space:nowrap;">Search</button>
+            <input class="form-input" id="manualSearchInput" placeholder="Type a Pokémon name…" oninput="debouncedSearch()" style="flex:1;" autocomplete="off"/>
+            <button class="btn btn-primary" onclick="manualSearch()" style="white-space:nowrap;font-size:10px;">GO</button>
           </div>
-          <div id="tcgResults" class="tcg-results" style="display:none;margin-top:10px;"></div>
         </div>
 
-        <div class="btn-row">
+        <!-- Filters toggle -->
+        <div style="margin-bottom:8px;">
+          <button class="btn btn-outline" onclick="toggleFilters()" id="filtersToggleBtn" style="width:100%;font-size:11px;padding:7px;">
+            ⚙ Filters <span id="filterCount"></span>
+          </button>
+        </div>
+
+        <!-- Filters panel -->
+        <div id="filtersPanel" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:12px;margin-bottom:10px;">
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">TYPE</label>
+              <select class="form-select" id="filterType" onchange="manualSearch()">
+                <option value="">Any Type</option>
+                <option>Colorless</option><option>Darkness</option><option>Dragon</option>
+                <option>Fairy</option><option>Fighting</option><option>Fire</option>
+                <option>Grass</option><option>Lightning</option><option>Metal</option>
+                <option>Psychic</option><option>Water</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">SUBTYPE</label>
+              <select class="form-select" id="filterSubtype" onchange="manualSearch()">
+                <option value="">Any Subtype</option>
+                <option>Basic</option><option>Stage 1</option><option>Stage 2</option>
+                <option>EX</option><option>GX</option><option>V</option><option>VMAX</option>
+                <option>VSTAR</option><option>MEGA</option><option>BREAK</option>
+                <option>TAG TEAM</option><option>Baby</option><option>Level-Up</option>
+                <option>Restored</option><option>Item</option><option>Supporter</option>
+                <option>Stadium</option><option>Pokémon Tool</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">RARITY</label>
+              <select class="form-select" id="filterRarity" onchange="manualSearch()">
+                <option value="">Any Rarity</option>
+                <option>Common</option><option>Uncommon</option><option>Rare</option>
+                <option>Rare Holo</option><option>Rare Holo EX</option><option>Rare Holo GX</option>
+                <option>Rare Holo V</option><option>Rare Holo VMAX</option><option>Rare Holo VSTAR</option>
+                <option>Rare Ultra</option><option>Rare Secret</option><option>Rare Rainbow</option>
+                <option>Rare ACE</option><option>Rare BREAK</option><option>Amazing Rare</option>
+                <option>LEGEND</option><option>Promo</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">SUPERTYPE</label>
+              <select class="form-select" id="filterSupertype" onchange="manualSearch()">
+                <option value="">Any</option>
+                <option>Pokémon</option><option>Trainer</option><option>Energy</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">MIN HP</label>
+              <input class="form-input" id="filterHpMin" type="number" min="0" placeholder="e.g. 100" oninput="manualSearch()"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">MAX HP</label>
+              <input class="form-input" id="filterHpMax" type="number" min="0" placeholder="e.g. 300" oninput="manualSearch()"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">FORMAT LEGAL</label>
+              <select class="form-select" id="filterLegal" onchange="manualSearch()">
+                <option value="">Any Format</option>
+                <option value="standard">Standard</option>
+                <option value="expanded">Expanded</option>
+                <option value="unlimited">Unlimited</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">ARTIST</label>
+              <input class="form-input" id="filterArtist" placeholder="Artist name…" oninput="manualSearch()"/>
+            </div>
+          </div>
+          <button class="btn btn-outline" onclick="clearFilters()" style="width:100%;margin-top:10px;font-size:11px;">✕ Clear All Filters</button>
+        </div>
+
+        <!-- Results -->
+        <div id="searchStatus" style="font-size:11px;color:var(--text3);margin-bottom:8px;min-height:16px;"></div>
+        <div id="tcgResults" class="tcg-results" style="display:none;"></div>
+        <div style="text-align:center;margin-top:10px;display:none;" id="loadMoreWrap">
+          <button class="btn btn-outline" onclick="loadMoreResults()" style="font-size:11px;">Load More Results</button>
+        </div>
+
+        <div class="btn-row" style="margin-top:12px;">
           <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
           <button class="btn btn-primary" id="step1Next" onclick="goStep2()" disabled>Next →</button>
         </div>
@@ -1096,29 +1175,62 @@ function setFilter(f){activeFilter=f;renderPortfolio();}
 
 // ── ADD CARD ──
 let capturedImageBase64=null;
+let searchPage=1;
+let searchDebounceTimer=null;
+let lastSearchQuery='';
+
 function openAddModal(){
-  selectedCard=null;capturedImageBase64=null;
-  $id('scanPreview').style.display='none';$id('scanPreview').src='';
-  $id('aiStatus').style.display='none';
-  $id('suggestions').style.display='none';$id('suggestionList').innerHTML='';
+  selectedCard=null;
   $id('manualSearchInput').value='';
   $id('tcgResults').style.display='none';$id('tcgResults').innerHTML='';
+  $id('loadMoreWrap').style.display='none';
+  $id('searchStatus').textContent='';
   $id('step1Next').disabled=true;
-  $id('cameraInput').value='';$id('galleryInput').value='';
+  $id('filtersPanel').style.display='none';
+  clearFilters(true);
+  searchPage=1;
   goStep1(true);$id('addModal').classList.add('open');
+  setTimeout(()=>$id('manualSearchInput').focus(),200);
 }
 function closeAddModal(){$id('addModal').classList.remove('open');}
 
-async function handleImageUpload(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=async ev=>{
-    const dataUrl=ev.target.result;
-    capturedImageBase64=dataUrl.split(',')[1];
-    $id('scanPreview').src=dataUrl;$id('scanPreview').style.display='block';
-    await identifyWithAI(capturedImageBase64);
-  };
-  reader.readAsDataURL(file);
+function toggleFilters(){
+  const panel=$id('filtersPanel');
+  panel.style.display=panel.style.display==='none'?'':'none';
+}
+
+function countActiveFilters(){
+  let n=0;
+  if($id('filterType').value)n++;
+  if($id('filterSubtype').value)n++;
+  if($id('filterRarity').value)n++;
+  if($id('filterSupertype').value)n++;
+  if($id('filterHpMin').value)n++;
+  if($id('filterHpMax').value)n++;
+  if($id('filterLegal').value)n++;
+  if($id('filterArtist').value)n++;
+  $id('filterCount').textContent=n>0?`(${n} active)`:'';
+  $id('filtersToggleBtn').style.borderColor=n>0?'var(--gb2)':'';
+}
+
+function clearFilters(silent){
+  ['filterType','filterSubtype','filterRarity','filterSupertype','filterLegal'].forEach(id=>{
+    if($id(id))$id(id).value='';
+  });
+  ['filterHpMin','filterHpMax','filterArtist'].forEach(id=>{
+    if($id(id))$id(id).value='';
+  });
+  $id('filterCount').textContent='';
+  $id('filtersToggleBtn').style.borderColor='';
+  if(!silent) manualSearch();
+}
+
+function debouncedSearch(){
+  clearTimeout(searchDebounceTimer);
+  const q=$id('manualSearchInput').value.trim();
+  if(q.length<2){ $id('tcgResults').style.display='none'; $id('searchStatus').textContent=''; return; }
+  $id('searchStatus').textContent='Searching…';
+  searchDebounceTimer=setTimeout(()=>manualSearch(),400);
 }
 
 async function identifyWithAI(base64){
@@ -1199,56 +1311,75 @@ function selectManual(i){
   document.querySelectorAll('.suggestion-item').forEach(el=>el.classList.remove('selected'));
 }
 
-async function searchTCG(name,set,number){
-  // If called from manual search, name may contain set info — parse it smartly
-  const knownSets=['base set','jungle','fossil','team rocket','gym heroes','gym challenge',
-    'neo genesis','neo discovery','neo revelation','neo destiny','legendary collection',
-    'expedition','aquapolis','skyridge','ruby sapphire','sandstorm','dragon','team magma',
-    'hidden legends','firered leafgreen','team rocket returns','deoxys','emerald',
-    'unseen forces','delta species','legend maker','holon phantoms','crystal guardians',
-    'dragon frontiers','power keepers','diamond pearl','mysterious treasures','secret wonders',
-    'great encounters','majestic dawn','legends awakened','stormfront','platinum','rising rivals',
-    'supreme victors','arceus','heartgold soulsilver','unleashed','undaunted','triumphant',
-    'call of legends','black white','emerging powers','noble victories','next destinies',
-    'dark explorers','dragons exalted','boundaries crossed','plasma storm','plasma freeze',
-    'plasma blast','legendary treasures','xy','flashfire','furious fists','phantom forces',
-    'primal clash','roaring skies','ancient origins','breakthrough','breakpoint','generations',
-    'fates collide','steam siege','evolutions','sun moon','guardians rising','burning shadows',
-    'shining legends','crimson invasion','ultra prism','forbidden light','celestial storm',
-    'dragon majesty','lost thunder','team up','detective pikachu','unbroken bonds',
-    'unified minds','hidden fates','cosmic eclipse','sword shield','rebel clash',
-    'darkness ablaze','champions path','vivid voltage','shining fates','battle styles',
-    'chilling reign','evolving skies','celebrations','fusion strike','brilliant stars',
-    'astral radiance','pokemon go','lost origin','silver tempest','crown zenith',
-    'scarlet violet','paldea evolved','obsidian flames','paradox rift','paldean fates',
-    'temporal forces','twilight masquerade','shrouded fable','stellar crown','surging sparks',
-    'prismatic evolutions'];
-  
-  let cardName = name;
-  let setName = set || '';
-  
-  // Try to detect if user typed "name set" e.g. "Zapdos Generations"
-  if(!set){
-    const lower = name.toLowerCase();
+async function searchTCG(name,set,number,page){
+  page=page||1;
+  const parts=[];
+
+  // Smart name parsing — detect set name embedded in query
+  let cardName=(name||'').trim();
+  let setName=set||'';
+
+  if(cardName && !setName){
+    const knownSets=['base set','jungle','fossil','team rocket','gym heroes','gym challenge',
+      'neo genesis','neo discovery','neo revelation','neo destiny','legendary collection',
+      'expedition','aquapolis','skyridge','ruby sapphire','sandstorm','dragon','team magma',
+      'hidden legends','firered leafgreen','team rocket returns','deoxys','emerald',
+      'unseen forces','delta species','legend maker','holon phantoms','crystal guardians',
+      'dragon frontiers','power keepers','diamond pearl','mysterious treasures','secret wonders',
+      'great encounters','majestic dawn','legends awakened','stormfront','platinum','rising rivals',
+      'supreme victors','arceus','heartgold soulsilver','unleashed','undaunted','triumphant',
+      'call of legends','black white','emerging powers','noble victories','next destinies',
+      'dark explorers','dragons exalted','boundaries crossed','plasma storm','plasma freeze',
+      'plasma blast','legendary treasures','xy','flashfire','furious fists','phantom forces',
+      'primal clash','roaring skies','ancient origins','breakthrough','breakpoint','generations',
+      'fates collide','steam siege','evolutions','sun moon','guardians rising','burning shadows',
+      'shining legends','crimson invasion','ultra prism','forbidden light','celestial storm',
+      'dragon majesty','lost thunder','team up','detective pikachu','unbroken bonds',
+      'unified minds','hidden fates','cosmic eclipse','sword shield','rebel clash',
+      'darkness ablaze','champions path','vivid voltage','shining fates','battle styles',
+      'chilling reign','evolving skies','celebrations','fusion strike','brilliant stars',
+      'astral radiance','pokemon go','lost origin','silver tempest','crown zenith',
+      'scarlet violet','paldea evolved','obsidian flames','paradox rift','paldean fates',
+      'temporal forces','twilight masquerade','shrouded fable','stellar crown','surging sparks',
+      'prismatic evolutions'];
+    const lower=cardName.toLowerCase();
     for(const s of knownSets){
-      if(lower.endsWith(' '+s)){
-        cardName = name.slice(0, name.length - s.length - 1);
-        setName = s;
-        break;
-      }
-      if(lower.startsWith(s+' ')){
-        setName = s;
-        cardName = name.slice(s.length+1);
-        break;
-      }
+      if(lower.endsWith(' '+s)){cardName=cardName.slice(0,cardName.length-s.length-1);setName=s;break;}
+      if(lower.startsWith(s+' ')){setName=s;cardName=cardName.slice(s.length+1);break;}
     }
   }
 
-  let q = `name:"${cardName}"`;
-  if(setName) q += ` set.name:"${setName}"`;
-  if(number) q += ` number:"${number.split('/')[0]}"`;
-  const res = await fetch(`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&pageSize=36`);
-  const data = await res.json();
+  // Build query
+  if(cardName) parts.push(`name:"${cardName}*"`);
+  if(setName) parts.push(`set.name:"${setName}"`);
+  if(number) parts.push(`number:"${number.split('/')[0]}"`);
+
+  // Filters from UI
+  const fType=$id('filterType')?.value;
+  const fSubtype=$id('filterSubtype')?.value;
+  const fRarity=$id('filterRarity')?.value;
+  const fSupertype=$id('filterSupertype')?.value;
+  const fHpMin=$id('filterHpMin')?.value;
+  const fHpMax=$id('filterHpMax')?.value;
+  const fLegal=$id('filterLegal')?.value;
+  const fArtist=$id('filterArtist')?.value;
+
+  if(fType) parts.push(`types:"${fType}"`);
+  if(fSubtype) parts.push(`subtypes:"${fSubtype}"`);
+  if(fRarity) parts.push(`rarity:"${fRarity}"`);
+  if(fSupertype) parts.push(`supertype:"${fSupertype}"`);
+  if(fHpMin && fHpMax) parts.push(`hp:[${fHpMin} TO ${fHpMax}]`);
+  else if(fHpMin) parts.push(`hp:[${fHpMin} TO *]`);
+  else if(fHpMax) parts.push(`hp:[* TO ${fHpMax}]`);
+  if(fLegal) parts.push(`legalities.${fLegal}:legal`);
+  if(fArtist) parts.push(`artist:"${fArtist}"`);
+
+  const q=parts.join(' ');
+  if(!q) return [];
+
+  const url=`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=36&page=${page}`;
+  const res=await fetch(url);
+  const data=await res.json();
   return data.data||[];
 }
 
