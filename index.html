@@ -744,7 +744,7 @@ body::after{
   <div class="header">
     <div class="header-left">
       <div class="header-logo">POKÉ<span>DEX</span></div>
-      <div class="header-badge">v1.9</div>
+      <div class="header-badge">v2.0</div>
     </div>
     <div class="hbtns">
       <button class="refresh-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ <span>Refresh Prices</span></button>
@@ -1018,6 +1018,7 @@ body::after{
 const OPENROUTER_KEY='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';
 const OPENROUTER_URL='https://openrouter.ai/api/v1/chat/completions';
 const TCG_BASE='https://api.pokemontcg.io/v2';
+const TCG_KEY='a7506525-ee34-42ba-9cb8-eecbef4b8d85';
 const PIN_KEY='pokedex_pin',DATA_KEY='pokedex_data',NAME_KEY='pokedex_name',GKEY_KEY='pokedex_orkey';
 
 let D={cards:[]},selectedCard=null,activeFilter='all';
@@ -1377,8 +1378,8 @@ async function searchTCG(name,set,number,page){
   const q=parts.join(' ');
   if(!q) return [];
 
-  const url=`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=36&page=${page}`;
-  const res=await fetch(url);
+  const url=`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=250&page=${page}`;
+  const res=await fetch(url,{headers:{'X-Api-Key':TCG_KEY}});
   const data=await res.json();
   return data.data||[];
 }
@@ -1705,7 +1706,7 @@ function scDeleteCard(){
 async function refreshOnePrice(id){
   const c=D.cards.find(x=>x.id===id);if(!c)return;
   try{
-    const res=await fetch(`${TCG_BASE}/cards/${c.tcgId}`);
+    const res=await fetch(`${TCG_BASE}/cards/${c.tcgId}`,{headers:{'X-Api-Key':TCG_KEY}});
     const data=await res.json();
     const mp=getMarketPrice(data.data||{});
     c.marketPrice=mp;c.marketPriceUpdated=new Date().toISOString();
@@ -1727,7 +1728,7 @@ async function refreshAllPrices(){
   let updated=0;
   for(const c of D.cards){
     try{
-      const res=await fetch(`${TCG_BASE}/cards/${c.tcgId}`);
+      const res=await fetch(`${TCG_BASE}/cards/${c.tcgId}`,{headers:{'X-Api-Key':TCG_KEY}});
       const data=await res.json();
       const mp=getMarketPrice(data.data||{});
       if(mp>0){c.marketPrice=mp;c.marketPriceUpdated=new Date().toISOString();updated++;}
