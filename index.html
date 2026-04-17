@@ -731,7 +731,7 @@ body::after{
   <div class="header">
     <div class="header-left">
       <div class="header-logo">POKÉ<span>DEX</span></div>
-      <div class="header-badge">v1.7</div>
+      <div class="header-badge">v1.8</div>
     </div>
     <div class="hbtns">
       <button class="refresh-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ <span>Refresh Prices</span></button>
@@ -1200,11 +1200,55 @@ function selectManual(i){
 }
 
 async function searchTCG(name,set,number){
-  let q=`name:"${name}"`;
-  if(set)q+=` set.name:"${set}"`;
-  if(number)q+=` number:"${number.split('/')[0]}"`;
-  const res=await fetch(`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&pageSize=36`);
-  const data=await res.json();
+  // If called from manual search, name may contain set info — parse it smartly
+  const knownSets=['base set','jungle','fossil','team rocket','gym heroes','gym challenge',
+    'neo genesis','neo discovery','neo revelation','neo destiny','legendary collection',
+    'expedition','aquapolis','skyridge','ruby sapphire','sandstorm','dragon','team magma',
+    'hidden legends','firered leafgreen','team rocket returns','deoxys','emerald',
+    'unseen forces','delta species','legend maker','holon phantoms','crystal guardians',
+    'dragon frontiers','power keepers','diamond pearl','mysterious treasures','secret wonders',
+    'great encounters','majestic dawn','legends awakened','stormfront','platinum','rising rivals',
+    'supreme victors','arceus','heartgold soulsilver','unleashed','undaunted','triumphant',
+    'call of legends','black white','emerging powers','noble victories','next destinies',
+    'dark explorers','dragons exalted','boundaries crossed','plasma storm','plasma freeze',
+    'plasma blast','legendary treasures','xy','flashfire','furious fists','phantom forces',
+    'primal clash','roaring skies','ancient origins','breakthrough','breakpoint','generations',
+    'fates collide','steam siege','evolutions','sun moon','guardians rising','burning shadows',
+    'shining legends','crimson invasion','ultra prism','forbidden light','celestial storm',
+    'dragon majesty','lost thunder','team up','detective pikachu','unbroken bonds',
+    'unified minds','hidden fates','cosmic eclipse','sword shield','rebel clash',
+    'darkness ablaze','champions path','vivid voltage','shining fates','battle styles',
+    'chilling reign','evolving skies','celebrations','fusion strike','brilliant stars',
+    'astral radiance','pokemon go','lost origin','silver tempest','crown zenith',
+    'scarlet violet','paldea evolved','obsidian flames','paradox rift','paldean fates',
+    'temporal forces','twilight masquerade','shrouded fable','stellar crown','surging sparks',
+    'prismatic evolutions'];
+  
+  let cardName = name;
+  let setName = set || '';
+  
+  // Try to detect if user typed "name set" e.g. "Zapdos Generations"
+  if(!set){
+    const lower = name.toLowerCase();
+    for(const s of knownSets){
+      if(lower.endsWith(' '+s)){
+        cardName = name.slice(0, name.length - s.length - 1);
+        setName = s;
+        break;
+      }
+      if(lower.startsWith(s+' ')){
+        setName = s;
+        cardName = name.slice(s.length+1);
+        break;
+      }
+    }
+  }
+
+  let q = `name:"${cardName}"`;
+  if(setName) q += ` set.name:"${setName}"`;
+  if(number) q += ` number:"${number.split('/')[0]}"`;
+  const res = await fetch(`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&pageSize=36`);
+  const data = await res.json();
   return data.data||[];
 }
 
