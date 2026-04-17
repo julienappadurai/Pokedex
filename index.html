@@ -2,238 +2,526 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>PokéDex — Card Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#0a0a0f;
-  --s1:#111118;
-  --s2:#18181f;
-  --s3:#22222c;
-  --border:#2a2a36;
-  --text:#e8e8f0;
-  --muted:#7070a0;
-  --gold:#f5c518;
-  --red:#ff4d6d;
-  --green:#39d98a;
-  --blue:#4d9fff;
-  --r:12px;
-  --r2:8px;
+  --gb1:#9bbc0f;
+  --gb2:#8bac0f;
+  --gb3:#306230;
+  --gb4:#0f380f;
+  --bg:#f0f0e8;
+  --surface:#ffffff;
+  --surface2:#f7f7f2;
+  --border:#e0e0d5;
+  --border2:#c8c8b8;
+  --text:#1a1a14;
+  --text2:#5a5a4a;
+  --text3:#9a9a88;
+  --red:#c0392b;
+  --green:#306230;
+  --shadow:rgba(15,56,15,.10);
+  --pixel:2px;
+  --r:14px;
+  --r2:10px;
+  --r3:8px;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+
+html,body{min-height:100%;background:var(--bg);}
+body{
+  font-family:'DM Sans',sans-serif;
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+/* ── SUBTLE SCANLINE on bg ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(155,188,15,.018) 3px,
+    rgba(155,188,15,.018) 4px
+  );
+  pointer-events:none;z-index:0;
+}
+
+/* ── PIXEL BORDER NODS ── */
+/* Top pixel stripe */
+body::after{
+  content:'';
+  position:fixed;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gb4),var(--gb3),var(--gb1),var(--gb2),var(--gb3),var(--gb4));
+  z-index:999;
+}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:var(--s1);}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:9px;}
+::-webkit-scrollbar-track{background:var(--border);}
+::-webkit-scrollbar-thumb{background:var(--gb2);border-radius:3px;}
 
-/* ── PIN SCREEN ── */
-#authWrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);flex-direction:column;gap:0;}
-.auth-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:40px 32px;width:100%;max-width:360px;text-align:center;}
-.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:3px;color:var(--gold);margin-bottom:4px;}
-.auth-sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:32px;}
-.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:28px;}
-.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all .15s;}
-.pin-dot.filled{background:var(--gold);border-color:var(--gold);}
+/* ══════════════════════════════════
+   AUTH / PIN
+══════════════════════════════════ */
+#authWrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:24px;position:relative;z-index:1;
+}
+.auth-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:0 4px 0 var(--border2),0 12px 40px var(--shadow);
+  padding:40px 32px;
+  width:100%;max-width:340px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+/* pixel corner accents */
+.auth-card::before,.auth-card::after{
+  content:'';position:absolute;width:16px;height:16px;
+  border-color:var(--gb1);border-style:solid;
+}
+.auth-card::before{top:12px;left:12px;border-width:2px 0 0 2px;}
+.auth-card::after{bottom:12px;right:12px;border-width:0 2px 2px 0;}
+
+.auth-eyebrow{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--gb2);letter-spacing:2px;margin-bottom:12px;}
+.auth-logo{font-family:'Press Start 2P',monospace;font-size:20px;color:var(--gb4);margin-bottom:6px;line-height:1.4;}
+.auth-sub{font-size:12px;color:var(--text3);margin-bottom:32px;font-weight:400;}
+
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:8px;}
+.pin-dot{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--border2);
+  background:var(--surface2);
+  transition:all .15s;
+}
+.pin-dot.filled{background:var(--gb2);border-color:var(--gb3);box-shadow:0 0 0 3px rgba(139,172,15,.2);}
 .pin-dot.error{background:var(--red);border-color:var(--red);}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto;}
-.pin-key{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px;font-size:22px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;color:var(--text);text-align:center;user-select:none;}
-.pin-key:hover{border-color:var(--gold);color:var(--gold);}
-.pin-key:active{transform:scale(.93);}
-.pin-msg{font-size:12px;color:var(--muted);margin-bottom:16px;min-height:16px;}
+.pin-msg{font-size:11px;color:var(--text3);margin-bottom:24px;min-height:16px;font-family:'DM Mono',monospace;}
 
-/* ── APP LAYOUT ── */
-#appWrap{display:none;min-height:100vh;flex-direction:column;}
-.header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--s1);position:sticky;top:0;z-index:100;}
-.header-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--gold);}
-.header-logo span{color:var(--muted);font-size:14px;font-family:'DM Mono',monospace;letter-spacing:1px;margin-left:8px;}
-.hbtn{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.hbtn:hover{border-color:var(--gold);color:var(--gold);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:220px;margin:0 auto;}
+.pin-key{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 8px;
+  font-family:'Press Start 2P',monospace;
+  font-size:12px;
+  color:var(--text);
+  cursor:pointer;
+  transition:all .1s;
+  box-shadow:0 2px 0 var(--border2);
+}
+.pin-key:hover{background:var(--gb1);color:var(--gb4);border-color:var(--gb2);}
+.pin-key:active{transform:translateY(2px);box-shadow:none;}
+
+/* ══════════════════════════════════
+   APP LAYOUT
+══════════════════════════════════ */
+#appWrap{display:none;min-height:100vh;flex-direction:column;position:relative;z-index:1;}
+
+/* ── HEADER ── */
+.header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 0 var(--border2),0 4px 16px var(--shadow);
+}
+.header-left{display:flex;align-items:center;gap:10px;}
+.header-logo{font-family:'Press Start 2P',monospace;font-size:13px;color:var(--gb4);line-height:1;}
+.header-logo span{color:var(--gb2);}
+.header-badge{
+  font-family:'Press Start 2P',monospace;font-size:5px;
+  background:var(--gb4);color:var(--gb1);
+  padding:3px 7px;border-radius:4px;
+  letter-spacing:1px;
+}
+
+/* ── HEADER BUTTONS ── */
+.hbtn{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:8px 14px;
+  font-size:12px;font-weight:500;color:var(--text2);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;
+}
+.hbtn:hover{border-color:var(--gb2);color:var(--gb3);}
+.hbtn.primary{
+  background:var(--gb4);color:var(--gb1);
+  border-color:var(--gb4);
+  font-family:'Press Start 2P',monospace;
+  font-size:8px;padding:8px 14px;
+}
+.hbtn.primary:hover{background:var(--gb3);}
 .hbtns{display:flex;gap:8px;align-items:center;}
 
 /* ── TABS ── */
-.tabs{display:flex;gap:2px;padding:16px 20px 0;border-bottom:1px solid var(--border);background:var(--s1);}
-.tab{padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
-.tab.on{color:var(--gold);border-color:var(--gold);}
-.tab:hover:not(.on){color:var(--text);}
+.tabs{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;
+  display:flex;gap:0;
+}
+.tab{
+  padding:12px 16px;font-size:11px;font-weight:600;
+  color:var(--text3);cursor:pointer;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+  transition:all .15s;white-space:nowrap;
+  font-family:'Press Start 2P',monospace;letter-spacing:.5px;
+}
+.tab.on{color:var(--gb3);border-color:var(--gb2);}
+.tab:hover:not(.on){color:var(--text2);}
 
 /* ── CONTENT ── */
-.content{padding:20px;max-width:1100px;margin:0 auto;width:100%;}
+.content{padding:20px;max-width:960px;margin:0 auto;width:100%;}
 
-/* ── STATS ROW ── */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
-.stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
-.stat-lbl{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
-.stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;}
-.stat-val.gold{color:var(--gold);}
-.stat-val.green{color:var(--green);}
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+.stat{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:16px 18px;
+  box-shadow:0 2px 0 var(--border2),0 4px 12px var(--shadow);
+  position:relative;overflow:hidden;
+}
+/* pixel corner on stat cards */
+.stat::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:24px;height:24px;
+  background:linear-gradient(135deg,transparent 50%,rgba(155,188,15,.15) 50%);
+}
+.stat-lbl{font-family:'Press Start 2P',monospace;font-size:5px;color:var(--text3);letter-spacing:1px;margin-bottom:10px;}
+.stat-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--text);line-height:1;}
+.stat-val.green{color:var(--gb3);}
 .stat-val.red{color:var(--red);}
-.stat-sub{font-size:11px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace;}
+
+/* ── SECTION HEADER ── */
+.section-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.section-title{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:var(--text2);letter-spacing:.5px;
+}
+.section-title span{color:var(--gb2);}
 
 /* ── CARD GRID ── */
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
-.pcard{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
-.pcard:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,197,24,.08);}
-.pcard-img{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--s2);display:block;}
-.pcard-img-placeholder{width:100%;aspect-ratio:3/4;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:40px;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;}
+
+/* ── POKEMON CARD ── */
+.pcard{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;cursor:pointer;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 2px 0 var(--border2),0 4px 12px var(--shadow);
+  position:relative;
+}
+.pcard:hover{
+  transform:translateY(-4px) scale(1.02);
+  border-color:var(--gb2);
+  box-shadow:0 2px 0 var(--gb2),0 12px 32px rgba(15,56,15,.15);
+}
+.pcard:active{transform:translateY(-1px);}
+
+/* holographic shimmer on hover */
+.pcard::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 40%,rgba(155,188,15,.06) 50%,transparent 60%);
+  opacity:0;transition:opacity .3s;z-index:1;pointer-events:none;
+  border-radius:var(--r);
+}
+.pcard:hover::before{opacity:1;}
+
+.pcard-img-wrap{position:relative;}
+.pcard-img{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--surface2);display:block;}
+.pcard-placeholder{width:100%;aspect-ratio:3/4;background:linear-gradient(135deg,var(--surface2),var(--border));display:flex;align-items:center;justify-content:center;font-size:40px;}
+.pcard-cond{
+  position:absolute;top:8px;right:8px;
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--border);
+  border-radius:6px;padding:3px 8px;
+  font-family:'Press Start 2P',monospace;font-size:5px;color:var(--text2);
+  backdrop-filter:blur(4px);
+}
+.pcard-qty{
+  position:absolute;top:8px;left:8px;
+  background:var(--gb4);color:var(--gb1);
+  border-radius:6px;padding:3px 8px;
+  font-family:'Press Start 2P',monospace;font-size:5px;
+}
 .pcard-body{padding:12px;}
-.pcard-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-.pcard-set{font-size:11px;color:var(--muted);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pcard-name{font-size:12px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pcard-set{font-size:11px;color:var(--text3);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pcard-price-row{display:flex;justify-content:space-between;align-items:center;}
-.pcard-market{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.pcard-market{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--gb3);}
 .pcard-pl{font-family:'DM Mono',monospace;font-size:11px;}
-.pcard-pl.pos{color:var(--green);}
+.pcard-pl.pos{color:var(--gb3);}
 .pcard-pl.neg{color:var(--red);}
-.pcard-cond{position:absolute;top:8px;right:8px;background:rgba(10,10,15,.85);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);}
-.pcard-qty{position:absolute;top:8px;left:8px;background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.3);border-radius:6px;padding:2px 7px;font-size:10px;font-family:'DM Mono',monospace;color:var(--gold);}
 
-/* ── EMPTY STATE ── */
-.empty{text-align:center;padding:60px 20px;color:var(--muted);}
-.empty-icon{font-size:48px;margin-bottom:16px;}
-.empty h3{font-size:18px;color:var(--text);margin-bottom:8px;}
-.empty p{font-size:13px;line-height:1.6;}
-
-/* ── MODAL ── */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:20px;}
-.modal-bg.open{display:flex;}
-.modal{background:var(--s1);border:1px solid var(--border);border-radius:20px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;}
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--s1);z-index:1;}
-.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
-.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px;line-height:1;}
-.modal-close:hover{color:var(--text);}
-.modal-body{padding:24px;flex:1;}
-
-/* ── FORM ── */
-.form-group{margin-bottom:16px;}
-.form-label{display:block;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
-.form-input,.form-select,.form-textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s;}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);}
-.form-select option{background:var(--s2);}
-.form-textarea{resize:vertical;min-height:70px;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
-/* ── BUTTONS ── */
-.btn{padding:11px 20px;border-radius:var(--r2);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif;}
-.btn-gold{background:var(--gold);color:#000;}
-.btn-gold:hover{opacity:.9;}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
-.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
-.btn-red{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);color:var(--red);}
-.btn-red:hover{background:rgba(255,77,109,.2);}
-.btn-row{display:flex;gap:10px;margin-top:20px;}
-.btn-row .btn{flex:1;}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-
-/* ── SCAN AREA ── */
-.scan-area{border:2px dashed var(--border);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
-.scan-area:hover{border-color:var(--gold);background:rgba(245,197,24,.03);}
-.scan-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.scan-icon{font-size:36px;margin-bottom:10px;}
-.scan-txt{font-size:13px;color:var(--muted);}
-.scan-preview{width:100%;max-height:200px;object-fit:contain;border-radius:var(--r2);margin-top:12px;display:none;}
-
-/* ── SUGGESTIONS ── */
-.suggestions{margin-top:16px;}
-.suggestion-lbl{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
-.suggestion-list{display:flex;flex-direction:column;gap:8px;}
-.suggestion-item{background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
-.suggestion-item:hover,.suggestion-item.selected{border-color:var(--gold);background:rgba(245,197,24,.05);}
-.suggestion-img{width:40px;height:55px;object-fit:contain;border-radius:4px;background:var(--s3);flex-shrink:0;}
-.suggestion-info{flex:1;min-width:0;}
-.suggestion-name{font-size:13px;font-weight:600;}
-.suggestion-set{font-size:11px;color:var(--muted);margin-top:2px;}
-.suggestion-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);margin-top:4px;}
-.suggestion-badge{font-size:10px;background:rgba(245,197,24,.1);color:var(--gold);border-radius:4px;padding:2px 6px;font-family:'DM Mono',monospace;}
-
-/* ── LOADING ── */
-.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.ai-status{background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 16px;font-size:13px;color:var(--muted);display:flex;align-items:center;margin-top:12px;}
-
-/* ── CARD DETAIL MODAL ── */
-.card-detail-img{width:100%;max-height:280px;object-fit:contain;border-radius:var(--r);background:var(--s2);margin-bottom:16px;}
-.detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.detail-row:last-child{border-bottom:none;}
-.detail-key{color:var(--muted);}
-.detail-val{font-family:'DM Mono',monospace;font-weight:500;}
-.pl-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;}
-.pl-badge.pos{background:rgba(57,217,138,.1);color:var(--green);}
-.pl-badge.neg{background:rgba(255,77,109,.1);color:var(--red);}
-
-/* ── SETTINGS ── */
-.settings-section{margin-bottom:24px;}
-.settings-title{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--s2);font-size:13px;}
-.settings-row:last-child{border-bottom:none;}
-
-/* ── SEARCH ── */
-.search-bar{display:flex;gap:10px;margin-bottom:16px;}
-.search-input{flex:1;background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:10px 14px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;}
-.search-input:focus{border-color:var(--gold);}
-
-/* ── MANUAL SEARCH ── */
-.tcg-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-height:300px;overflow-y:auto;margin-top:12px;}
-.tcg-result{background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:8px;cursor:pointer;transition:all .15s;text-align:center;}
-.tcg-result:hover,.tcg-result.selected{border-color:var(--gold);}
-.tcg-result img{width:100%;border-radius:4px;}
-.tcg-result-name{font-size:10px;margin-top:6px;color:var(--muted);}
-.tcg-result-set{font-size:9px;color:var(--border);font-family:'DM Mono',monospace;}
-
-/* ── REFRESH BTN ── */
-.refresh-prices-btn{background:rgba(77,159,255,.1);border:1px solid rgba(77,159,255,.3);color:var(--blue);padding:7px 14px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;}
-.refresh-prices-btn:hover{background:rgba(77,159,255,.2);}
+/* ── SEARCH BAR ── */
+.search-wrap{
+  display:flex;gap:10px;margin-bottom:16px;
+}
+.search-input{
+  flex:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);padding:10px 14px;
+  font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);
+  outline:none;transition:border-color .15s;
+  box-shadow:0 2px 0 var(--border2);
+}
+.search-input:focus{border-color:var(--gb2);box-shadow:0 2px 0 var(--gb2),0 0 0 3px rgba(139,172,15,.1);}
+.search-input::placeholder{color:var(--text3);}
+.sort-select{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);padding:8px 12px;
+  font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);
+  outline:none;cursor:pointer;
+  box-shadow:0 2px 0 var(--border2);
+}
 
 /* ── FILTER PILLS ── */
-.filter-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-.pill{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:11px;cursor:pointer;transition:all .15s;color:var(--muted);}
-.pill.on{background:rgba(245,197,24,.1);border-color:var(--gold);color:var(--gold);}
-.pill:hover:not(.on){color:var(--text);}
+.filter-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;}
+.pill{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px;
+  font-size:11px;font-weight:500;cursor:pointer;
+  transition:all .15s;color:var(--text2);
+}
+.pill.on{background:var(--gb4);color:var(--gb1);border-color:var(--gb4);}
+.pill:hover:not(.on){border-color:var(--gb2);color:var(--gb3);}
 
-/* ── STEP INDICATOR ── */
-.steps{display:flex;gap:0;margin-bottom:20px;}
-.step{flex:1;text-align:center;font-size:11px;color:var(--muted);position:relative;padding-bottom:10px;}
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 24px;color:var(--text3);}
+.empty-icon{font-size:48px;margin-bottom:16px;}
+.empty-title{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--text2);margin-bottom:10px;}
+.empty-txt{font-size:13px;line-height:1.8;color:var(--text3);}
+
+/* ══════════════════════════════════
+   MODALS
+══════════════════════════════════ */
+.modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(15,56,15,.3);
+  backdrop-filter:blur(4px);
+  z-index:200;align-items:center;justify-content:center;padding:20px;
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:0 4px 0 var(--border2),0 24px 64px rgba(15,56,15,.2);
+  width:100%;max-width:440px;max-height:90vh;
+  overflow-y:auto;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+/* pixel corner on modal */
+.modal::before,.modal::after{
+  content:'';position:absolute;width:12px;height:12px;
+  border-color:var(--gb1);border-style:solid;z-index:1;pointer-events:none;
+}
+.modal::before{top:10px;left:10px;border-width:2px 0 0 2px;}
+.modal::after{bottom:10px;right:10px;border-width:0 2px 2px 0;}
+.modal-scroll{overflow-y:auto;max-height:90vh;display:flex;flex-direction:column;}
+.modal-header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;
+}
+.modal-title{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gb4);}
+.modal-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px;transition:color .1s;}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:20px;overflow-y:auto;}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-family:'Press Start 2P',monospace;font-size:6px;color:var(--text3);letter-spacing:.5px;margin-bottom:6px;}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r3);padding:10px 12px;
+  font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);
+  outline:none;transition:all .15s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:var(--gb2);background:var(--surface);
+  box-shadow:0 0 0 3px rgba(139,172,15,.12);
+}
+.form-select option{background:var(--surface);}
+.form-textarea{resize:vertical;min-height:70px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-input::placeholder{color:var(--text3);}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:10px 18px;border-radius:var(--r3);
+  font-size:12px;font-weight:600;cursor:pointer;border:none;
+  transition:all .15s;font-family:'DM Sans',sans-serif;
+}
+.btn-primary{background:var(--gb4);color:var(--gb1);font-family:'Press Start 2P',monospace;font-size:7px;}
+.btn-primary:hover{background:var(--gb3);}
+.btn-outline{background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
+.btn-outline:hover{border-color:var(--gb2);color:var(--gb3);}
+.btn-red{background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.25);color:var(--red);}
+.btn-red:hover{background:rgba(192,57,43,.15);}
+.btn-row{display:flex;gap:8px;margin-top:16px;}
+.btn-row .btn{flex:1;text-align:center;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── STEPS ── */
+.steps{display:flex;gap:0;margin-bottom:18px;}
+.step{
+  flex:1;text-align:center;
+  font-family:'Press Start 2P',monospace;font-size:5px;
+  color:var(--text3);position:relative;padding-bottom:8px;
+}
 .step::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--border);}
-.step.active{color:var(--gold);}
-.step.active::after{background:var(--gold);}
-.step.done{color:var(--green);}
-.step.done::after{background:var(--green);}
+.step.active{color:var(--gb3);}
+.step.active::after{background:var(--gb2);}
+.step.done{color:var(--gb2);}
+.step.done::after{background:var(--gb2);}
+
+/* ── SCAN AREA ── */
+.scan-area{
+  border:2px dashed var(--border2);
+  border-radius:var(--r2);padding:28px;text-align:center;
+  background:var(--surface2);transition:all .2s;
+}
+.scan-area:hover{border-color:var(--gb2);background:rgba(155,188,15,.04);}
+.scan-icon{font-size:36px;margin-bottom:10px;display:block;}
+.scan-txt{font-size:12px;color:var(--text3);line-height:1.7;}
+.scan-preview{width:100%;max-height:180px;object-fit:contain;margin-top:12px;display:none;border-radius:var(--r3);border:1px solid var(--border);}
+
+/* ── UPLOAD BTNS ── */
+.upload-btns{display:flex;gap:8px;margin-top:10px;}
+.upload-btns .btn{flex:1;font-size:12px;font-family:'DM Sans',sans-serif;}
+
+/* ── AI STATUS ── */
+.ai-status{
+  background:rgba(155,188,15,.06);border:1px solid rgba(155,188,15,.2);
+  border-radius:var(--r3);padding:12px 14px;
+  font-size:12px;color:var(--gb3);
+  display:flex;align-items:center;gap:10px;margin-top:10px;
+}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(139,172,15,.3);border-top-color:var(--gb2);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── SUGGESTIONS ── */
+.suggestions-lbl{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--text3);letter-spacing:.5px;margin-bottom:10px;margin-top:14px;}
+.suggestion-item{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r3);padding:10px;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:10px;
+  margin-bottom:7px;
+}
+.suggestion-item:hover,.suggestion-item.selected{border-color:var(--gb2);background:rgba(155,188,15,.05);}
+.suggestion-item.selected{box-shadow:0 0 0 2px rgba(139,172,15,.2);}
+.suggestion-img{width:44px;height:60px;object-fit:contain;border-radius:6px;background:var(--border);flex-shrink:0;}
+.suggestion-info{flex:1;min-width:0;}
+.suggestion-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+.suggestion-set{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.suggestion-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gb3);font-weight:500;}
+.suggestion-badge{
+  font-family:'Press Start 2P',monospace;font-size:5px;
+  padding:3px 7px;border-radius:4px;flex-shrink:0;
+}
+.suggestion-badge.high{background:rgba(48,98,48,.1);color:var(--gb3);}
+.suggestion-badge.medium{background:rgba(155,188,15,.12);color:var(--gb2);}
+.suggestion-badge.low{background:var(--surface2);color:var(--text3);}
+
+/* ── TCG RESULTS ── */
+.tcg-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;max-height:220px;overflow-y:auto;margin-top:10px;}
+.tcg-result{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r3);padding:6px;cursor:pointer;
+  transition:all .15s;text-align:center;
+}
+.tcg-result:hover,.tcg-result.selected{border-color:var(--gb2);}
+.tcg-result img{width:100%;border-radius:4px;}
+.tcg-result-name{font-size:9px;color:var(--text3);margin-top:4px;line-height:1.3;}
+
+/* ── CARD DETAIL ── */
+.detail-img{width:100%;max-height:260px;object-fit:contain;border-radius:var(--r2);background:var(--surface2);margin-bottom:16px;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;gap:12px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-key{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--text3);padding-top:3px;flex-shrink:0;}
+.detail-val{font-family:'DM Mono',monospace;font-size:14px;color:var(--text);text-align:right;}
+.pl-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;}
+.pl-badge.pos{background:rgba(48,98,48,.1);color:var(--gb3);}
+.pl-badge.neg{background:rgba(192,57,43,.08);color:var(--red);}
+
+/* ── SETTINGS ── */
+.settings-section{margin-bottom:22px;}
+.settings-title{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--text3);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px;letter-spacing:.5px;}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:var(--gb4);color:var(--gb1);
+  border-radius:10px;padding:10px 20px;
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  opacity:0;transition:all .25s;z-index:9998;
+  box-shadow:0 4px 0 rgba(0,0,0,.2),0 8px 24px rgba(15,56,15,.3);
+  white-space:nowrap;letter-spacing:.5px;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.err{background:var(--red);color:#fff;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:600px){
-  .header{padding:12px 16px;}
+  .header{padding:10px 16px;}
   .content{padding:16px;}
-  .card-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+  .stats{grid-template-columns:1fr 1fr;}
   .form-row{grid-template-columns:1fr;}
-  .stats{grid-template-columns:repeat(2,1fr);}
+  .hbtn span{display:none;}
 }
 
-/* ── TOAST ── */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-size:13px;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-#toast.ok{border-color:var(--green);color:var(--green);}
-#toast.err{border-color:var(--red);color:var(--red);}
-
-/* ── SORT ── */
-.sort-select{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:8px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;outline:none;cursor:pointer;}
+/* ── GB PIXEL DIVIDER ── */
+.px-divider{
+  border:none;height:2px;margin:16px 0;
+  background:repeating-linear-gradient(90deg,var(--gb2) 0,var(--gb2) 4px,transparent 4px,transparent 8px);
+}
 
 /* ── CHART ── */
-.chart-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px;}
-.chart-title{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
-canvas{width:100%!important;}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:20px;box-shadow:0 2px 0 var(--border2),0 4px 12px var(--shadow);}
+.chart-title{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--text3);margin-bottom:14px;letter-spacing:.5px;}
+
+/* refresh btn */
+.refresh-btn{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:8px 12px;font-size:12px;
+  color:var(--text2);cursor:pointer;transition:all .15s;
+  font-family:'DM Mono',monospace;
+}
+.refresh-btn:hover{border-color:var(--gb2);color:var(--gb3);}
 </style>
 </head>
 <body>
-
-<!-- ── TOAST ── -->
 <div id="toast"></div>
 
-<!-- ── PIN SCREEN ── -->
+<!-- ══ PIN SCREEN ══ -->
 <div id="authWrap">
   <div class="auth-card">
-    <div class="auth-logo">PokéDex</div>
+    <div class="auth-eyebrow">DMG-CARD-01</div>
+    <div class="auth-logo">POKÉDEX</div>
     <div class="auth-sub">Card Portfolio Tracker</div>
     <div id="pinMsg" class="pin-msg">Enter your PIN</div>
     <div class="pin-dots" id="pinDots"></div>
@@ -241,42 +529,40 @@ canvas{width:100%!important;}
   </div>
 </div>
 
-<!-- ── APP ── -->
+<!-- ══ APP ══ -->
 <div id="appWrap">
   <div class="header">
-    <div class="header-logo">PokéDex <span>Portfolio</span></div>
+    <div class="header-left">
+      <div class="header-logo">POKÉ<span>DEX</span></div>
+      <div class="header-badge">v1.0</div>
+    </div>
     <div class="hbtns">
-      <button class="refresh-prices-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ Prices</button>
-      <button class="hbtn" onclick="openSettings()">⚙ Settings</button>
-      <button class="hbtn btn-gold" style="background:var(--gold);color:#000;font-weight:700;" onclick="openAddModal()">+ Add Card</button>
+      <button class="refresh-btn" onclick="refreshAllPrices()" id="refreshBtn">↻ <span>Refresh Prices</span></button>
+      <button class="hbtn" onclick="openSettings()">⚙ <span>Settings</span></button>
+      <button class="hbtn primary" onclick="openAddModal()">+ ADD</button>
     </div>
   </div>
+
   <div class="tabs">
-    <div class="tab on" onclick="switchTab('dashboard',this)">Dashboard</div>
-    <div class="tab" onclick="switchTab('portfolio',this)">Portfolio</div>
+    <div class="tab on" onclick="switchTab('dashboard',this)">DASHBOARD</div>
+    <div class="tab" onclick="switchTab('portfolio',this)">COLLECTION</div>
   </div>
 
   <!-- DASHBOARD -->
   <div id="tab-dashboard" class="content">
     <div class="stats" id="statsRow"></div>
-    <div class="chart-wrap" id="chartWrap" style="display:none;">
-      <div class="chart-title">Portfolio Value Over Time (Estimated)</div>
-      <canvas id="portfolioChart" height="120"></canvas>
-    </div>
-    <div id="dashCards"></div>
+    <div id="dashSection"></div>
   </div>
 
   <!-- PORTFOLIO -->
   <div id="tab-portfolio" class="content" style="display:none;">
-    <div class="search-bar">
-      <input class="search-input" id="searchInput" placeholder="Search cards…" oninput="renderPortfolio()"/>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" placeholder="Search cards, sets…" oninput="renderPortfolio()"/>
       <select class="sort-select" id="sortSelect" onchange="renderPortfolio()">
-        <option value="date_desc">Newest first</option>
-        <option value="date_asc">Oldest first</option>
-        <option value="value_desc">Highest value</option>
-        <option value="value_asc">Lowest value</option>
+        <option value="date_desc">Newest</option>
+        <option value="value_desc">Highest Value</option>
         <option value="pl_desc">Best P&L</option>
-        <option value="name_asc">A–Z</option>
+        <option value="name_asc">A → Z</option>
       </select>
     </div>
     <div class="filter-pills" id="filterPills"></div>
@@ -284,58 +570,72 @@ canvas{width:100%!important;}
   </div>
 </div>
 
-<!-- ── ADD CARD MODAL ── -->
+<!-- ══ ADD CARD MODAL ══ -->
 <div class="modal-bg" id="addModal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="addModalTitle">Add Card</div>
+      <div class="modal-title">Add Card</div>
       <button class="modal-close" onclick="closeAddModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="steps">
-        <div class="step active" id="step1lbl">1. Identify</div>
-        <div class="step" id="step2lbl">2. Details</div>
-        <div class="step" id="step3lbl">3. Confirm</div>
+        <div class="step active" id="step1lbl">1. IDENTIFY</div>
+        <div class="step" id="step2lbl">2. DETAILS</div>
+        <div class="step" id="step3lbl">3. CONFIRM</div>
       </div>
 
-      <!-- STEP 1: Scan -->
+      <!-- STEP 1 -->
       <div id="addStep1">
-        <div class="scan-area" id="scanArea" onclick="triggerFileInput()">
-          <div class="scan-icon">📷</div>
-          <div class="scan-txt">Tap to take a photo or upload an image of your card</div>
+        <div class="scan-area">
+          <span class="scan-icon">📷</span>
+          <div class="scan-txt">Scan your card — AI will identify it for you</div>
           <img id="scanPreview" class="scan-preview"/>
-          <input type="file" id="cardImgInput" accept="image/*" capture="environment" onchange="handleImageUpload(event)" style="display:none;"/>
         </div>
+        <div class="upload-btns">
+          <button class="btn btn-primary" onclick="document.getElementById('cameraInput').click()">📷 Camera</button>
+          <button class="btn btn-outline" onclick="document.getElementById('galleryInput').click()">🖼 Gallery</button>
+        </div>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleImageUpload(event)" style="display:none;"/>
+        <input type="file" id="galleryInput" accept="image/*" onchange="handleImageUpload(event)" style="display:none;"/>
+
         <div id="aiStatus" style="display:none;" class="ai-status">
-          <span class="spinner"></span> Identifying card with AI…
+          <span class="spinner"></span> Identifying card with Gemini AI…
         </div>
-        <div id="suggestions" class="suggestions" style="display:none;">
-          <div class="suggestion-lbl">AI Suggestions — tap to select</div>
-          <div id="suggestionList" class="suggestion-list"></div>
+
+        <div id="suggestions" style="display:none;">
+          <div class="suggestions-lbl">AI SUGGESTIONS — tap to select</div>
+          <div id="suggestionList"></div>
         </div>
-        <div style="margin-top:16px;text-align:center;">
-          <span style="font-size:12px;color:var(--muted);">Or search manually: </span>
-          <input class="form-input" id="manualSearchInput" placeholder="Card name…" style="margin-top:8px;" onkeydown="if(event.key==='Enter')manualSearch()"/>
-          <div id="tcgResults" class="tcg-results" style="display:none;"></div>
+
+        <hr class="px-divider"/>
+
+        <div class="form-group">
+          <label class="form-label">MANUAL SEARCH</label>
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" id="manualSearchInput" placeholder="Card name…" onkeydown="if(event.key==='Enter')manualSearch()" style="flex:1;"/>
+            <button class="btn btn-outline" onclick="manualSearch()" style="white-space:nowrap;">Search</button>
+          </div>
+          <div id="tcgResults" class="tcg-results" style="display:none;margin-top:10px;"></div>
         </div>
+
         <div class="btn-row">
           <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
-          <button class="btn btn-gold" id="step1Next" onclick="goStep2()" disabled>Next →</button>
+          <button class="btn btn-primary" id="step1Next" onclick="goStep2()" disabled>Next →</button>
         </div>
       </div>
 
-      <!-- STEP 2: Details -->
+      <!-- STEP 2 -->
       <div id="addStep2" style="display:none;">
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
-          <img id="selectedCardImg" style="width:80px;border-radius:8px;background:var(--s2);" src=""/>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:12px;">
+          <img id="selectedCardImg" style="width:64px;border-radius:8px;background:var(--border);" src=""/>
           <div>
-            <div style="font-weight:600;font-size:15px;" id="selectedCardName"></div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="selectedCardSet"></div>
-            <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);margin-top:4px;" id="selectedCardMarket"></div>
+            <div style="font-size:15px;font-weight:600;margin-bottom:3px;" id="selectedCardName"></div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:6px;" id="selectedCardSet"></div>
+            <div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--gb3);font-weight:500;" id="selectedCardMarket"></div>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Condition Type</label>
+          <label class="form-label">CONDITION TYPE</label>
           <select class="form-select" id="condTypeSelect" onchange="renderCondField()">
             <option value="raw">Raw (NM / LP / MP / HP / Damaged)</option>
             <option value="psa">PSA Grade (1–10)</option>
@@ -344,44 +644,44 @@ canvas{width:100%!important;}
         <div class="form-group" id="condFieldWrap"></div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Purchase Price (USD)</label>
+            <label class="form-label">PURCHASE PRICE (USD)</label>
             <input class="form-input" id="purchasePriceInput" type="number" step="0.01" min="0" placeholder="0.00"/>
           </div>
           <div class="form-group">
-            <label class="form-label">Quantity</label>
+            <label class="form-label">QUANTITY</label>
             <input class="form-input" id="quantityInput" type="number" min="1" value="1"/>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Date Acquired</label>
+          <label class="form-label">DATE ACQUIRED</label>
           <input class="form-input" id="dateAcquiredInput" type="date"/>
         </div>
         <div class="form-group">
-          <label class="form-label">Notes (optional)</label>
-          <textarea class="form-textarea" id="notesInput" placeholder="e.g. Bought at local card shop, great condition…"></textarea>
+          <label class="form-label">NOTES (OPTIONAL)</label>
+          <textarea class="form-textarea" id="notesInput" placeholder="e.g. Bought at local card shop…"></textarea>
         </div>
         <div class="btn-row">
           <button class="btn btn-outline" onclick="goStep1()">← Back</button>
-          <button class="btn btn-gold" onclick="goStep3()">Next →</button>
+          <button class="btn btn-primary" onclick="goStep3()">Next →</button>
         </div>
       </div>
 
-      <!-- STEP 3: Confirm -->
+      <!-- STEP 3 -->
       <div id="addStep3" style="display:none;">
-        <div style="text-align:center;margin-bottom:20px;">
-          <img id="confirmImg" style="max-height:180px;border-radius:var(--r);background:var(--s2);" src=""/>
+        <div style="text-align:center;margin-bottom:16px;">
+          <img id="confirmImg" style="max-height:200px;border-radius:var(--r2);background:var(--surface2);" src=""/>
         </div>
         <div id="confirmDetails"></div>
         <div class="btn-row">
           <button class="btn btn-outline" onclick="goStep2()">← Edit</button>
-          <button class="btn btn-gold" onclick="saveCard()">✓ Add to Portfolio</button>
+          <button class="btn btn-primary" onclick="saveCard()">✓ Add to Collection</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── CARD DETAIL MODAL ── -->
+<!-- ══ DETAIL MODAL ══ -->
 <div class="modal-bg" id="detailModal">
   <div class="modal">
     <div class="modal-header">
@@ -392,7 +692,7 @@ canvas{width:100%!important;}
   </div>
 </div>
 
-<!-- ── SETTINGS MODAL ── -->
+<!-- ══ SETTINGS MODAL ══ -->
 <div class="modal-bg" id="settingsModal">
   <div class="modal">
     <div class="modal-header">
@@ -401,32 +701,37 @@ canvas{width:100%!important;}
     </div>
     <div class="modal-body">
       <div class="settings-section">
-        <div class="settings-title">Account</div>
+        <div class="settings-title">TRAINER PROFILE</div>
         <div class="form-group">
-          <label class="form-label">Your Name</label>
+          <label class="form-label">YOUR NAME</label>
           <input class="form-input" id="settingsName" placeholder="e.g. Ash Ketchum"/>
         </div>
-        <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="saveName()">Save Name</button>
-        <button class="btn btn-outline" style="width:100%;" onclick="changePin()">Change PIN</button>
+        <button class="btn btn-outline" style="width:100%;" onclick="saveName()">Save Name</button>
       </div>
       <div class="settings-section">
-        <div class="settings-title">Gemini AI Key (optional override)</div>
+        <div class="settings-title">GEMINI AI KEY (OPTIONAL OVERRIDE)</div>
         <div class="form-group">
-          <label class="form-label">API Key</label>
-          <input class="form-input" id="settingsGeminiKey" placeholder="Leave blank to use default"/>
+          <input class="form-input" id="settingsGeminiKey" placeholder="Leave blank to use built-in key"/>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.8;">
+          Get a free key at <strong>aistudio.google.com</strong> → Get API Key → Create API Key
         </div>
         <button class="btn btn-outline" style="width:100%;" onclick="saveGeminiKey()">Save Key</button>
       </div>
       <div class="settings-section">
-        <div class="settings-title">Data</div>
+        <div class="settings-title">DATA</div>
         <div class="btn-row">
           <button class="btn btn-outline" onclick="exportData()">↓ Export JSON</button>
-          <button class="btn btn-outline" onclick="$id('importFile').click()">↑ Import JSON</button>
+          <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">↑ Import JSON</button>
         </div>
         <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)"/>
       </div>
       <div class="settings-section">
-        <div class="settings-title">Danger Zone</div>
+        <div class="settings-title">SECURITY</div>
+        <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="changePin()">Change PIN</button>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">DANGER ZONE</div>
         <button class="btn btn-red" style="width:100%;" onclick="clearAllData()">🗑 Clear All Data</button>
       </div>
     </div>
@@ -434,757 +739,453 @@ canvas{width:100%!important;}
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════
-const GEMINI_KEY = 'AIzaSyAQ.Ab8RN6Jn76j0PkNITrmA4wq56-8pUxYUIWdOA1CIqWLXVIls-Q';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-const TCG_BASE   = 'https://api.pokemontcg.io/v2';
-const PIN_KEY    = 'pokedex_pin';
-const DATA_KEY   = 'pokedex_data';
-const NAME_KEY   = 'pokedex_name';
-const GKEY_KEY   = 'pokedex_gkey';
+const GEMINI_KEY='AIzaSyAQ.Ab8RN6Jn76j0PkNITrmA4wq56-8pUxYUIWdOA1CIqWLXVIls-Q';
+const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const TCG_BASE='https://api.pokemontcg.io/v2';
+const PIN_KEY='pokedex_pin',DATA_KEY='pokedex_data',NAME_KEY='pokedex_name',GKEY_KEY='pokedex_gkey';
 
-// ═══════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════
-let D = { cards: [] };
-let selectedCard = null; // TCG card object chosen in step 1
-let currentDetailId = null;
-let activeFilter = 'all';
+let D={cards:[]},selectedCard=null,activeFilter='all';
 
-function loadData(){
-  const raw = localStorage.getItem(DATA_KEY);
-  if(raw){ try{ D = JSON.parse(raw); } catch(e){} }
-  if(!D.cards) D.cards = [];
-}
-function saveData(){
-  localStorage.setItem(DATA_KEY, JSON.stringify(D));
+function loadData(){try{const r=localStorage.getItem(DATA_KEY);if(r)D=JSON.parse(r);}catch(e){}if(!D.cards)D.cards=[];}
+function saveData(){localStorage.setItem(DATA_KEY,JSON.stringify(D));}
+function $id(id){return document.getElementById(id);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(n){return '$'+Number(n||0).toFixed(2);}
+function fmtPL(n){return(n>=0?'+':'')+fmt(n);}
+function geminiKey(){return localStorage.getItem(GKEY_KEY)||GEMINI_KEY;}
+function toast(msg,type='ok'){
+  const t=$id('toast');t.textContent=msg;t.className='show'+(type==='err'?' err':'');
+  setTimeout(()=>{t.className='';},2800);
 }
 
-// ═══════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════
-function $id(id){ return document.getElementById(id); }
-function toast(msg, type='ok'){
-  const t = $id('toast');
-  t.textContent = msg;
-  t.className = 'show ' + type;
-  setTimeout(()=>{ t.className = ''; }, 2800);
-}
-function fmt(n){ return '$' + Number(n||0).toFixed(2); }
-function fmtPL(n){
-  const sign = n >= 0 ? '+' : '';
-  return sign + fmt(n);
-}
-function geminiKey(){
-  return localStorage.getItem(GKEY_KEY) || GEMINI_KEY;
-}
-
-// ═══════════════════════════════════════════════
-// PIN
-// ═══════════════════════════════════════════════
-let pinBuffer = '';
-let pinMode   = 'login';
-let pinFirst  = '';
-
+// ── PIN ──
+let pinBuffer='',pinMode='login',pinFirst='';
 function buildPinPad(){
-  const pad = $id('pinPad');
-  pad.innerHTML = '';
-  const keys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
-  keys.forEach(k => {
-    const btn = document.createElement('button');
-    btn.className = 'pin-key';
-    btn.textContent = k;
-    if(k === '') { btn.style.cssText = 'pointer-events:none;opacity:0;'; }
-    else btn.addEventListener('click', () => handlePin(k));
+  const pad=$id('pinPad');pad.innerHTML='';
+  ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k=>{
+    const btn=document.createElement('button');
+    btn.className='pin-key';btn.textContent=k;
+    if(k==='')btn.style.cssText='pointer-events:none;opacity:0;';
+    else btn.addEventListener('click',()=>handlePin(k));
     pad.appendChild(btn);
   });
 }
-
-function updateDots(filled, isError){
-  const wrap = $id('pinDots');
-  wrap.innerHTML = '';
+function updateDots(filled,isError){
+  const wrap=$id('pinDots');wrap.innerHTML='';
   for(let i=0;i<4;i++){
-    const d = document.createElement('div');
-    d.className = 'pin-dot' + (i<filled ? (isError?' error':' filled') : '');
+    const d=document.createElement('div');
+    d.className='pin-dot'+(i<filled?(isError?' error':' filled'):'');
     wrap.appendChild(d);
   }
 }
-
 function handlePin(key){
-  if(key === '⌫') pinBuffer = pinBuffer.slice(0,-1);
-  else if(pinBuffer.length < 4) pinBuffer += key;
-  updateDots(pinBuffer.length, false);
-  if(pinBuffer.length === 4){
-    const stored = localStorage.getItem(PIN_KEY);
+  if(key==='⌫')pinBuffer=pinBuffer.slice(0,-1);
+  else if(pinBuffer.length<4)pinBuffer+=key;
+  updateDots(pinBuffer.length,false);
+  if(pinBuffer.length===4){
+    const stored=localStorage.getItem(PIN_KEY);
     if(!stored){
-      if(pinMode === 'setup'){
-        pinFirst = pinBuffer; pinBuffer = ''; pinMode = 'confirm';
-        $id('pinMsg').textContent = 'Confirm your PIN';
-        updateDots(0, false);
-      } else {
-        if(pinBuffer === pinFirst){
-          localStorage.setItem(PIN_KEY, btoa(pinBuffer));
-          enterApp();
-        } else {
-          updateDots(4, true);
-          $id('pinMsg').textContent = "PINs don't match";
-          setTimeout(()=>{ pinBuffer=''; pinFirst=''; pinMode='setup'; updateDots(0,false); $id('pinMsg').textContent='Choose a 4-digit PIN'; }, 900);
-        }
+      if(pinMode==='setup'){pinFirst=pinBuffer;pinBuffer='';pinMode='confirm';$id('pinMsg').textContent='Confirm your PIN';updateDots(0,false);}
+      else{
+        if(pinBuffer===pinFirst){localStorage.setItem(PIN_KEY,btoa(pinBuffer));enterApp();}
+        else{updateDots(4,true);$id('pinMsg').textContent="PINs don't match";setTimeout(()=>{pinBuffer='';pinFirst='';pinMode='setup';updateDots(0,false);$id('pinMsg').textContent='Choose a PIN';},900);}
       }
     } else {
-      if(btoa(pinBuffer) === stored){
-        enterApp();
-      } else {
-        updateDots(4, true);
-        $id('pinMsg').textContent = 'Incorrect PIN';
-        setTimeout(()=>{ pinBuffer=''; updateDots(0,false); $id('pinMsg').textContent='Enter your PIN'; }, 900);
-      }
+      if(btoa(pinBuffer)===stored){enterApp();}
+      else{updateDots(4,true);$id('pinMsg').textContent='Incorrect PIN';setTimeout(()=>{pinBuffer='';updateDots(0,false);$id('pinMsg').textContent='Enter your PIN';},900);}
     }
   }
 }
-
-function changePin(){
-  closeSettings();
-  localStorage.removeItem(PIN_KEY);
-  pinBuffer=''; pinFirst=''; pinMode='setup';
-  $id('pinMsg').textContent = 'Choose a new 4-digit PIN';
-  updateDots(0,false);
-  $id('authWrap').style.display = 'flex';
-  $id('appWrap').style.display = 'none';
-}
-
+function changePin(){closeSettings();localStorage.removeItem(PIN_KEY);pinBuffer='';pinFirst='';pinMode='setup';$id('pinMsg').textContent='Choose a new PIN';updateDots(0,false);$id('authWrap').style.display='flex';$id('appWrap').style.display='none';}
 function enterApp(){
-  $id('authWrap').style.display = 'none';
-  $id('appWrap').style.display = 'flex';
-  $id('appWrap').style.flexDirection = 'column';
-  loadData();
-  renderAll();
-  const name = localStorage.getItem(NAME_KEY);
-  if(name) $id('settingsName').value = name;
-  const gk = localStorage.getItem(GKEY_KEY);
-  if(gk) $id('settingsGeminiKey').value = gk;
+  $id('authWrap').style.display='none';
+  $id('appWrap').style.display='flex';
+  loadData();renderAll();
+  const n=localStorage.getItem(NAME_KEY);if(n)$id('settingsName').value=n;
+  const g=localStorage.getItem(GKEY_KEY);if(g)$id('settingsGeminiKey').value=g;
 }
 
-// ═══════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════
-function switchTab(tab, el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
-  $id('tab-dashboard').style.display = tab==='dashboard' ? '' : 'none';
-  $id('tab-portfolio').style.display = tab==='portfolio' ? '' : 'none';
-  if(tab === 'portfolio') renderPortfolio();
+// ── TABS ──
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  $id('tab-dashboard').style.display=tab==='dashboard'?'':'none';
+  $id('tab-portfolio').style.display=tab==='portfolio'?'':'none';
+  if(tab==='portfolio')renderPortfolio();
 }
 
-// ═══════════════════════════════════════════════
-// RENDER ALL
-// ═══════════════════════════════════════════════
-function renderAll(){
-  renderStats();
-  renderDashCards();
-  renderPortfolio();
-}
-
-function totalMarketValue(){
-  return D.cards.reduce((s,c) => s + (c.marketPrice||0) * (c.quantity||1), 0);
-}
-function totalCost(){
-  return D.cards.reduce((s,c) => s + (c.purchasePrice||0) * (c.quantity||1), 0);
-}
+// ── RENDER ──
+function renderAll(){renderStats();renderDashSection();}
+function totalMV(){return D.cards.reduce((s,c)=>s+(c.marketPrice||0)*(c.quantity||1),0);}
+function totalCost(){return D.cards.reduce((s,c)=>s+(c.purchasePrice||0)*(c.quantity||1),0);}
 
 function renderStats(){
-  const mv = totalMarketValue();
-  const cost = totalCost();
-  const pl = mv - cost;
-  const plPct = cost > 0 ? (pl/cost*100) : 0;
-  const count = D.cards.reduce((s,c) => s + (c.quantity||1), 0);
-  $id('statsRow').innerHTML = `
-    <div class="stat"><div class="stat-lbl">Portfolio Value</div><div class="stat-val gold">${fmt(mv)}</div><div class="stat-sub">market value</div></div>
-    <div class="stat"><div class="stat-lbl">Total Cost</div><div class="stat-val">${fmt(cost)}</div><div class="stat-sub">purchase price</div></div>
-    <div class="stat"><div class="stat-lbl">P&amp;L</div><div class="stat-val ${pl>=0?'green':'red'}">${fmtPL(pl)}</div><div class="stat-sub">${plPct>=0?'+':''}${plPct.toFixed(1)}%</div></div>
-    <div class="stat"><div class="stat-lbl">Cards</div><div class="stat-val">${count}</div><div class="stat-sub">${D.cards.length} unique</div></div>
-  `;
+  const mv=totalMV(),cost=totalCost(),pl=mv-cost;
+  const plPct=cost>0?(pl/cost*100):0;
+  const count=D.cards.reduce((s,c)=>s+(c.quantity||1),0);
+  $id('statsRow').innerHTML=`
+    <div class="stat"><div class="stat-lbl">PORTFOLIO VALUE</div><div class="stat-val">${fmt(mv)}</div><div class="stat-sub">market price</div></div>
+    <div class="stat"><div class="stat-lbl">TOTAL P&amp;L</div><div class="stat-val ${pl>=0?'green':'red'}">${fmtPL(pl)}</div><div class="stat-sub">${plPct>=0?'+':''}${plPct.toFixed(1)}%</div></div>
+    <div class="stat"><div class="stat-lbl">COST BASIS</div><div class="stat-val">${fmt(cost)}</div><div class="stat-sub">total spent</div></div>
+    <div class="stat"><div class="stat-lbl">COLLECTION</div><div class="stat-val">${count}</div><div class="stat-sub">${D.cards.length} unique cards</div></div>`;
 }
 
-function renderDashCards(){
-  const wrap = $id('dashCards');
-  if(!D.cards.length){ wrap.innerHTML=''; return; }
-
-  // Top gainers
-  const sorted = [...D.cards].filter(c=>c.purchasePrice>0).sort((a,b)=>{
-    const pa = (a.marketPrice-a.purchasePrice)*a.quantity;
-    const pb = (b.marketPrice-b.purchasePrice)*b.quantity;
-    return pb-pa;
-  });
-  const gainers = sorted.slice(0,3);
-  const losers = sorted.slice(-3).reverse().filter(c=>(c.marketPrice-c.purchasePrice)<0);
-
-  let html = '';
-  if(gainers.length){
-    html += `<div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">🏆 Top Performers</div>`;
-    html += `<div class="card-grid" style="margin-bottom:24px;">`;
-    gainers.forEach(c=>{ html += cardHtml(c); });
-    html += `</div>`;
+function renderDashSection(){
+  const wrap=$id('dashSection');
+  if(!D.cards.length){
+    wrap.innerHTML=`<div class="empty"><div class="empty-icon">🃏</div><div class="empty-title">NO CARDS YET</div><div class="empty-txt">Tap + ADD to start scanning your collection.<br/>Gemini AI will identify your cards instantly.</div></div>`;
+    return;
   }
-  if(losers.length){
-    html += `<div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">📉 Underperformers</div>`;
-    html += `<div class="card-grid">`;
-    losers.forEach(c=>{ html += cardHtml(c); });
-    html += `</div>`;
+  const byPL=[...D.cards].filter(c=>c.purchasePrice>0).sort((a,b)=>((b.marketPrice||0)-(b.purchasePrice||0))-((a.marketPrice||0)-(a.purchasePrice||0)));
+  const recent=[...D.cards].sort((a,b)=>(b.dateAdded||'').localeCompare(a.dateAdded||'')).slice(0,4);
+  let html='';
+  if(byPL.length){
+    html+=`<div class="section-hdr"><div class="section-title">🏆 TOP <span>PERFORMERS</span></div></div>`;
+    html+=`<div class="card-grid" style="margin-bottom:24px;">${byPL.slice(0,4).map(c=>cardHtml(c)).join('')}</div>`;
   }
-  wrap.innerHTML = html;
+  html+=`<div class="section-hdr"><div class="section-title">🕐 RECENTLY <span>ADDED</span></div></div>`;
+  html+=`<div class="card-grid">${recent.map(c=>cardHtml(c)).join('')}</div>`;
+  wrap.innerHTML=html;
 }
 
 function cardHtml(c){
-  const pl = ((c.marketPrice||0) - (c.purchasePrice||0)) * (c.quantity||1);
-  const plClass = pl >= 0 ? 'pos' : 'neg';
-  const img = c.imageSmall || c.imageLarge || '';
-  const imgEl = img
-    ? `<img class="pcard-img" src="${img}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div class="pcard-img-placeholder" style="display:none;">🃏</div>`
-    : `<div class="pcard-img-placeholder">🃏</div>`;
+  const pl=((c.marketPrice||0)-(c.purchasePrice||0))*(c.quantity||1);
+  const img=c.imageSmall||c.imageLarge||'';
+  const imgEl=img
+    ?`<img class="pcard-img" src="${img}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div class="pcard-placeholder" style="display:none;">🃏</div>`
+    :`<div class="pcard-placeholder">🃏</div>`;
   return `<div class="pcard" onclick="openDetail('${c.id}')">
-    ${c.quantity>1?`<div class="pcard-qty">×${c.quantity}</div>`:''}
-    <div class="pcard-cond">${c.condition||''}</div>
-    ${imgEl}
+    <div class="pcard-img-wrap">
+      ${c.quantity>1?`<div class="pcard-qty">×${c.quantity}</div>`:''}
+      <div class="pcard-cond">${esc(c.condition||'')}</div>
+      ${imgEl}
+    </div>
     <div class="pcard-body">
       <div class="pcard-name">${esc(c.name)}</div>
-      <div class="pcard-set">${esc(c.setName||'')}${c.number?' #'+c.number:''}</div>
+      <div class="pcard-set">${esc(c.setName||'')}${c.number?' · #'+c.number:''}</div>
       <div class="pcard-price-row">
         <div class="pcard-market">${fmt(c.marketPrice)}</div>
-        ${c.purchasePrice?`<div class="pcard-pl ${plClass}">${fmtPL(pl)}</div>`:''}
+        ${c.purchasePrice?`<div class="pcard-pl ${pl>=0?'pos':'neg'}">${fmtPL(pl)}</div>`:''}
       </div>
     </div>
   </div>`;
 }
 
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ═══════════════════════════════════════════════
-// PORTFOLIO
-// ═══════════════════════════════════════════════
 function renderPortfolio(){
-  const q = ($id('searchInput').value||'').toLowerCase();
-  const sort = $id('sortSelect').value;
-
-  // Build filter pills from sets
-  const sets = [...new Set(D.cards.map(c=>c.setName).filter(Boolean))];
-  const pills = $id('filterPills');
-  pills.innerHTML = `<div class="pill ${activeFilter==='all'?'on':''}" onclick="setFilter('all',this)">All (${D.cards.length})</div>`;
+  const q=($id('searchInput').value||'').toLowerCase();
+  const sort=$id('sortSelect').value;
+  const sets=[...new Set(D.cards.map(c=>c.setName).filter(Boolean))];
+  const pills=$id('filterPills');
+  pills.innerHTML=`<div class="pill ${activeFilter==='all'?'on':''}" onclick="setFilter('all',this)">All (${D.cards.length})</div>`;
   sets.forEach(s=>{
-    const cnt = D.cards.filter(c=>c.setName===s).length;
-    pills.innerHTML += `<div class="pill ${activeFilter===s?'on':''}" onclick="setFilter('${esc(s)}',this)">${esc(s)} (${cnt})</div>`;
+    const cnt=D.cards.filter(c=>c.setName===s).length;
+    pills.innerHTML+=`<div class="pill ${activeFilter===s?'on':''}" onclick="setFilter('${esc(s)}',this)">${esc(s)} (${cnt})</div>`;
   });
-
-  let cards = [...D.cards];
-  if(activeFilter !== 'all') cards = cards.filter(c=>c.setName===activeFilter);
-  if(q) cards = cards.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.setName||'').toLowerCase().includes(q));
-
-  // Sort
+  let cards=[...D.cards];
+  if(activeFilter!=='all')cards=cards.filter(c=>c.setName===activeFilter);
+  if(q)cards=cards.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.setName||'').toLowerCase().includes(q));
   cards.sort((a,b)=>{
     switch(sort){
-      case 'date_asc':  return (a.dateAdded||'').localeCompare(b.dateAdded||'');
-      case 'value_desc':return (b.marketPrice||0)-(a.marketPrice||0);
-      case 'value_asc': return (a.marketPrice||0)-(b.marketPrice||0);
-      case 'pl_desc':   return ((b.marketPrice||0)-(b.purchasePrice||0))-((a.marketPrice||0)-(a.purchasePrice||0));
-      case 'name_asc':  return (a.name||'').localeCompare(b.name||'');
-      default:          return (b.dateAdded||'').localeCompare(a.dateAdded||'');
+      case 'value_desc':return(b.marketPrice||0)-(a.marketPrice||0);
+      case 'pl_desc':return((b.marketPrice||0)-(b.purchasePrice||0))-((a.marketPrice||0)-(a.purchasePrice||0));
+      case 'name_asc':return(a.name||'').localeCompare(b.name||'');
+      default:return(b.dateAdded||'').localeCompare(a.dateAdded||'');
     }
   });
-
-  const grid = $id('portfolioGrid');
-  if(!cards.length){
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">🔍</div><h3>No cards found</h3><p>Try a different search or filter.</p></div>`;
-    return;
-  }
-  grid.innerHTML = cards.map(c=>cardHtml(c)).join('');
+  const grid=$id('portfolioGrid');
+  if(!cards.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">🔍</div><div class="empty-title">NO RESULTS</div><div class="empty-txt">Try a different search or filter.</div></div>`;return;}
+  grid.innerHTML=cards.map(c=>cardHtml(c)).join('');
 }
+function setFilter(f){activeFilter=f;renderPortfolio();}
 
-function setFilter(f, el){
-  activeFilter = f;
-  renderPortfolio();
-}
-
-// ═══════════════════════════════════════════════
-// ADD CARD MODAL
-// ═══════════════════════════════════════════════
-let capturedImageBase64 = null;
-
+// ── ADD CARD ──
+let capturedImageBase64=null;
 function openAddModal(){
-  selectedCard = null;
-  capturedImageBase64 = null;
-  $id('scanPreview').style.display = 'none';
-  $id('scanPreview').src = '';
-  $id('aiStatus').style.display = 'none';
-  $id('suggestions').style.display = 'none';
-  $id('suggestionList').innerHTML = '';
-  $id('manualSearchInput').value = '';
-  $id('tcgResults').style.display = 'none';
-  $id('step1Next').disabled = true;
-  $id('cardImgInput').value = '';
-  goStep1(true);
-  $id('addModal').classList.add('open');
+  selectedCard=null;capturedImageBase64=null;
+  $id('scanPreview').style.display='none';$id('scanPreview').src='';
+  $id('aiStatus').style.display='none';
+  $id('suggestions').style.display='none';$id('suggestionList').innerHTML='';
+  $id('manualSearchInput').value='';
+  $id('tcgResults').style.display='none';$id('tcgResults').innerHTML='';
+  $id('step1Next').disabled=true;
+  $id('cameraInput').value='';$id('galleryInput').value='';
+  goStep1(true);$id('addModal').classList.add('open');
 }
-function closeAddModal(){
-  $id('addModal').classList.remove('open');
-}
-
-function triggerFileInput(){
-  $id('cardImgInput').click();
-}
+function closeAddModal(){$id('addModal').classList.remove('open');}
 
 async function handleImageUpload(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async ev => {
-    const dataUrl = ev.target.result;
-    capturedImageBase64 = dataUrl.split(',')[1];
-    const preview = $id('scanPreview');
-    preview.src = dataUrl;
-    preview.style.display = 'block';
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    const dataUrl=ev.target.result;
+    capturedImageBase64=dataUrl.split(',')[1];
+    $id('scanPreview').src=dataUrl;$id('scanPreview').style.display='block';
     await identifyWithGemini(capturedImageBase64);
   };
   reader.readAsDataURL(file);
 }
 
 async function identifyWithGemini(base64){
-  $id('aiStatus').style.display = 'flex';
-  $id('suggestions').style.display = 'none';
-  $id('suggestionList').innerHTML = '';
-  $id('step1Next').disabled = true;
-
-  const prompt = `You are a Pokémon trading card expert. Analyze this image of a Pokémon card and identify it.
-
-Return ONLY a JSON array (no markdown, no explanation) with up to 3 possible matches, ordered by confidence:
-[
-  { "name": "Charizard", "set": "Base Set", "number": "4/102", "confidence": "high" },
-  ...
-]
-
-Rules:
-- "name" is the Pokémon or card name exactly as printed
-- "set" is the set name exactly as printed or commonly known
-- "number" is the card number if visible (e.g. "4/102"), or null
-- "confidence" is "high", "medium", or "low"
-- If you cannot identify the card at all, return []`;
-
+  $id('aiStatus').style.display='flex';
+  $id('suggestions').style.display='none';
+  $id('step1Next').disabled=true;
+  const prompt=`You are a Pokémon trading card expert. Analyze this card image and identify it.
+Return ONLY a JSON array (no markdown, no extra text) with up to 3 matches ordered by confidence:
+[{"name":"Charizard","set":"Base Set","number":"4/102","confidence":"high"}]
+confidence must be: high, medium, or low. If unidentifiable return [].`;
   try{
-    const res = await fetch(`${GEMINI_URL}?key=${geminiKey()}`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        contents:[{parts:[
-          {inline_data:{mime_type:'image/jpeg',data:base64}},
-          {text:prompt}
-        ]}],
-        generationConfig:{temperature:0.1,maxOutputTokens:500}
-      })
+    const res=await fetch(`${GEMINI_URL}?key=${geminiKey()}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:'image/jpeg',data:base64}},{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:400}})
     });
-    const data = await res.json();
-    if(data.error){ throw new Error(data.error.message); }
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
-    const clean = text.replace(/```json|```/g,'').trim();
-    const suggestions = JSON.parse(clean);
-    if(!suggestions.length){ throw new Error('Could not identify card'); }
-    await showSuggestions(suggestions);
-  } catch(err){
-    $id('aiStatus').innerHTML = `<span style="color:var(--red);">✗ ${err.message}. Please search manually below.</span>`;
-    $id('aiStatus').style.display = 'flex';
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+    const sug=JSON.parse(text.replace(/```json|```/g,'').trim());
+    if(!sug.length)throw new Error('Could not identify card');
+    await showSuggestions(sug);
+  }catch(err){
+    $id('aiStatus').innerHTML=`<span style="color:var(--red);">✗ ${err.message} — please search manually below.</span>`;
+    $id('aiStatus').style.display='flex';
   }
 }
 
 async function showSuggestions(suggestions){
-  $id('aiStatus').style.display = 'none';
-  $id('suggestions').style.display = 'block';
-  const list = $id('suggestionList');
-  list.innerHTML = '<div style="color:var(--muted);font-size:12px;margin-bottom:8px;">Fetching card details…</div>';
-
-  const items = [];
+  $id('aiStatus').style.display='none';
+  $id('suggestions').style.display='block';
+  const list=$id('suggestionList');
+  list.innerHTML=`<div style="font-size:12px;color:var(--text3);">Fetching card details…</div>`;
+  const items=[];
   for(const s of suggestions){
-    try{
-      const cards = await searchTCG(s.name, s.set, s.number);
-      if(cards.length) items.push({...cards[0], confidence: s.confidence});
-    } catch(e){}
+    try{const cards=await searchTCG(s.name,s.set,s.number);if(cards.length)items.push({...cards[0],confidence:s.confidence});}catch(e){}
   }
-
-  if(!items.length){
-    list.innerHTML = '<div style="color:var(--muted);font-size:12px;">No matches found in TCG database. Please search manually.</div>';
-    return;
-  }
-
-  list.innerHTML = items.map((c,i) => `
+  if(!items.length){list.innerHTML=`<div style="font-size:12px;color:var(--text3);">No TCG match found — please search manually below.</div>`;return;}
+  window._suggestions=items;
+  list.innerHTML=items.map((c,i)=>`
     <div class="suggestion-item" id="sug_${i}" onclick="selectSuggestion(${i})">
       <img class="suggestion-img" src="${c.images?.small||''}" onerror="this.style.display='none'"/>
       <div class="suggestion-info">
         <div class="suggestion-name">${esc(c.name)}</div>
-        <div class="suggestion-set">${esc(c.set?.name||'')} ${c.number?'#'+c.number:''}</div>
-        <div class="suggestion-price">${fmt(c.tcgplayer?.prices?.holofoil?.market || c.tcgplayer?.prices?.normal?.market || 0)}</div>
+        <div class="suggestion-set">${esc(c.set?.name||'')} ${c.number?'· #'+c.number:''}</div>
+        <div class="suggestion-price">${fmt(getMarketPrice(c))}</div>
       </div>
-      <div class="suggestion-badge">${c.confidence||''}</div>
-    </div>
-  `).join('');
-
-  // Store items for selection
-  window._suggestions = items;
+      <div class="suggestion-badge ${c.confidence||'low'}">${(c.confidence||'').toUpperCase()}</div>
+    </div>`).join('');
 }
 
 function selectSuggestion(i){
   document.querySelectorAll('.suggestion-item').forEach(el=>el.classList.remove('selected'));
   $id('sug_'+i).classList.add('selected');
-  selectedCard = window._suggestions[i];
-  $id('step1Next').disabled = false;
+  selectedCard=window._suggestions[i];
+  $id('step1Next').disabled=false;
+  document.querySelectorAll('.tcg-result').forEach(el=>el.classList.remove('selected'));
 }
 
 async function manualSearch(){
-  const q = $id('manualSearchInput').value.trim();
-  if(!q) return;
-  $id('tcgResults').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px;">Searching…</div>';
-  $id('tcgResults').style.display = 'grid';
+  const q=$id('manualSearchInput').value.trim();if(!q)return;
+  $id('tcgResults').style.display='grid';
+  $id('tcgResults').innerHTML=`<div style="font-size:12px;color:var(--text3);grid-column:1/-1;">Searching…</div>`;
   try{
-    const cards = await searchTCG(q);
-    if(!cards.length){ $id('tcgResults').innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px;">No results found.</div>'; return; }
-    window._manualResults = cards;
-    $id('tcgResults').innerHTML = cards.slice(0,20).map((c,i)=>`
+    const cards=await searchTCG(q);
+    if(!cards.length){$id('tcgResults').innerHTML=`<div style="font-size:12px;color:var(--text3);grid-column:1/-1;">No results found.</div>`;return;}
+    window._manualResults=cards;
+    $id('tcgResults').innerHTML=cards.slice(0,16).map((c,i)=>`
       <div class="tcg-result" id="mr_${i}" onclick="selectManual(${i})">
         <img src="${c.images?.small||''}" onerror="this.src=''" style="width:100%;border-radius:4px;"/>
         <div class="tcg-result-name">${esc(c.name)}</div>
-        <div class="tcg-result-set">${esc(c.set?.name||'')}</div>
-      </div>
-    `).join('');
-  } catch(e){
-    $id('tcgResults').innerHTML = `<div style="color:var(--red);font-size:12px;padding:8px;">Error: ${e.message}</div>`;
-  }
+      </div>`).join('');
+  }catch(e){$id('tcgResults').innerHTML=`<div style="color:var(--red);font-size:12px;grid-column:1/-1;">Error: ${esc(e.message)}</div>`;}
 }
 
 function selectManual(i){
   document.querySelectorAll('.tcg-result').forEach(el=>el.classList.remove('selected'));
   $id('mr_'+i).classList.add('selected');
-  selectedCard = window._manualResults[i];
-  $id('step1Next').disabled = false;
-  // Clear AI suggestions selection
+  selectedCard=window._manualResults[i];
+  $id('step1Next').disabled=false;
   document.querySelectorAll('.suggestion-item').forEach(el=>el.classList.remove('selected'));
 }
 
-async function searchTCG(name, set, number){
-  let q = `name:"${name}"`;
-  if(set) q += ` set.name:"${set}"`;
-  if(number) q += ` number:"${number.split('/')[0]}"`;
-  const url = `${TCG_BASE}/cards?q=${encodeURIComponent(q)}&pageSize=10`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.data || [];
+async function searchTCG(name,set,number){
+  let q=`name:"${name}"`;
+  if(set)q+=` set.name:"${set}"`;
+  if(number)q+=` number:"${number.split('/')[0]}"`;
+  const res=await fetch(`${TCG_BASE}/cards?q=${encodeURIComponent(q)}&pageSize=16`);
+  const data=await res.json();
+  return data.data||[];
 }
 
 function getMarketPrice(card){
-  const p = card.tcgplayer?.prices;
-  if(!p) return 0;
-  return p.holofoil?.market || p['1stEditionHolofoil']?.market || p.normal?.market || p.reverseHolofoil?.market || p.unlimited?.market || 0;
+  const p=card.tcgplayer?.prices;if(!p)return 0;
+  return p.holofoil?.market||p['1stEditionHolofoil']?.market||p.normal?.market||p.reverseHolofoil?.market||p.unlimited?.market||0;
 }
 
-// ── STEPS ──
-function goStep1(init){
-  $id('addStep1').style.display = '';
-  $id('addStep2').style.display = 'none';
-  $id('addStep3').style.display = 'none';
-  setStep(1);
-}
+function goStep1(init){$id('addStep1').style.display='';$id('addStep2').style.display='none';$id('addStep3').style.display='none';setStep(1);}
 function goStep2(){
-  if(!selectedCard){ toast('Please select a card first', 'err'); return; }
-  $id('addStep1').style.display = 'none';
-  $id('addStep2').style.display = '';
-  $id('addStep3').style.display = 'none';
-  setStep(2);
-  // Populate step 2
-  $id('selectedCardImg').src = selectedCard.images?.small || '';
-  $id('selectedCardName').textContent = selectedCard.name || '';
-  $id('selectedCardSet').textContent = (selectedCard.set?.name||'') + (selectedCard.number?' #'+selectedCard.number:'');
-  const mp = getMarketPrice(selectedCard);
-  $id('selectedCardMarket').textContent = 'Market: ' + fmt(mp);
-  // Default date to today
-  $id('dateAcquiredInput').value = new Date().toISOString().slice(0,10);
+  if(!selectedCard){toast('Please select a card first','err');return;}
+  $id('addStep1').style.display='none';$id('addStep2').style.display='';$id('addStep3').style.display='none';setStep(2);
+  $id('selectedCardImg').src=selectedCard.images?.small||'';
+  $id('selectedCardName').textContent=selectedCard.name||'';
+  $id('selectedCardSet').textContent=(selectedCard.set?.name||'')+(selectedCard.number?' · #'+selectedCard.number:'');
+  $id('selectedCardMarket').textContent='Market: '+fmt(getMarketPrice(selectedCard));
+  $id('dateAcquiredInput').value=new Date().toISOString().slice(0,10);
   renderCondField();
 }
 function goStep3(){
-  const cond = getConditionValue();
-  if(!cond){ toast('Please select a condition', 'err'); return; }
-  const pp = parseFloat($id('purchasePriceInput').value) || 0;
-  const qty = parseInt($id('quantityInput').value) || 1;
-  const mp = getMarketPrice(selectedCard);
-  const pl = (mp - pp) * qty;
-
-  $id('addStep2').style.display = 'none';
-  $id('addStep3').style.display = '';
-  setStep(3);
-
-  $id('confirmImg').src = selectedCard.images?.large || selectedCard.images?.small || '';
-  $id('confirmDetails').innerHTML = `
-    <div class="detail-row"><span class="detail-key">Card</span><span class="detail-val">${esc(selectedCard.name)}</span></div>
-    <div class="detail-row"><span class="detail-key">Set</span><span class="detail-val">${esc(selectedCard.set?.name||'')}</span></div>
-    <div class="detail-row"><span class="detail-key">Number</span><span class="detail-val">${esc(selectedCard.number||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">Condition</span><span class="detail-val">${cond}</span></div>
-    <div class="detail-row"><span class="detail-key">Purchase Price</span><span class="detail-val">${fmt(pp)}</span></div>
-    <div class="detail-row"><span class="detail-key">Market Price</span><span class="detail-val" style="color:var(--gold)">${fmt(mp)}</span></div>
+  const cond=getConditionValue();if(!cond){toast('Please select a condition','err');return;}
+  const pp=parseFloat($id('purchasePriceInput').value)||0;
+  const qty=parseInt($id('quantityInput').value)||1;
+  const mp=getMarketPrice(selectedCard);
+  const pl=(mp-pp)*qty;
+  $id('addStep2').style.display='none';$id('addStep3').style.display='';setStep(3);
+  $id('confirmImg').src=selectedCard.images?.large||selectedCard.images?.small||'';
+  $id('confirmDetails').innerHTML=`
+    <div class="detail-row"><span class="detail-key">CARD</span><span class="detail-val">${esc(selectedCard.name)}</span></div>
+    <div class="detail-row"><span class="detail-key">SET</span><span class="detail-val">${esc(selectedCard.set?.name||'')}</span></div>
+    <div class="detail-row"><span class="detail-key">NUMBER</span><span class="detail-val">${esc(selectedCard.number||'—')}</span></div>
+    <div class="detail-row"><span class="detail-key">CONDITION</span><span class="detail-val">${cond}</span></div>
+    <div class="detail-row"><span class="detail-key">PAID</span><span class="detail-val">${fmt(pp)}</span></div>
+    <div class="detail-row"><span class="detail-key">MARKET</span><span class="detail-val" style="color:var(--gb3)">${fmt(mp)}</span></div>
     <div class="detail-row"><span class="detail-key">P&amp;L</span><span class="detail-val"><span class="pl-badge ${pl>=0?'pos':'neg'}">${fmtPL(pl)}</span></span></div>
-    <div class="detail-row"><span class="detail-key">Quantity</span><span class="detail-val">×${qty}</span></div>
-    <div class="detail-row"><span class="detail-key">Date Acquired</span><span class="detail-val">${$id('dateAcquiredInput').value||'—'}</span></div>
-    ${$id('notesInput').value?`<div class="detail-row"><span class="detail-key">Notes</span><span class="detail-val" style="font-family:'DM Sans';font-size:12px;">${esc($id('notesInput').value)}</span></div>`:''}
-  `;
+    <div class="detail-row"><span class="detail-key">QTY</span><span class="detail-val">×${qty}</span></div>`;
 }
-
-function setStep(n){
-  for(let i=1;i<=3;i++){
-    const el = $id('step'+i+'lbl');
-    el.className = 'step' + (i<n?' done':(i===n?' active':''));
-  }
-}
-
+function setStep(n){for(let i=1;i<=3;i++){$id('step'+i+'lbl').className='step'+(i<n?' done':(i===n?' active':''));}}
 function renderCondField(){
-  const type = $id('condTypeSelect').value;
-  const wrap = $id('condFieldWrap');
-  if(type === 'raw'){
-    wrap.innerHTML = `
-      <label class="form-label">Condition</label>
+  const type=$id('condTypeSelect').value,wrap=$id('condFieldWrap');
+  if(type==='raw'){
+    wrap.innerHTML=`<label class="form-label">CONDITION</label>
       <select class="form-select" id="condRaw">
         <option value="">Select condition…</option>
-        <option value="Mint">Mint (M)</option>
-        <option value="Near Mint">Near Mint (NM)</option>
-        <option value="Lightly Played">Lightly Played (LP)</option>
-        <option value="Moderately Played">Moderately Played (MP)</option>
-        <option value="Heavily Played">Heavily Played (HP)</option>
-        <option value="Damaged">Damaged (D)</option>
+        <option value="Mint">Mint (M)</option><option value="Near Mint">Near Mint (NM)</option>
+        <option value="Lightly Played">Lightly Played (LP)</option><option value="Moderately Played">Moderately Played (MP)</option>
+        <option value="Heavily Played">Heavily Played (HP)</option><option value="Damaged">Damaged (D)</option>
       </select>`;
   } else {
-    wrap.innerHTML = `
-      <label class="form-label">PSA Grade</label>
+    wrap.innerHTML=`<label class="form-label">PSA GRADE</label>
       <select class="form-select" id="condPSA">
         <option value="">Select grade…</option>
-        ${[10,9,8,7,6,5,4,3,2,1].map(n=>`<option value="PSA ${n}">PSA ${n}${n===10?' (Gem Mint)':n===9?' (Mint)':n===8?' (NM-MT)':n===7?' (NM)':''}</option>`).join('')}
+        ${[10,9,8,7,6,5,4,3,2,1].map(n=>`<option value="PSA ${n}">PSA ${n}${n===10?' — Gem Mint':n===9?' — Mint':n===8?' — NM-MT':n===7?' — Near Mint':''}</option>`).join('')}
       </select>`;
   }
 }
-
-function getConditionValue(){
-  const type = $id('condTypeSelect').value;
-  if(type === 'raw') return ($id('condRaw')?.value||'');
-  return ($id('condPSA')?.value||'');
-}
-
+function getConditionValue(){const type=$id('condTypeSelect').value;return type==='raw'?($id('condRaw')?.value||''):($id('condPSA')?.value||'');}
 function saveCard(){
-  if(!selectedCard) return;
-  const mp = getMarketPrice(selectedCard);
-  const entry = {
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-    tcgId: selectedCard.id,
-    name: selectedCard.name,
-    setName: selectedCard.set?.name || '',
-    setId: selectedCard.set?.id || '',
-    number: selectedCard.number || '',
-    rarity: selectedCard.rarity || '',
-    imageSmall: selectedCard.images?.small || '',
-    imageLarge: selectedCard.images?.large || '',
-    conditionType: $id('condTypeSelect').value,
-    condition: getConditionValue(),
-    purchasePrice: parseFloat($id('purchasePriceInput').value) || 0,
-    marketPrice: mp,
-    marketPriceUpdated: new Date().toISOString(),
-    quantity: parseInt($id('quantityInput').value) || 1,
-    dateAdded: $id('dateAcquiredInput').value || new Date().toISOString().slice(0,10),
-    notes: $id('notesInput').value || '',
-    supertype: selectedCard.supertype || '',
-    subtypes: selectedCard.subtypes || [],
+  if(!selectedCard)return;
+  const mp=getMarketPrice(selectedCard);
+  const entry={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    tcgId:selectedCard.id,name:selectedCard.name,
+    setName:selectedCard.set?.name||'',setId:selectedCard.set?.id||'',
+    number:selectedCard.number||'',rarity:selectedCard.rarity||'',
+    imageSmall:selectedCard.images?.small||'',imageLarge:selectedCard.images?.large||'',
+    conditionType:$id('condTypeSelect').value,condition:getConditionValue(),
+    purchasePrice:parseFloat($id('purchasePriceInput').value)||0,
+    marketPrice:mp,marketPriceUpdated:new Date().toISOString(),
+    quantity:parseInt($id('quantityInput').value)||1,
+    dateAdded:$id('dateAcquiredInput').value||new Date().toISOString().slice(0,10),
+    notes:$id('notesInput').value||'',
   };
-  D.cards.unshift(entry);
-  saveData();
-  renderAll();
-  closeAddModal();
-  toast('✓ Card added to portfolio');
+  D.cards.unshift(entry);saveData();renderAll();closeAddModal();toast('✓ Card added to collection');
 }
 
-// ═══════════════════════════════════════════════
-// CARD DETAIL
-// ═══════════════════════════════════════════════
+// ── DETAIL ──
 function openDetail(id){
-  const c = D.cards.find(x=>x.id===id);
-  if(!c) return;
-  currentDetailId = id;
-  $id('detailTitle').textContent = c.name;
-  const mp = c.marketPrice || 0;
-  const pp = c.purchasePrice || 0;
-  const pl = (mp - pp) * (c.quantity||1);
-  const plPct = pp > 0 ? ((mp-pp)/pp*100) : 0;
-  const updated = c.marketPriceUpdated ? new Date(c.marketPriceUpdated).toLocaleDateString('en-GB') : '—';
-
-  $id('detailBody').innerHTML = `
-    <img class="card-detail-img" src="${c.imageLarge||c.imageSmall||''}" onerror="this.style.display='none'"/>
-    <div class="detail-row"><span class="detail-key">Set</span><span class="detail-val">${esc(c.setName)}</span></div>
-    <div class="detail-row"><span class="detail-key">Number</span><span class="detail-val">${esc(c.number||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">Rarity</span><span class="detail-val">${esc(c.rarity||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">Condition</span><span class="detail-val">${esc(c.condition||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">Quantity</span><span class="detail-val">×${c.quantity||1}</span></div>
-    <div class="detail-row"><span class="detail-key">Purchase Price</span><span class="detail-val">${fmt(pp)}</span></div>
-    <div class="detail-row"><span class="detail-key">Market Price</span><span class="detail-val" style="color:var(--gold)">${fmt(mp)} <span style="font-size:10px;color:var(--muted);">updated ${updated}</span></span></div>
+  const c=D.cards.find(x=>x.id===id);if(!c)return;
+  $id('detailTitle').textContent=c.name;
+  const mp=c.marketPrice||0,pp=c.purchasePrice||0;
+  const pl=(mp-pp)*(c.quantity||1);
+  const plPct=pp>0?((mp-pp)/pp*100):0;
+  const updated=c.marketPriceUpdated?new Date(c.marketPriceUpdated).toLocaleDateString('en-GB'):'—';
+  $id('detailBody').innerHTML=`
+    <img class="detail-img" src="${c.imageLarge||c.imageSmall||''}" onerror="this.style.display='none'"/>
+    <div class="detail-row"><span class="detail-key">SET</span><span class="detail-val">${esc(c.setName)}</span></div>
+    <div class="detail-row"><span class="detail-key">NUMBER</span><span class="detail-val">${esc(c.number||'—')}</span></div>
+    <div class="detail-row"><span class="detail-key">RARITY</span><span class="detail-val">${esc(c.rarity||'—')}</span></div>
+    <div class="detail-row"><span class="detail-key">CONDITION</span><span class="detail-val">${esc(c.condition||'—')}</span></div>
+    <div class="detail-row"><span class="detail-key">QTY</span><span class="detail-val">×${c.quantity||1}</span></div>
+    <div class="detail-row"><span class="detail-key">PAID</span><span class="detail-val">${fmt(pp)}</span></div>
+    <div class="detail-row"><span class="detail-key">MARKET</span><span class="detail-val" style="color:var(--gb3)">${fmt(mp)} <span style="font-size:10px;color:var(--text3);">${updated}</span></span></div>
     <div class="detail-row"><span class="detail-key">P&amp;L</span><span class="detail-val"><span class="pl-badge ${pl>=0?'pos':'neg'}">${fmtPL(pl)} (${plPct>=0?'+':''}${plPct.toFixed(1)}%)</span></span></div>
-    <div class="detail-row"><span class="detail-key">Total Value</span><span class="detail-val" style="color:var(--gold)">${fmt(mp*(c.quantity||1))}</span></div>
-    <div class="detail-row"><span class="detail-key">Acquired</span><span class="detail-val">${c.dateAdded||'—'}</span></div>
-    ${c.notes?`<div class="detail-row"><span class="detail-key">Notes</span><span class="detail-val" style="font-family:'DM Sans';font-size:12px;max-width:200px;text-align:right;">${esc(c.notes)}</span></div>`:''}
-    <div class="btn-row" style="margin-top:20px;">
+    <div class="detail-row"><span class="detail-key">TOTAL VALUE</span><span class="detail-val" style="color:var(--gb3)">${fmt(mp*(c.quantity||1))}</span></div>
+    ${c.notes?`<div class="detail-row"><span class="detail-key">NOTES</span><span class="detail-val" style="font-family:'DM Sans';font-size:12px;max-width:200px;text-align:right;">${esc(c.notes)}</span></div>`:''}
+    <div class="btn-row">
       <button class="btn btn-outline" onclick="refreshOnePrice('${id}')">↻ Refresh Price</button>
       <button class="btn btn-red" onclick="deleteCard('${id}')">🗑 Remove</button>
-    </div>
-  `;
+    </div>`;
   $id('detailModal').classList.add('open');
 }
-
-function closeDetail(){
-  $id('detailModal').classList.remove('open');
-}
+function closeDetail(){$id('detailModal').classList.remove('open');}
 
 async function refreshOnePrice(id){
-  const c = D.cards.find(x=>x.id===id);
-  if(!c) return;
+  const c=D.cards.find(x=>x.id===id);if(!c)return;
   try{
-    const res = await fetch(`${TCG_BASE}/cards/${c.tcgId}`);
-    const data = await res.json();
-    const mp = getMarketPrice(data.data||{});
-    c.marketPrice = mp;
-    c.marketPriceUpdated = new Date().toISOString();
-    saveData();
-    openDetail(id);
-    renderStats();
-    toast('✓ Price updated: ' + fmt(mp));
-  } catch(e){
-    toast('Could not fetch price', 'err');
-  }
+    const res=await fetch(`${TCG_BASE}/cards/${c.tcgId}`);
+    const data=await res.json();
+    const mp=getMarketPrice(data.data||{});
+    c.marketPrice=mp;c.marketPriceUpdated=new Date().toISOString();
+    saveData();openDetail(id);renderStats();toast('✓ Price updated: '+fmt(mp));
+  }catch(e){toast('Could not fetch price','err');}
 }
-
 function deleteCard(id){
-  if(!confirm('Remove this card from your portfolio?')) return;
-  D.cards = D.cards.filter(x=>x.id!==id);
-  saveData();
-  renderAll();
-  closeDetail();
-  toast('Card removed');
+  if(!confirm('Remove this card from your collection?'))return;
+  D.cards=D.cards.filter(x=>x.id!==id);
+  saveData();renderAll();closeDetail();toast('Card removed');
 }
 
-// ═══════════════════════════════════════════════
-// REFRESH ALL PRICES
-// ═══════════════════════════════════════════════
+// ── REFRESH ALL ──
 async function refreshAllPrices(){
-  if(!D.cards.length){ toast('No cards to update', 'err'); return; }
-  const btn = $id('refreshBtn');
-  btn.textContent = '↻ Updating…';
-  btn.disabled = true;
-  let updated = 0;
+  if(!D.cards.length){toast('No cards to update','err');return;}
+  const btn=$id('refreshBtn');btn.textContent='↻ Updating…';btn.disabled=true;
+  let updated=0;
   for(const c of D.cards){
     try{
-      const res = await fetch(`${TCG_BASE}/cards/${c.tcgId}`);
-      const data = await res.json();
-      const mp = getMarketPrice(data.data||{});
-      if(mp > 0){ c.marketPrice = mp; c.marketPriceUpdated = new Date().toISOString(); updated++; }
-      await new Promise(r=>setTimeout(r,100)); // rate limit courtesy
-    } catch(e){}
+      const res=await fetch(`${TCG_BASE}/cards/${c.tcgId}`);
+      const data=await res.json();
+      const mp=getMarketPrice(data.data||{});
+      if(mp>0){c.marketPrice=mp;c.marketPriceUpdated=new Date().toISOString();updated++;}
+      await new Promise(r=>setTimeout(r,120));
+    }catch(e){}
   }
-  saveData();
-  renderAll();
-  btn.textContent = '↻ Prices';
-  btn.disabled = false;
-  toast(`✓ Updated ${updated} card prices`);
+  saveData();renderAll();
+  btn.textContent='↻ Refresh Prices';btn.disabled=false;
+  toast(`✓ ${updated} prices updated`);
 }
 
-// ═══════════════════════════════════════════════
-// SETTINGS
-// ═══════════════════════════════════════════════
-function openSettings(){
-  const name = localStorage.getItem(NAME_KEY)||'';
-  $id('settingsName').value = name;
-  const gk = localStorage.getItem(GKEY_KEY)||'';
-  $id('settingsGeminiKey').value = gk;
-  $id('settingsModal').classList.add('open');
-}
-function closeSettings(){
-  $id('settingsModal').classList.remove('open');
-}
-function saveName(){
-  const n = $id('settingsName').value.trim();
-  localStorage.setItem(NAME_KEY, n);
-  toast('✓ Name saved');
-}
-function saveGeminiKey(){
-  const k = $id('settingsGeminiKey').value.trim();
-  if(k) localStorage.setItem(GKEY_KEY, k);
-  else localStorage.removeItem(GKEY_KEY);
-  toast('✓ Gemini key saved');
-}
-
+// ── SETTINGS ──
+function openSettings(){$id('settingsName').value=localStorage.getItem(NAME_KEY)||'';$id('settingsGeminiKey').value=localStorage.getItem(GKEY_KEY)||'';$id('settingsModal').classList.add('open');}
+function closeSettings(){$id('settingsModal').classList.remove('open');}
+function saveName(){localStorage.setItem(NAME_KEY,$id('settingsName').value.trim());toast('✓ Name saved');}
+function saveGeminiKey(){const k=$id('settingsGeminiKey').value.trim();if(k)localStorage.setItem(GKEY_KEY,k);else localStorage.removeItem(GKEY_KEY);toast('✓ Key saved');}
 function exportData(){
-  const blob = new Blob([JSON.stringify(D,null,2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'pokedex-portfolio-' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  toast('✓ Export downloaded');
+  const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='pokedex-'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('✓ Exported');
 }
 function importData(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const r = new FileReader();
-  r.onload = ev => {
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
     try{
-      const imported = JSON.parse(ev.target.result);
-      if(!imported.cards) throw new Error('Invalid format');
-      if(!confirm(`Import ${imported.cards.length} cards? This will merge with your existing data.`)) return;
-      // Merge by id
-      const existingIds = new Set(D.cards.map(c=>c.id));
-      const newCards = imported.cards.filter(c=>!existingIds.has(c.id));
-      D.cards = [...D.cards, ...newCards];
-      saveData();
-      renderAll();
-      toast(`✓ Imported ${newCards.length} new cards`);
-    } catch(err){
-      toast('Invalid file: ' + err.message, 'err');
-    }
+      const imported=JSON.parse(ev.target.result);
+      if(!imported.cards)throw new Error('Invalid format');
+      if(!confirm(`Import ${imported.cards.length} cards? This will merge with your existing data.`))return;
+      const existing=new Set(D.cards.map(c=>c.id));
+      const newCards=imported.cards.filter(c=>!existing.has(c.id));
+      D.cards=[...D.cards,...newCards];saveData();renderAll();toast(`✓ ${newCards.length} cards imported`);
+    }catch(err){toast('Invalid file','err');}
   };
-  r.readAsText(file);
-  e.target.value = '';
+  r.readAsText(file);e.target.value='';
 }
-function clearAllData(){
-  if(!confirm('Delete ALL cards from your portfolio? This cannot be undone.')) return;
-  D = { cards: [] };
-  saveData();
-  renderAll();
-  closeSettings();
-  toast('Portfolio cleared');
-}
+function clearAllData(){if(!confirm('Delete all data? This cannot be undone.'))return;D={cards:[]};saveData();renderAll();closeSettings();toast('Data cleared');}
 
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-window.addEventListener('load', () => {
+// ── INIT ──
+window.addEventListener('load',()=>{
   buildPinPad();
-  const hasPin = !!localStorage.getItem(PIN_KEY);
-  if(!hasPin){
-    pinMode = 'setup';
-    $id('pinMsg').textContent = 'Choose a 4-digit PIN';
-  } else {
-    $id('pinMsg').textContent = 'Enter your PIN';
-  }
-  updateDots(0, false);
+  const hasPin=!!localStorage.getItem(PIN_KEY);
+  pinMode=hasPin?'login':'setup';
+  $id('pinMsg').textContent=hasPin?'Enter your PIN':'Choose a 4-digit PIN';
+  updateDots(0,false);
 });
-
-// Close modals on background click
-document.querySelectorAll('.modal-bg').forEach(bg => {
-  bg.addEventListener('click', e => {
-    if(e.target === bg) bg.classList.remove('open');
-  });
-});
-
-// Manual search on Enter
-document.addEventListener('keydown', e => {
-  if(e.key === 'Enter' && document.activeElement === $id('manualSearchInput')){
-    manualSearch();
-  }
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');});
 });
 </script>
 </body>
