@@ -709,7 +709,7 @@ body::after{
         <button class="btn btn-outline" style="width:100%;" onclick="saveName()">Save Name</button>
       </div>
       <div class="settings-section">
-        <div class="settings-title">GEMINI AI KEY (OPTIONAL OVERRIDE)</div>
+        <div class="settings-title">OPENROUTER KEY (OPTIONAL OVERRIDE)</div>
         <div class="form-group">
           <input class="form-input" id="settingsGeminiKey" placeholder="Leave blank to use built-in key"/>
         </div>
@@ -739,8 +739,8 @@ body::after{
 </div>
 
 <script>
-const GEMINI_KEY='AQ.Ab8RN6Lc2vXrHlCtFavev_rRrvh6Sz4bZduwuxlRtuHExcuYpw';
-const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
+const OPENROUTER_KEY='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';
+const OPENROUTER_URL='https://openrouter.ai/api/v1/chat/completions';
 const TCG_BASE='https://api.pokemontcg.io/v2';
 const PIN_KEY='pokedex_pin',DATA_KEY='pokedex_data',NAME_KEY='pokedex_name',GKEY_KEY='pokedex_gkey';
 
@@ -752,7 +752,7 @@ function $id(id){return document.getElementById(id);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmt(n){return '$'+Number(n||0).toFixed(2);}
 function fmtPL(n){return(n>=0?'+':'')+fmt(n);}
-function geminiKey(){return localStorage.getItem(GKEY_KEY)||GEMINI_KEY;}
+function openrouterKey(){return localStorage.getItem(GKEY_KEY)||OPENROUTER_KEY;}
 function toast(msg,type='ok'){
   const t=$id('toast');t.textContent=msg;t.className='show'+(type==='err'?' err':'');
   setTimeout(()=>{t.className='';},2800);
@@ -919,32 +919,30 @@ async function handleImageUpload(e){
     const dataUrl=ev.target.result;
     capturedImageBase64=dataUrl.split(',')[1];
     $id('scanPreview').src=dataUrl;$id('scanPreview').style.display='block';
-    await identifyWithGemini(capturedImageBase64);
+    await identifyWithAI(capturedImageBase64);
   };
   reader.readAsDataURL(file);
 }
 
-async function identifyWithGemini(base64){
+async function identifyWithAI(base64){
   $id('aiStatus').style.display='flex';
   $id('suggestions').style.display='none';
   $id('step1Next').disabled=true;
-  const prompt=`You are a Pokémon trading card expert. Analyze this card image and identify it.
-Return ONLY a JSON array (no markdown, no extra text) with up to 3 matches ordered by confidence:
-[{"name":"Charizard","set":"Base Set","number":"4/102","confidence":"high"}]
-confidence must be: high, medium, or low. If unidentifiable return [].`;
+  const prompt='You are a Pokemon trading card expert. Analyze this card image and identify it. Return ONLY a JSON array (no markdown, no extra text) with up to 3 matches ordered by confidence: [{"name":"Charizard","set":"Base Set","number":"4/102","confidence":"high"}] confidence must be: high, medium, or low. If unidentifiable return [].';
   try{
-    const res=await fetch(`${GEMINI_URL}?key=${geminiKey()}`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:'image/jpeg',data:base64}},{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:400}})
+    const res=await fetch(OPENROUTER_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+openrouterKey(),'HTTP-Referer':'https://julienappadurai.github.io/Poke','X-Title':'PokedexPortfolio'},
+      body:JSON.stringify({model:'google/gemini-2.0-flash-lite-001',messages:[{role:'user',content:[{type:'image_url',image_url:{url:'data:image/jpeg;base64,'+base64}},{type:'text',text:prompt}]}],max_tokens:400,temperature:0.1})
     });
     const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+    if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+    const text=data.choices?.[0]?.message?.content||'[]';
     const sug=JSON.parse(text.replace(/```json|```/g,'').trim());
     if(!sug.length)throw new Error('Could not identify card');
     await showSuggestions(sug);
   }catch(err){
-    $id('aiStatus').innerHTML=`<span style="color:var(--red);">✗ ${err.message} — please search manually below.</span>`;
+    $id('aiStatus').innerHTML='<span style="color:var(--red);">✗ '+err.message+' — please search manually below.</span>';
     $id('aiStatus').style.display='flex';
   }
 }
