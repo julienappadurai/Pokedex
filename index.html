@@ -3,175 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pokédex Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Pokédex Binder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0c10;--s1:#111318;--s2:#181b22;--border:#252830;
-  --red:#e8323c;--yellow:#f5c842;--blue:#4a90e8;--green:#3ecf8e;
-  --text:#ecedf2;--muted:#5a5f6e;--r:12px;
-  --card-bg:#13161d;
+:root {
+  --bg:#0d0f1a; --s1:#141627; --s2:#1c1f35; --border:#2a2e4a;
+  --red:#e63946; --gold:#f4d03f; --green:#4caf7d; --blue:#5c9de0;
+  --text:#f0ece0; --muted:#8892a4; --r:10px;
+}
+body.light {
+  --bg:#f0ece0; --s1:#ffffff; --s2:#ebe7d8; --border:#d0cab8;
+  --red:#c0272f; --gold:#b8860b; --green:#2d8a5a; --blue:#2c6dba;
+  --text:#1a1814; --muted:#6a6458;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
-/* scrollbar */
-::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-track{background:var(--s1);} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
 /* ── AUTH ── */
-#authWrap{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;background-image:radial-gradient(ellipse at 20% 50%, rgba(232,50,60,.07) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(74,144,232,.07) 0%, transparent 60%);}
-.auth-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:40px 32px;max-width:420px;width:100%;text-align:center;position:relative;overflow:hidden;}
-.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--blue));}
-.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:3px;background:linear-gradient(135deg,var(--yellow),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px;}
-.auth-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:28px;}
-.auth-card p{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:28px;}
-.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;border-radius:10px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;}
-.btn-google:hover{border-color:var(--yellow);box-shadow:0 0 0 1px var(--yellow);}
-.btn-google svg{width:18px;height:18px;flex-shrink:0;}
-#authMsg{margin-top:12px;font-size:12px;color:var(--muted);min-height:18px;}
+#authWrap{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:36px 28px;max-width:380px;width:100%;text-align:center;}
+.auth-title{font-family:'Playfair Display',serif;font-size:30px;color:var(--red);margin-bottom:4px;}
+.auth-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);transition:all .15s;}
+.pin-dot.filled{background:var(--red);border-color:var(--red);}
+.pin-dot.error{background:var(--gold);border-color:var(--gold);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto;}
+.pin-key{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:20px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;color:var(--text);text-align:center;user-select:none;}
+.pin-key:hover{border-color:var(--red);color:var(--red);}
+.pin-key:active{transform:scale(.94);}
+.pin-key.del{font-size:16px;color:var(--muted);}
+.pin-msg{font-size:12px;color:var(--muted);min-height:18px;margin-top:10px;}
 
 /* ── LOAD ── */
 #loadWrap{position:fixed;inset:0;background:var(--bg);z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.load-txt{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;}
 
 /* ── APP ── */
 #appWrap{display:none;}
-.app{max-width:1100px;margin:0 auto;padding:28px 16px 80px;}
+.app{max-width:1100px;margin:0 auto;padding:24px 16px 80px;}
 
-/* ── HEADER ── */
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;flex-wrap:wrap;gap:12px;}
-.logo-wrap{}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;background:linear-gradient(135deg,var(--yellow),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
-.logo small{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;display:block;margin-top:2px;-webkit-text-fill-color:var(--muted);}
-.hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.hbtn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.hbtn:hover{border-color:var(--yellow);color:var(--yellow);}
-.hbtn.ok{color:var(--green);border-color:rgba(62,207,142,.3);}
-.hbtn.saving{color:var(--yellow);border-color:rgba(245,200,66,.3);animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.logo{font-family:'Playfair Display',serif;font-size:24px;color:var(--red);}
+.logo small{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.hbtn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.hbtn:hover{border-color:var(--red);color:var(--red);}
+.hbtn.ok{color:var(--green);border-color:rgba(76,175,125,.3);}
+.hbtn.saving{color:var(--gold);border-color:rgba(244,208,63,.3);}
 
-/* ── STATS BAR ── */
-.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;}
-@media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
-.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;position:relative;overflow:hidden;}
-.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.stat-card.s-total::after{background:var(--yellow);}
-.stat-card.s-market::after{background:var(--blue);}
-.stat-card.s-pnl::after{background:var(--green);}
-.stat-card.s-count::after{background:var(--red);}
-.stat-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-.stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--text);line-height:1;}
-.stat-val.pos{color:var(--green);} .stat-val.neg{color:var(--red);}
+/* ── TABS ── */
+.tab-bar{display:flex;gap:0;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:4px;margin-bottom:24px;width:fit-content;}
+.tab{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;padding:8px 20px;border-radius:7px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;}
+.tab.on{background:var(--red);color:#fff;font-weight:500;}
 
-/* ── SEARCH ── */
-.search-section{margin-bottom:32px;}
-.search-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
-.search-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
-.search-input{flex:1;min-width:200px;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
-.search-input:focus{border-color:var(--yellow);}
-.search-input::placeholder{color:var(--muted);}
-.btn-search{padding:12px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--red),#c42830);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap;}
-.btn-search:hover{opacity:.85;}
-.btn-search:disabled{opacity:.4;cursor:not-allowed;}
-.search-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:12px;}
-.search-hint{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;padding:8px 0;}
+/* ── COLLECTION VIEW ── */
+.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:28px;}
+.set-card{background:var(--s1);border:2px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.set-card:hover,.set-card.on{border-color:var(--red);}
+.set-card.on{background:rgba(230,57,70,.06);}
+.set-card-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--text);margin-bottom:6px;}
+.set-card-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px;letter-spacing:1px;}
+.set-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:6px;}
+.set-progress-bar{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease;}
+.set-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--green);}
+.set-badge{position:absolute;top:10px;right:10px;font-size:18px;}
 
-/* ── SEARCH RESULT CARD ── */
-.sr-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;}
-.sr-card:hover{border-color:var(--yellow);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4);}
-.sr-img-wrap{position:relative;background:var(--s2);aspect-ratio:3/4;overflow:hidden;}
-.sr-img-wrap img{width:100%;height:100%;object-fit:contain;padding:6px;}
-.sr-info{padding:8px;}
-.sr-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-.sr-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
-.sr-price{font-family:'DM Mono',monospace;font-size:11px;color:var(--yellow);margin-top:4px;}
+/* ── COLLECTION FILTERS ── */
+.col-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.filter-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;}
+.filter-btn:hover{border-color:var(--red);}
+.filter-btn.on{background:var(--s2);color:var(--text);border-color:var(--muted);}
+.col-search{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;width:180px;}
+.col-search:focus{border-color:var(--red);}
 
-/* ── COLLECTION ── */
-.collection-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--text);}
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;}
-.filter-input{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;transition:border-color .15s;}
-.filter-input:focus{border-color:var(--yellow);}
-.filter-input::placeholder{color:var(--muted);}
-.collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;}
-@media(max-width:480px){.collection-grid{grid-template-columns:repeat(2,1fr);}}
+/* ── CARD GRID (binder style) ── */
+.binder{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.card-slot{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:all .15s;position:relative;}
+.card-slot:hover{border-color:var(--red);transform:translateY(-1px);}
+.card-slot.owned{border-color:var(--green);background:rgba(76,175,125,.05);}
+.card-slot.upgrade{border-color:var(--gold);}
+.card-slot.missing{opacity:.55;}
+.card-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:1px;}
+.card-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px;line-height:1.3;}
+.card-rarity{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
+.card-owned-info{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.card-cond{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(76,175,125,.15);color:var(--green);}
+.card-cond.lp{background:rgba(244,208,63,.12);color:var(--gold);}
+.card-cond.poor{background:rgba(230,57,70,.12);color:var(--red);}
+.card-price{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px;}
+.card-upgrade-flag{position:absolute;top:6px;right:6px;font-size:12px;}
+.card-type-badge{position:absolute;top:6px;left:6px;font-family:'DM Mono',monospace;font-size:8px;padding:1px 4px;border-radius:3px;background:rgba(92,158,224,.15);color:var(--blue);}
+.card-check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;}
 
-/* ── COLLECTION CARD ── */
-.coll-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;cursor:pointer;}
-.coll-card:hover{border-color:rgba(245,200,66,.4);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.5);}
-.coll-img-wrap{background:var(--s2);aspect-ratio:3/4;overflow:hidden;position:relative;}
-.coll-img-wrap img{width:100%;height:100%;object-fit:contain;padding:8px;transition:transform .3s;}
-.coll-card:hover .coll-img-wrap img{transform:scale(1.04);}
-.coll-pnl-badge{position:absolute;top:8px;right:8px;font-family:'DM Mono',monospace;font-size:9px;padding:3px 7px;border-radius:6px;font-weight:500;}
-.coll-pnl-badge.pos{background:rgba(62,207,142,.2);color:var(--green);}
-.coll-pnl-badge.neg{background:rgba(232,50,60,.2);color:var(--red);}
-.coll-pnl-badge.neutral{background:rgba(90,95,110,.2);color:var(--muted);}
-.coll-body{padding:10px;}
-.coll-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-.coll-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;}
-.coll-prices{display:flex;flex-direction:column;gap:3px;}
-.coll-price-row{display:flex;justify-content:space-between;align-items:center;}
-.coll-price-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
-.coll-price-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text);}
-.coll-price-val.market{color:var(--yellow);}
-.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;line-height:2;}
-.empty-icon{font-size:48px;margin-bottom:12px;opacity:.3;}
+/* ── COLLECTION STATS ── */
+.col-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+@media(max-width:600px){.col-stats{grid-template-columns:1fr 1fr;}}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.stat-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.stat-val{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);}
+.stat-val.g{color:var(--green);}
+.stat-val.r{color:var(--red);}
+.stat-val.gold{color:var(--gold);}
+
+/* ── LEDGER VIEW ── */
+.ledger-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.ledger-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+@media(max-width:600px){.ledger-stats{grid-template-columns:1fr 1fr;}}
+
+.ledger-table-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.ledger-table{width:100%;border-collapse:collapse;font-size:13px;}
+.ledger-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--s2);white-space:nowrap;cursor:pointer;user-select:none;}
+.ledger-table th:hover{color:var(--text);}
+.ledger-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.ledger-table tr:last-child td{border-bottom:none;}
+.ledger-table tr:hover td{background:var(--s2);}
+.type-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
+.type-badge.raw{background:rgba(92,158,224,.15);color:var(--blue);}
+.type-badge.slab{background:rgba(244,208,63,.15);color:var(--gold);}
+.profit-pos{color:var(--green);font-family:'DM Mono',monospace;}
+.profit-neg{color:var(--red);font-family:'DM Mono',monospace;}
+.profit-open{color:var(--muted);font-family:'DM Mono',monospace;}
+.ledger-empty{text-align:center;padding:48px;color:var(--muted);font-size:13px;}
+
+/* ── LEDGER FILTERS ── */
+.ledger-filters{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.ledger-filters .field{margin-bottom:0;}
+.ledger-filters label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.ledger-filters input,.ledger-filters select{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;}
+.ledger-filters input:focus,.ledger-filters select:focus{border-color:var(--red);}
+.ledger-filters select option{background:var(--s2);}
 
 /* ── MODAL ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px);}
-.overlay.on{display:flex;}
-.modal{background:var(--s1);border:1px solid var(--border);border-radius:20px;max-width:480px;width:100%;margin:auto;position:relative;overflow:hidden;}
-.modal-top-bar{height:3px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--blue));}
-.modal-body{padding:28px;}
-.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:20px;color:var(--text);}
-.modal-card-preview{display:flex;gap:16px;align-items:flex-start;margin-bottom:24px;background:var(--s2);border-radius:12px;padding:12px;}
-.modal-card-img{width:80px;flex-shrink:0;border-radius:8px;overflow:hidden;}
-.modal-card-img img{width:100%;display:block;}
-.modal-card-meta{}
-.modal-card-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
-.modal-card-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;}
-.modal-card-market{font-family:'DM Mono',monospace;font-size:12px;color:var(--yellow);margin-top:6px;}
-.form-row{margin-bottom:16px;}
-.form-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;}
-.form-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
-.form-input:focus{border-color:var(--yellow);}
-input[type="date"].form-input{color-scheme:dark;}
-.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.modal-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;}
-.btn-primary{flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--red),#c42830);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;}
-.btn-primary:hover{opacity:.85;}
-.btn-secondary{padding:12px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
-.btn-secondary:hover{border-color:var(--yellow);color:var(--yellow);}
-.btn-danger{padding:12px 20px;border-radius:10px;border:1px solid rgba(232,50,60,.3);background:transparent;color:var(--red);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
-.btn-danger:hover{background:rgba(232,50,60,.1);}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.ov.on{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:26px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;animation:su .18s ease;}
+@keyframes su{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal h2{font-family:'Playfair Display',serif;font-size:19px;color:var(--red);margin-bottom:4px;}
+.modal-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:18px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);}
+.field select option{background:var(--s2);}
+.field textarea{resize:vertical;min-height:60px;}
+.mbtns{display:flex;gap:8px;margin-top:20px;}
+.mbtn-p{flex:1;background:var(--red);color:#fff;border:none;border-radius:7px;padding:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;}
+.mbtn-p:hover{background:#c0272f;}
+.mbtn-g{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
+.mbtn-g:hover{border-color:var(--muted);color:var(--text);}
+.mbtn-d{background:transparent;color:var(--red);border:1px solid rgba(230,57,70,.3);border-radius:7px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
+.mbtn-d:hover{border-color:var(--red);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+input[type="date"],input[type="month"]{color-scheme:dark;}
+body.light input[type="date"],body.light input[type="month"]{color-scheme:light;}
 
-/* detail modal extras */
-.detail-pnl{padding:12px 16px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
-.detail-pnl.pos{background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.2);}
-.detail-pnl.neg{background:rgba(232,50,60,.1);border:1px solid rgba(232,50,60,.2);}
-.detail-pnl.neutral{background:var(--s2);border:1px solid var(--border);}
-.pnl-main{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;}
-.pnl-main.pos{color:var(--green);} .pnl-main.neg{color:var(--red);} .pnl-main.neutral{color:var(--muted);}
-.pnl-pct{font-family:'DM Mono',monospace;font-size:12px;}
-.pnl-pct.pos{color:var(--green);} .pnl-pct.neg{color:var(--red);} .pnl-pct.neutral{color:var(--muted);}
-.detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.detail-row:last-of-type{border-bottom:none;}
-.detail-lbl{color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;}
-.detail-val{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);}
-.refresh-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;margin-left:8px;}
-.refresh-btn:hover{border-color:var(--yellow);color:var(--yellow);}
-.manual-price-row{display:flex;gap:8px;align-items:center;margin-top:8px;}
-.manual-price-input{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;}
-.manual-price-input:focus{border-color:var(--yellow);}
-.btn-set-price{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:all .15s;}
-.btn-set-price:hover{border-color:var(--green);color:var(--green);}
+/* ── SECTION DIVIDER ── */
+.sec{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;display:flex;align-items:center;gap:10px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);z-index:999;transition:transform .3s;white-space:nowrap;}
-.toast.show{transform:translateX(-50%) translateY(0);}
-.toast.green{border-color:rgba(62,207,142,.4);color:var(--green);}
-.toast.red{border-color:rgba(232,50,60,.4);color:var(--red);}
+/* ── OWNED CHECKBOX STYLE ── */
+.owned-toggle{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--s2);border-radius:8px;}
+.owned-toggle input{width:18px;height:18px;accent-color:var(--red);cursor:pointer;}
+.owned-toggle span{font-size:13px;color:var(--text);}
+
+/* ── SUMMARY ROW ── */
+.summary-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);}
+.summary-row span{padding:4px 10px;border-radius:6px;background:var(--s2);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
 </head>
 <body>
@@ -179,555 +183,1188 @@ input[type="date"].form-input{color-scheme:dark;}
 <!-- AUTH -->
 <div id="authWrap">
   <div class="auth-card">
-    <div class="auth-logo">Pokédex</div>
-    <div class="auth-sub">Card Tracker</div>
-    <p>Sign in with Google to load your collection from Drive and sync across devices.</p>
-    <button class="btn-google" onclick="signIn()">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
-      Sign in with Google
-    </button>
-    <div id="authMsg"></div>
+    <div class="auth-title">Pokédex Binder</div>
+    <div class="auth-sub">Collection & Ledger</div>
+    <div id="pinSetupWrap" style="display:none;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Set a 4-digit PIN to protect your collection.</p>
+      <div class="pin-dots" id="pinDots1"></div>
+      <div class="pin-pad" id="pinPad1"></div>
+      <div class="pin-msg" id="pinSetupMsg"></div>
+    </div>
+    <div id="pinLoginWrap" style="display:none;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Enter your PIN to continue.</p>
+      <div class="pin-dots" id="pinDots2"></div>
+      <div class="pin-pad" id="pinPad2"></div>
+      <div class="pin-msg" id="pinLoginMsg" style="color:var(--red);"></div>
+    </div>
+    <div id="pinLoadingWrap"><div style="color:var(--muted);font-size:13px;">Loading…</div></div>
   </div>
 </div>
 
-<!-- LOAD -->
+<!-- LOADING -->
 <div id="loadWrap">
   <div class="spinner"></div>
-  <div class="load-txt">LOADING COLLECTION</div>
+  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;" id="loadTxt">LOADING</div>
 </div>
 
 <!-- APP -->
 <div id="appWrap">
-  <div class="app">
-    <header>
-      <div class="logo-wrap">
-        <div class="logo">Pokédex</div>
-        <div class="logo" style="font-size:12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);-webkit-text-fill-color:var(--muted);line-height:1.5;">CARD TRACKER</div>
-      </div>
-      <div class="hbtns">
-        <button class="hbtn" id="syncBtn" onclick="manualSync()">↻ SYNC</button>
-        <button class="hbtn" onclick="signOut()">SIGN OUT</button>
-      </div>
-    </header>
+<div class="app">
 
-    <!-- STATS -->
-    <div class="stats-bar">
-      <div class="stat-card s-count">
-        <div class="stat-label">Cards Owned</div>
-        <div class="stat-val" id="statCount">0</div>
-      </div>
-      <div class="stat-card s-total">
-        <div class="stat-label">Total Spent</div>
-        <div class="stat-val" id="statCost">£0.00</div>
-      </div>
-      <div class="stat-card s-market">
-        <div class="stat-label">Market Value</div>
-        <div class="stat-val" id="statMarket">£0.00</div>
-      </div>
-      <div class="stat-card s-pnl">
-        <div class="stat-label">Total P&amp;L</div>
-        <div class="stat-val" id="statPnl">£0.00</div>
-      </div>
+  <header>
+    <div>
+      <div class="logo">Pokédex Binder <small>TCG Collection Tracker</small></div>
     </div>
+    <div class="hbtns">
+      <button class="hbtn" id="themeBtn" onclick="toggleTheme()">☀</button>
+      <button class="hbtn" id="syncBtn" onclick="manualSync()">● Connecting…</button>
+      <button class="hbtn" onclick="signOut()">⏻ Sign out</button>
+    </div>
+  </header>
 
-    <!-- SEARCH -->
-    <div class="search-section">
-      <div class="search-title">Search &amp; Add Card</div>
-      <div class="search-bar">
-        <input class="search-input" id="searchInput" type="text" placeholder="Search by name, number (e.g. 4/102) or set…" onkeydown="if(event.key==='Enter')doSearch()">
-        <button class="btn-search" id="searchBtn" onclick="doSearch()">Search</button>
-      </div>
-      <div id="searchHint" class="search-hint">Type a card name or number to search the Pokémon TCG database</div>
-      <div class="search-results" id="searchResults"></div>
-    </div>
-
-    <!-- COLLECTION -->
-    <div class="collection-header">
-      <div class="section-title">My Collection</div>
-      <div class="filter-bar">
-        <input class="filter-input" id="filterInput" type="text" placeholder="Filter collection…" oninput="renderCollection()">
-      </div>
-    </div>
-    <div class="collection-grid" id="collectionGrid"></div>
+  <div class="tab-bar">
+    <button class="tab on" id="tabCollection" onclick="showTab('collection')">📦 Collection</button>
+    <button class="tab" id="tabLedger" onclick="showTab('ledger')">💰 Ledger</button>
   </div>
+
+  <!-- ═══ COLLECTION TAB ═══ -->
+  <div id="viewCollection">
+    <!-- Set selector -->
+    <div class="sec">Sets</div>
+    <div class="set-grid" id="setGrid"></div>
+
+    <!-- Collection for selected set -->
+    <div id="collectionBody" style="display:none;">
+      <div class="sec" id="collectionSetTitle">Base Set</div>
+      <div class="col-stats" id="colStats"></div>
+      <div class="col-filters">
+        <button class="filter-btn on" id="filterAll" onclick="setFilter('all')">All</button>
+        <button class="filter-btn" id="filterOwned" onclick="setFilter('owned')">Owned</button>
+        <button class="filter-btn" id="filterMissing" onclick="setFilter('missing')">Missing</button>
+        <button class="filter-btn" id="filterUpgrade" onclick="setFilter('upgrade')">Needs Upgrade</button>
+        <input class="col-search" id="colSearch" placeholder="Search cards…" oninput="renderBinder()">
+      </div>
+      <div class="binder" id="binderGrid"></div>
+    </div>
+  </div>
+
+  <!-- ═══ LEDGER TAB ═══ -->
+  <div id="viewLedger" style="display:none;">
+    <div class="ledger-top">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Purchase & Sales Log</div>
+      <button class="hbtn" onclick="openAddLedger()" style="color:var(--red);border-color:rgba(230,57,70,.3);">+ Add Entry</button>
+    </div>
+
+    <div class="ledger-stats" id="ledgerStats"></div>
+
+    <div class="ledger-filters">
+      <div class="field">
+        <label>Search</label>
+        <input id="lSearch" placeholder="Card name…" oninput="renderLedger()" style="width:160px;">
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <select id="lType" onchange="renderLedger()" style="width:110px;">
+          <option value="">All</option>
+          <option value="raw">Raw</option>
+          <option value="slab">Slab</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Set</label>
+        <select id="lSet" onchange="renderLedger()" style="width:150px;">
+          <option value="">All sets</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Platform</label>
+        <select id="lPlatform" onchange="renderLedger()" style="width:130px;">
+          <option value="">All</option>
+          <option>eBay</option>
+          <option>Whatnot</option>
+          <option>Local</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="lStatus" onchange="renderLedger()" style="width:120px;">
+          <option value="">All</option>
+          <option value="open">Open</option>
+          <option value="sold">Sold</option>
+        </select>
+      </div>
+      <button onclick="clearLedgerFilters()" class="hbtn" style="align-self:flex-end;">Clear</button>
+    </div>
+
+    <div class="summary-row" id="ledgerSummaryRow"></div>
+
+    <div class="ledger-table-wrap">
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th onclick="lSort('date')">Date <span id="lSortDate"></span></th>
+            <th onclick="lSort('name')">Card <span id="lSortName"></span></th>
+            <th>Set</th>
+            <th>Type</th>
+            <th onclick="lSort('paid')" style="text-align:right;">Paid <span id="lSortPaid"></span></th>
+            <th>Platform</th>
+            <th style="text-align:right;">Sold</th>
+            <th onclick="lSort('profit')" style="text-align:right;">P&L <span id="lSortProfit"></span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+    </div>
+    <div id="ledgerEmpty" class="ledger-empty" style="display:none;">No entries yet — tap + Add Entry to log a purchase.</div>
+  </div>
+
+</div>
 </div>
 
-<!-- ADD MODAL -->
-<div class="overlay" id="addOverlay">
+<!-- CARD DETAIL MODAL -->
+<div class="ov" id="cardOv">
   <div class="modal">
-    <div class="modal-top-bar"></div>
-    <div class="modal-body">
-      <div class="modal-title">Add to Collection</div>
-      <div class="modal-card-preview" id="addPreview"></div>
-      <div class="form-row-2">
-        <div class="form-row">
-          <label class="form-label">Purchase Price (£)</label>
-          <input class="form-input" id="addPrice" type="number" step="0.01" min="0" placeholder="0.00">
+    <h2 id="cardModalTitle">Card</h2>
+    <div class="modal-sub" id="cardModalSub"></div>
+
+    <div class="owned-toggle">
+      <input type="checkbox" id="cardOwned" onchange="toggleOwnedUI()">
+      <span>I own this card</span>
+    </div>
+
+    <div id="cardOwnedFields">
+      <div class="two-col">
+        <div class="field">
+          <label>Condition</label>
+          <select id="cardCond">
+            <option value="NM">NM (Near Mint)</option>
+            <option value="LP+">LP+ (Light Play+)</option>
+            <option value="LP">LP (Light Play)</option>
+            <option value="LP-">LP- (Light Play-)</option>
+            <option value="MP">MP (Moderate Play)</option>
+            <option value="HP">HP (Heavy Play)</option>
+          </select>
         </div>
-        <div class="form-row">
-          <label class="form-label">Date Purchased</label>
-          <input class="form-input" id="addDate" type="date">
+        <div class="field">
+          <label>Type</label>
+          <select id="cardType">
+            <option value="raw">Raw</option>
+            <option value="slab">Slab</option>
+          </select>
         </div>
       </div>
-      <div class="form-row">
-        <label class="form-label">Quantity</label>
-        <input class="form-input" id="addQty" type="number" min="1" value="1">
+      <div class="field" id="cardSlabGradeField" style="display:none;">
+        <label>Slab Grade (e.g. PSA 9, CGC 10)</label>
+        <input id="cardSlabGrade" placeholder="e.g. ACE 9">
       </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeAddModal()">Cancel</button>
-        <button class="btn-primary" onclick="confirmAdd()">Add to Collection</button>
+      <div class="two-col">
+        <div class="field">
+          <label>NM Market Price (£)</label>
+          <input type="number" id="cardNMPrice" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Avg Market LP (£)</label>
+          <input type="number" id="cardLPPrice" step="0.01" placeholder="0.00">
+        </div>
       </div>
+      <div class="field">
+        <label>Notes</label>
+        <input id="cardNotes" placeholder="Optional notes…">
+      </div>
+      <div class="owned-toggle" style="margin-bottom:0;">
+        <input type="checkbox" id="cardUpgrade">
+        <span>Needs upgrade (better condition)</span>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;padding:12px;background:var(--s2);border-radius:8px;font-size:12px;color:var(--muted);" id="cardLedgerHint" style="display:none;"></div>
+
+    <div class="mbtns">
+      <button class="mbtn-g" onclick="closeCardModal()">Cancel</button>
+      <button class="mbtn-p" onclick="saveCard()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- DETAIL MODAL -->
-<div class="overlay" id="detailOverlay">
-  <div class="modal">
-    <div class="modal-top-bar"></div>
-    <div class="modal-body" id="detailBody"></div>
+<!-- LEDGER ENTRY MODAL -->
+<div class="ov" id="ledgerOv">
+  <div class="modal" style="max-width:480px;">
+    <h2 id="ledgerModalTitle">Add Purchase</h2>
+    <div class="modal-sub">Log a card purchase or sale</div>
+
+    <div class="field">
+      <label>Card Name / Description</label>
+      <input id="lName" placeholder="e.g. Charizard 4/102, Base Set Commons…">
+    </div>
+    <div class="two-col">
+      <div class="field">
+        <label>Set</label>
+        <select id="lEntrySet">
+          <option value="">— Select —</option>
+          <option>Base Set</option>
+          <option>Jungle</option>
+          <option>Fossil</option>
+          <option>WOTC Black Star Promos</option>
+          <option>Other / Modern</option>
+          <option>Mixed / Bulk Lot</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <select id="lEntryType">
+          <option value="raw">Raw Card</option>
+          <option value="slab">Slab (Graded)</option>
+          <option value="bulk">Bulk Lot</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" id="lSlabGradeField" style="display:none;">
+      <label>Slab Grade</label>
+      <input id="lSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10">
+    </div>
+    <div class="two-col">
+      <div class="field">
+        <label>Date Bought</label>
+        <input type="date" id="lDateBought">
+      </div>
+      <div class="field">
+        <label>Platform</label>
+        <select id="lPlatformEntry">
+          <option>eBay</option>
+          <option>Whatnot</option>
+          <option>Local</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Price Paid (£)</label>
+      <input type="number" id="lPaid" step="0.01" placeholder="0.00">
+    </div>
+
+    <div class="sec">Sale (if sold)</div>
+    <div class="two-col">
+      <div class="field">
+        <label>Date Sold</label>
+        <input type="date" id="lDateSold">
+      </div>
+      <div class="field">
+        <label>Sold Price (£)</label>
+        <input type="number" id="lSoldPrice" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="field">
+      <label>Sold Platform</label>
+      <select id="lSoldPlatform">
+        <option value="">— not sold —</option>
+        <option>eBay</option>
+        <option>Whatnot</option>
+        <option>Local</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Notes</label>
+      <input id="lNotes" placeholder="Optional notes…">
+    </div>
+
+    <div class="mbtns">
+      <button class="mbtn-g" onclick="closeLedgerModal()">Cancel</button>
+      <button class="mbtn-d" id="lDelBtn" style="display:none;" onclick="deleteLedgerEntry()">Delete</button>
+      <button class="mbtn-p" onclick="saveLedgerEntry()">Save</button>
+    </div>
   </div>
 </div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+// CARD DATABASE
+// ═══════════════════════════════════════════════
+const SETS = {
+  'Base Set': {
+    icon:'🔴', total:102,
+    cards:[
+      {num:'1/102',name:'Alakazam',rarity:'Holo Rare'},
+      {num:'2/102',name:'Blastoise',rarity:'Holo Rare'},
+      {num:'3/102',name:'Chansey',rarity:'Holo Rare'},
+      {num:'4/102',name:'Charizard',rarity:'Holo Rare'},
+      {num:'5/102',name:'Clefairy',rarity:'Holo Rare'},
+      {num:'6/102',name:'Gyarados',rarity:'Holo Rare'},
+      {num:'7/102',name:'Hitmonchan',rarity:'Holo Rare'},
+      {num:'8/102',name:'Machamp',rarity:'Holo Rare'},
+      {num:'9/102',name:'Magneton',rarity:'Holo Rare'},
+      {num:'10/102',name:'Mewtwo',rarity:'Holo Rare'},
+      {num:'11/102',name:'Nidoking',rarity:'Holo Rare'},
+      {num:'12/102',name:'Ninetales',rarity:'Holo Rare'},
+      {num:'13/102',name:'Poliwrath',rarity:'Holo Rare'},
+      {num:'14/102',name:'Raichu',rarity:'Holo Rare'},
+      {num:'15/102',name:'Venusaur',rarity:'Holo Rare'},
+      {num:'16/102',name:'Zapdos',rarity:'Holo Rare'},
+      {num:'17/102',name:'Beedrill',rarity:'Rare'},
+      {num:'18/102',name:'Dragonair',rarity:'Rare'},
+      {num:'19/102',name:'Dugtrio',rarity:'Rare'},
+      {num:'20/102',name:'Electabuzz',rarity:'Rare'},
+      {num:'21/102',name:'Electrode',rarity:'Rare'},
+      {num:'22/102',name:'Pidgeotto',rarity:'Rare'},
+      {num:'23/102',name:'Arcanine',rarity:'Rare'},
+      {num:'24/102',name:'Charmeleon',rarity:'Rare'},
+      {num:'25/102',name:'Dewgong',rarity:'Rare'},
+      {num:'26/102',name:'Hitmonlee',rarity:'Rare'},
+      {num:'27/102',name:'Hypno',rarity:'Rare'},
+      {num:'28/102',name:'Jynx',rarity:'Rare'},
+      {num:'29/102',name:'Kadabra',rarity:'Rare'},
+      {num:'30/102',name:'Kakuna',rarity:'Rare'},
+      {num:'31/102',name:'Nidorino',rarity:'Rare'},
+      {num:'32/102',name:'Poliwhirl',rarity:'Rare'},
+      {num:'33/102',name:'Scyther',rarity:'Rare'},
+      {num:'34/102',name:'Seadra',rarity:'Rare'},
+      {num:'35/102',name:'Seel',rarity:'Rare'},
+      {num:'36/102',name:'Slowbro',rarity:'Rare'},
+      {num:'37/102',name:'Clefairy Doll',rarity:'Trainer'},
+      {num:'38/102',name:'Computer Search',rarity:'Trainer'},
+      {num:'39/102',name:'Defender',rarity:'Trainer'},
+      {num:'40/102',name:'Imposter Professor Oak',rarity:'Trainer'},
+      {num:'41/102',name:'Item Finder',rarity:'Trainer'},
+      {num:'42/102',name:'Lass',rarity:'Trainer'},
+      {num:'43/102',name:'Pokémon Breeder',rarity:'Trainer'},
+      {num:'44/102',name:'Pokémon Trader',rarity:'Trainer'},
+      {num:'45/102',name:'Scoop Up',rarity:'Trainer'},
+      {num:'46/102',name:'Super Energy Removal',rarity:'Trainer'},
+      {num:'47/102',name:'Devolution Spray',rarity:'Trainer'},
+      {num:'48/102',name:'Impostor Professor Oak',rarity:'Trainer'},
+      {num:'49/102',name:'Item Finder',rarity:'Trainer'},
+      {num:'50/102',name:'Pokémon Flute',rarity:'Trainer'},
+      {num:'51/102',name:'Pokémon Trader',rarity:'Trainer'},
+      {num:'52/102',name:'Poké Ball',rarity:'Trainer'},
+      {num:'53/102',name:'Professor Oak',rarity:'Trainer'},
+      {num:'54/102',name:'Revive',rarity:'Trainer'},
+      {num:'55/102',name:'Super Potion',rarity:'Trainer'},
+      {num:'56/102',name:'Bill',rarity:'Trainer'},
+      {num:'57/102',name:'Energy Removal',rarity:'Trainer'},
+      {num:'58/102',name:'Gust of Wind',rarity:'Trainer'},
+      {num:'59/102',name:'Potion',rarity:'Trainer'},
+      {num:'60/102',name:'Switch',rarity:'Trainer'},
+      {num:'61/102',name:'Bulbasaur',rarity:'Common'},
+      {num:'62/102',name:'Caterpie',rarity:'Common'},
+      {num:'63/102',name:'Charmander',rarity:'Common'},
+      {num:'64/102',name:'Diglett',rarity:'Common'},
+      {num:'65/102',name:'Doduo',rarity:'Common'},
+      {num:'66/102',name:'Drowzee',rarity:'Common'},
+      {num:'67/102',name:'Gastly',rarity:'Common'},
+      {num:'68/102',name:'Koffing',rarity:'Common'},
+      {num:'69/102',name:'Machop',rarity:'Common'},
+      {num:'70/102',name:'Magikarp',rarity:'Common'},
+      {num:'71/102',name:'Metapod',rarity:'Common'},
+      {num:'72/102',name:'Nidoran♂',rarity:'Common'},
+      {num:'73/102',name:'Onix',rarity:'Common'},
+      {num:'74/102',name:'Pidgey',rarity:'Common'},
+      {num:'75/102',name:'Pikachu',rarity:'Common'},
+      {num:'76/102',name:'Poliwag',rarity:'Common'},
+      {num:'77/102',name:'Ponyta',rarity:'Common'},
+      {num:'78/102',name:'Rattata',rarity:'Common'},
+      {num:'79/102',name:'Sandshrew',rarity:'Common'},
+      {num:'80/102',name:'Squirtle',rarity:'Common'},
+      {num:'81/102',name:'Starmie',rarity:'Common'},
+      {num:'82/102',name:'Staryu',rarity:'Common'},
+      {num:'83/102',name:'Tangela',rarity:'Common'},
+      {num:'84/102',name:'Voltorb',rarity:'Common'},
+      {num:'85/102',name:'Vulpix',rarity:'Common'},
+      {num:'86/102',name:'Weedle',rarity:'Common'},
+      {num:'87/102',name:'Clefairy (UC)',rarity:'Uncommon'},
+      {num:'88/102',name:'Dratini',rarity:'Uncommon'},
+      {num:'89/102',name:'Farfetch\'d',rarity:'Uncommon'},
+      {num:'90/102',name:'Growlithe',rarity:'Uncommon'},
+      {num:'91/102',name:'Haunter',rarity:'Uncommon'},
+      {num:'92/102',name:'Ivysaur',rarity:'Uncommon'},
+      {num:'93/102',name:'Jigglypuff',rarity:'Uncommon'},
+      {num:'94/102',name:'Kabuto',rarity:'Uncommon'},
+      {num:'95/102',name:'Krabby',rarity:'Uncommon'},
+      {num:'96/102',name:'Machoke',rarity:'Uncommon'},
+      {num:'97/102',name:'Magmar',rarity:'Uncommon'},
+      {num:'98/102',name:'Nidorina',rarity:'Uncommon'},
+      {num:'99/102',name:'Porygon',rarity:'Uncommon'},
+      {num:'100/102',name:'Raticate',rarity:'Uncommon'},
+      {num:'101/102',name:'Snorlax',rarity:'Uncommon'},
+      {num:'102/102',name:'Wartortle',rarity:'Uncommon'},
+    ]
+  },
+  'Jungle': {
+    icon:'🌿', total:64,
+    cards:[
+      {num:'1/64',name:'Clefable',rarity:'Holo Rare'},
+      {num:'2/64',name:'Electrode',rarity:'Holo Rare'},
+      {num:'3/64',name:'Flareon',rarity:'Holo Rare'},
+      {num:'4/64',name:'Jolteon',rarity:'Holo Rare'},
+      {num:'5/64',name:'Kangaskhan',rarity:'Holo Rare'},
+      {num:'6/64',name:'Mr. Mime',rarity:'Holo Rare'},
+      {num:'7/64',name:'Nidoqueen',rarity:'Holo Rare'},
+      {num:'8/64',name:'Pidgeot',rarity:'Holo Rare'},
+      {num:'9/64',name:'Pinsir',rarity:'Holo Rare'},
+      {num:'10/64',name:'Scyther',rarity:'Holo Rare'},
+      {num:'11/64',name:'Snorlax',rarity:'Holo Rare'},
+      {num:'12/64',name:'Vaporeon',rarity:'Holo Rare'},
+      {num:'13/64',name:'Venomoth',rarity:'Holo Rare'},
+      {num:'14/64',name:'Victreebel',rarity:'Holo Rare'},
+      {num:'15/64',name:'Vileplume',rarity:'Holo Rare'},
+      {num:'16/64',name:'Wigglytuff',rarity:'Holo Rare'},
+      {num:'17/64',name:'Clefable',rarity:'Rare'},
+      {num:'18/64',name:'Electrode',rarity:'Rare'},
+      {num:'19/64',name:'Flareon',rarity:'Rare'},
+      {num:'20/64',name:'Jolteon',rarity:'Rare'},
+      {num:'21/64',name:'Kangaskhan',rarity:'Rare'},
+      {num:'22/64',name:'Mr. Mime',rarity:'Rare'},
+      {num:'23/64',name:'Nidoqueen',rarity:'Rare'},
+      {num:'24/64',name:'Pidgeot',rarity:'Rare'},
+      {num:'25/64',name:'Pinsir',rarity:'Rare'},
+      {num:'26/64',name:'Scyther',rarity:'Rare'},
+      {num:'27/64',name:'Snorlax',rarity:'Rare'},
+      {num:'28/64',name:'Vaporeon',rarity:'Rare'},
+      {num:'29/64',name:'Venomoth',rarity:'Rare'},
+      {num:'30/64',name:'Victreebel',rarity:'Rare'},
+      {num:'31/64',name:'Vileplume',rarity:'Rare'},
+      {num:'32/64',name:'Wigglytuff',rarity:'Rare'},
+      {num:'33/64',name:'Butterfree',rarity:'Uncommon'},
+      {num:'34/64',name:'Dodrio',rarity:'Uncommon'},
+      {num:'35/64',name:'Exeggutor',rarity:'Uncommon'},
+      {num:'36/64',name:'Fearow',rarity:'Uncommon'},
+      {num:'37/64',name:'Gloom',rarity:'Uncommon'},
+      {num:'38/64',name:'Lickitung',rarity:'Uncommon'},
+      {num:'39/64',name:'Marowak',rarity:'Uncommon'},
+      {num:'40/64',name:'Nidorina',rarity:'Uncommon'},
+      {num:'41/64',name:'Paras',rarity:'Uncommon'},
+      {num:'42/64',name:'Persian',rarity:'Uncommon'},
+      {num:'43/64',name:'Primeape',rarity:'Uncommon'},
+      {num:'44/64',name:'Rapidash',rarity:'Uncommon'},
+      {num:'45/64',name:'Rhydon',rarity:'Uncommon'},
+      {num:'46/64',name:'Seaking',rarity:'Uncommon'},
+      {num:'47/64',name:'Tauros',rarity:'Uncommon'},
+      {num:'48/64',name:'Weepinbell',rarity:'Uncommon'},
+      {num:'49/64',name:'Bellsprout',rarity:'Common'},
+      {num:'50/64',name:'Cubone',rarity:'Common'},
+      {num:'51/64',name:'Eevee',rarity:'Common'},
+      {num:'52/64',name:'Exeggcute',rarity:'Common'},
+      {num:'53/64',name:'Goldeen',rarity:'Common'},
+      {num:'54/64',name:'Jigglypuff',rarity:'Common'},
+      {num:'55/64',name:'Mankey',rarity:'Common'},
+      {num:'56/64',name:'Meowth',rarity:'Common'},
+      {num:'57/64',name:'Nidoran♀',rarity:'Common'},
+      {num:'58/64',name:'Oddish',rarity:'Common'},
+      {num:'59/64',name:'Paras',rarity:'Common'},
+      {num:'60/64',name:'Pikachu',rarity:'Common'},
+      {num:'61/64',name:'Rhyhorn',rarity:'Common'},
+      {num:'62/64',name:'Spearow',rarity:'Common'},
+      {num:'63/64',name:'Venonat',rarity:'Common'},
+      {num:'64/64',name:'Weepinbell',rarity:'Common'},
+    ]
+  },
+  'Fossil': {
+    icon:'🦴', total:62,
+    cards:[
+      {num:'1/62',name:'Aerodactyl',rarity:'Holo Rare'},
+      {num:'2/62',name:'Articuno',rarity:'Holo Rare'},
+      {num:'3/62',name:'Ditto',rarity:'Holo Rare'},
+      {num:'4/62',name:'Dragonite',rarity:'Holo Rare'},
+      {num:'5/62',name:'Gengar',rarity:'Holo Rare'},
+      {num:'6/62',name:'Haunter',rarity:'Holo Rare'},
+      {num:'7/62',name:'Hitmonlee',rarity:'Holo Rare'},
+      {num:'8/62',name:'Hypno',rarity:'Holo Rare'},
+      {num:'9/62',name:'Kabutops',rarity:'Holo Rare'},
+      {num:'10/62',name:'Lapras',rarity:'Holo Rare'},
+      {num:'11/62',name:'Magneton',rarity:'Holo Rare'},
+      {num:'12/62',name:'Moltres',rarity:'Holo Rare'},
+      {num:'13/62',name:'Muk',rarity:'Holo Rare'},
+      {num:'14/62',name:'Raichu',rarity:'Holo Rare'},
+      {num:'15/62',name:'Zapdos',rarity:'Holo Rare'},
+      {num:'16/62',name:'Aerodactyl',rarity:'Rare'},
+      {num:'17/62',name:'Articuno',rarity:'Rare'},
+      {num:'18/62',name:'Ditto',rarity:'Rare'},
+      {num:'19/62',name:'Dragonite',rarity:'Rare'},
+      {num:'20/62',name:'Gengar',rarity:'Rare'},
+      {num:'21/62',name:'Haunter',rarity:'Rare'},
+      {num:'22/62',name:'Hitmonlee',rarity:'Rare'},
+      {num:'23/62',name:'Hypno',rarity:'Rare'},
+      {num:'24/62',name:'Kabutops',rarity:'Rare'},
+      {num:'25/62',name:'Lapras',rarity:'Rare'},
+      {num:'26/62',name:'Magneton',rarity:'Rare'},
+      {num:'27/62',name:'Moltres',rarity:'Rare'},
+      {num:'28/62',name:'Muk',rarity:'Rare'},
+      {num:'29/62',name:'Raichu',rarity:'Rare'},
+      {num:'30/62',name:'Zapdos',rarity:'Rare'},
+      {num:'31/62',name:'Arcanine',rarity:'Uncommon'},
+      {num:'32/62',name:'Cloyster',rarity:'Uncommon'},
+      {num:'33/62',name:'Gastly',rarity:'Uncommon'},
+      {num:'34/62',name:'Haunter',rarity:'Uncommon'},
+      {num:'35/62',name:'Kabuto',rarity:'Uncommon'},
+      {num:'36/62',name:'Omanyte',rarity:'Uncommon'},
+      {num:'37/62',name:'Omastar',rarity:'Uncommon'},
+      {num:'38/62',name:'Psyduck',rarity:'Uncommon'},
+      {num:'39/62',name:'Shellder',rarity:'Uncommon'},
+      {num:'40/62',name:'Slowpoke',rarity:'Uncommon'},
+      {num:'41/62',name:'Tentacruel',rarity:'Uncommon'},
+      {num:'42/62',name:'Weezing',rarity:'Uncommon'},
+      {num:'43/62',name:'Ekans',rarity:'Common'},
+      {num:'44/62',name:'Geodude',rarity:'Common'},
+      {num:'45/62',name:'Golduck',rarity:'Common'},
+      {num:'46/62',name:'Graveler',rarity:'Common'},
+      {num:'47/62',name:'Grimer',rarity:'Common'},
+      {num:'48/62',name:'Horsea',rarity:'Common'},
+      {num:'49/62',name:'Krabby',rarity:'Common'},
+      {num:'50/62',name:'Magmar',rarity:'Common'},
+      {num:'51/62',name:'Omanyte',rarity:'Common'},
+      {num:'52/62',name:'Ponyta',rarity:'Common'},
+      {num:'53/62',name:'Porygon',rarity:'Common'},
+      {num:'54/62',name:'Seel',rarity:'Common'},
+      {num:'55/62',name:'Shellder',rarity:'Common'},
+      {num:'56/62',name:'Slowpoke',rarity:'Common'},
+      {num:'57/62',name:'Staryu',rarity:'Common'},
+      {num:'58/62',name:'Tangela',rarity:'Common'},
+      {num:'59/62',name:'Tentacool',rarity:'Common'},
+      {num:'60/62',name:'Voltorb',rarity:'Common'},
+      {num:'61/62',name:'Vulpix',rarity:'Common'},
+      {num:'62/62',name:'Zubat',rarity:'Common'},
+    ]
+  },
+  'WOTC Black Star Promos': {
+    icon:'🌟', total:53,
+    cards:[
+      {num:'#1',name:'Pikachu',rarity:'Promo'},
+      {num:'#2',name:'Electabuzz',rarity:'Promo'},
+      {num:'#3',name:'Mewtwo',rarity:'Promo'},
+      {num:'#4',name:'Pikachu',rarity:'Promo'},
+      {num:'#5',name:'Dragonite',rarity:'Promo'},
+      {num:'#6',name:'Mewtwo',rarity:'Promo'},
+      {num:'#7',name:'Mew',rarity:'Promo'},
+      {num:'#8',name:'Growlithe',rarity:'Promo'},
+      {num:'#9',name:'Arcanine',rarity:'Promo'},
+      {num:'#10',name:'Misty\'s Tears',rarity:'Promo'},
+      {num:'#11',name:'Rocket\'s Sneak Attack',rarity:'Promo'},
+      {num:'#12',name:'Lt. Surge\'s Treaty',rarity:'Promo'},
+      {num:'#13',name:'Ash\'s Pikachu',rarity:'Promo'},
+      {num:'#14',name:'Brock\'s Ninetales',rarity:'Promo'},
+      {num:'#15',name:'Misty\'s Tear',rarity:'Promo'},
+      {num:'#16',name:'Pikachu',rarity:'Promo'},
+      {num:'#17',name:'Cleffa',rarity:'Promo'},
+      {num:'#18',name:'Igglybuff',rarity:'Promo'},
+      {num:'#19',name:'Bellossom',rarity:'Promo'},
+      {num:'#20',name:'Politoed',rarity:'Promo'},
+      {num:'#21',name:'Moltres',rarity:'Promo'},
+      {num:'#22',name:'Articuno',rarity:'Promo'},
+      {num:'#23',name:'Zapdos',rarity:'Promo'},
+      {num:'#24',name:'Charizard',rarity:'Promo'},
+      {num:'#25',name:'Pikachu',rarity:'Promo'},
+      {num:'#26',name:'Raichu',rarity:'Promo'},
+      {num:'#27',name:'Mewtwo',rarity:'Promo'},
+      {num:'#28',name:'Entei',rarity:'Promo'},
+      {num:'#29',name:'Lugia',rarity:'Promo'},
+      {num:'#30',name:'Ho-Oh',rarity:'Promo'},
+      {num:'#31',name:'Pikachu',rarity:'Promo'},
+      {num:'#32',name:'Pichu',rarity:'Promo'},
+      {num:'#33',name:'Scizor',rarity:'Promo'},
+      {num:'#34',name:'Entei',rarity:'Promo'},
+      {num:'#35',name:'Smeargle',rarity:'Promo'},
+      {num:'#36',name:'Unown E',rarity:'Promo'},
+      {num:'#37',name:'Houndoom',rarity:'Promo'},
+      {num:'#38',name:'Suicune',rarity:'Promo'},
+      {num:'#39',name:'Kingdra',rarity:'Promo'},
+      {num:'#40',name:'Pikachu',rarity:'Promo'},
+      {num:'#41',name:'Marill',rarity:'Promo'},
+      {num:'#42',name:'Togepi',rarity:'Promo'},
+      {num:'#43',name:'Misdreavus',rarity:'Promo'},
+      {num:'#44',name:'Celebi',rarity:'Promo'},
+      {num:'#45',name:'Larvitar',rarity:'Promo'},
+      {num:'#46',name:'Ancient Mew',rarity:'Promo'},
+      {num:'#47',name:'Jigglypuff',rarity:'Promo'},
+      {num:'#48',name:'Pikachu',rarity:'Promo'},
+      {num:'#49',name:'Pikachu (Birthday)',rarity:'Promo'},
+      {num:'#50',name:'Pikachu (Gold)',rarity:'Promo'},
+      {num:'#51',name:'Rapidash',rarity:'Promo'},
+      {num:'#52',name:'Wobbuffet',rarity:'Promo'},
+      {num:'#53',name:'Raikou',rarity:'Promo'},
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let D = {
+  collection: {}, // { "Base Set|1/102": { owned, cond, type, slabGrade, nmPrice, lpPrice, notes, upgrade } }
+  ledger: [],     // [{ id, name, set, type, dateBought, platform, paid, dateSold, soldPrice, soldPlatform, notes, slabGrade }]
+};
+
+const PIN_KEY  = 'pokebinder_pin';
+const DATA_KEY = 'pokebinder_cache';
 const CLIENT_ID = '259135370683-2kh47mi72o35829gd5e82fqo8hnan56a.apps.googleusercontent.com';
 const API_KEY   = 'AIzaSyB9FjDiIuLwRgQm6bus-VbbWybvjWb4RnM';
 const SCOPES    = 'https://www.googleapis.com/auth/drive.file';
-const FOLDER    = 'Pokemon Tracker';
-const FILE_NAME = 'pokedex-data.json';
-const TCG_API   = 'https://api.pokemontcg.io/v2';
-const CACHE_KEY = 'pokedex_data_v1';
-const FILE_KEY  = 'pokedex_file_id';
+const FOLDER    = 'Pokédex Binder';
+const FILENAME  = 'pokebinder-data.json';
 
-// ─── STATE ───────────────────────────────────────────────
-let D = { collection: [] };
-let gapi_ready = false, gsi_ready = false, token = null;
-let driveFileId = localStorage.getItem(FILE_KEY) || null;
-let pendingCard = null; // card being added
-let viewingId = null;   // card in detail modal
+let activeSet = 'Base Set';
+let activeFilter = 'all';
+let editingCardKey = null;
+let editingLedgerId = null;
+let lSortCol = 'date', lSortDir = 'desc';
+let folderId = null, fileId = null, tokenClient = null, gapiOk = false, driveReady = false;
+let pinBuffer = '', pinMode = 'login', pinFirst = '';
 
-// ─── HELPERS ─────────────────────────────────────────────
-const $id = id => document.getElementById(id);
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const fmt  = v => v == null || isNaN(v) ? '—' : '£' + Number(v).toFixed(2);
-const uuid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+// ── Helpers ──
+function $id(id){ return document.getElementById(id); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n){ if(n===null||n===undefined||n==='') return '—'; const a=Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}); return (n<0?'−':'')+'£'+a; }
+function fmtSign(n){ const a=Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}); return (n>=0?'+':'−')+'£'+a; }
 
-function toast(msg, type='', dur=2500){
-  const el=$id('toast'); el.textContent=msg; el.className='toast '+(type||'');
-  el.classList.add('show');
-  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),dur);
+// ── Theme ──
+function toggleTheme(){
+  const l=document.body.classList.toggle('light');
+  localStorage.setItem('pokebinder_theme',l?'light':'dark');
+  $id('themeBtn').textContent=l?'🌙':'☀';
+}
+function applyTheme(){
+  if(localStorage.getItem('pokebinder_theme')==='light'){
+    document.body.classList.add('light');
+    const b=$id('themeBtn'); if(b) b.textContent='🌙';
+  }
 }
 
-// ─── DATA ─────────────────────────────────────────────────
-function save(){ localStorage.setItem(CACHE_KEY, JSON.stringify(D)); driveSave(); renderAll(); }
-
-function loadCache(){
-  const raw = localStorage.getItem(CACHE_KEY);
-  if(raw){ try{ D = JSON.parse(raw); }catch(e){} }
+// ═══════════════════════════════════════════════
+// PIN
+// ═══════════════════════════════════════════════
+function showPinScreen(){
+  $id('loadWrap').style.display='none';
+  $id('authWrap').style.display='flex';
+  $id('appWrap').style.display='none';
+  const hasPin=!!localStorage.getItem(PIN_KEY);
+  $id('pinSetupWrap').style.display=hasPin?'none':'';
+  $id('pinLoginWrap').style.display=hasPin?'':'none';
+  $id('pinLoadingWrap').style.display='none';
+  pinBuffer=''; pinFirst='';
+  pinMode=hasPin?'login':'setup';
+  buildPinPad('pinPad1',handleSetupKey);
+  buildPinPad('pinPad2',handleLoginKey);
+  updateDots('pinDots1',4,0,false);
+  updateDots('pinDots2',4,0,false);
 }
-
-// ─── GOOGLE AUTH ──────────────────────────────────────────
-function gapiLoaded(){ gapi.load('client', initGapiClient); }
-async function initGapiClient(){
-  await gapi.client.init({ apiKey: API_KEY, discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-  gapi_ready = true; maybeReady();
+function buildPinPad(cid,handler){
+  const pad=$id(cid); pad.innerHTML='';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(k=>{
+    const btn=document.createElement('div');
+    btn.className='pin-key'+(k==='⌫'?' del':'');
+    btn.textContent=k===''?'':k;
+    if(k==='') btn.style.cssText='pointer-events:none;opacity:0;';
+    else btn.addEventListener('click',()=>handler(String(k)));
+    pad.appendChild(btn);
+  });
 }
-function gsiLoaded(){
-  gsi_ready = true; maybeReady();
+function updateDots(id,total,filled,err){
+  const w=$id(id); w.innerHTML='';
+  for(let i=0;i<total;i++){
+    const d=document.createElement('div');
+    d.className='pin-dot'+(i<filled?(err?' error':' filled'):'');
+    w.appendChild(d);
+  }
 }
-function maybeReady(){
-  if(!gapi_ready || !gsi_ready) return;
-  // try silent restore
-  const cached = localStorage.getItem('pokedex_token');
-  if(cached){ try{ const t=JSON.parse(cached); if(t.expiry>Date.now()){ token=t; gapi.client.setToken({access_token:t.access_token}); onSignedIn(); return; }}catch(e){} }
-}
-
-function signIn(){
-  $id('authMsg').textContent='Signing in…';
-  google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID, scope: SCOPES,
-    callback: resp => {
-      if(resp.error){ $id('authMsg').textContent='Sign-in failed: '+resp.error; return; }
-      token = { access_token: resp.access_token, expiry: Date.now() + (resp.expires_in||3600)*1000 };
-      localStorage.setItem('pokedex_token', JSON.stringify(token));
-      gapi.client.setToken({ access_token: token.access_token });
-      onSignedIn();
+function handleSetupKey(k){
+  if(k==='⌫') pinBuffer=pinBuffer.slice(0,-1);
+  else if(pinBuffer.length<4) pinBuffer+=k;
+  updateDots('pinDots1',4,pinBuffer.length,false);
+  if(pinBuffer.length===4){
+    if(pinMode==='setup'){
+      pinFirst=pinBuffer; pinBuffer=''; pinMode='confirm';
+      $id('pinSetupMsg').textContent='Confirm your PIN';
+      updateDots('pinDots1',4,0,false);
+    } else {
+      if(pinBuffer===pinFirst){
+        localStorage.setItem(PIN_KEY,btoa(pinBuffer));
+        enterApp();
+      } else {
+        updateDots('pinDots1',4,4,true);
+        $id('pinSetupMsg').textContent='PINs don\'t match — try again';
+        setTimeout(()=>{ pinBuffer=''; pinFirst=''; pinMode='setup'; updateDots('pinDots1',4,0,false); $id('pinSetupMsg').textContent=''; },900);
+      }
     }
-  }).requestAccessToken();
+  }
 }
-
-function signOut(){
-  localStorage.removeItem('pokedex_token'); token=null;
-  $id('appWrap').style.display='none'; $id('authWrap').style.display='flex';
+function handleLoginKey(k){
+  if(k==='⌫') pinBuffer=pinBuffer.slice(0,-1);
+  else if(pinBuffer.length<4) pinBuffer+=k;
+  updateDots('pinDots2',4,pinBuffer.length,false);
+  if(pinBuffer.length===4){
+    const stored=localStorage.getItem(PIN_KEY);
+    if(stored&&btoa(pinBuffer)===stored){ pinBuffer=''; enterApp(); }
+    else {
+      updateDots('pinDots2',4,4,true);
+      $id('pinLoginMsg').textContent='Incorrect PIN';
+      setTimeout(()=>{ pinBuffer=''; updateDots('pinDots2',4,0,false); $id('pinLoginMsg').textContent=''; },900);
+    }
+  }
 }
-
-async function onSignedIn(){
+function enterApp(){
+  const cached=localStorage.getItem(DATA_KEY);
+  if(cached){ try{ const l=JSON.parse(cached); D=Object.assign({collection:{},ledger:[]},l); }catch(e){} }
   $id('authWrap').style.display='none';
-  const lw=$id('loadWrap'); lw.style.display='flex';
-  loadCache();
-  await driveLoad();
-  lw.style.display='none';
   $id('appWrap').style.display='block';
+  $id('loadWrap').style.display='none';
+  setSyncBtn('saving','● Connecting…');
   renderAll();
-  startAutoSync();
+  connectDrive();
+}
+function signOut(){
+  if(!confirm('Lock Pokédex Binder?')) return;
+  $id('appWrap').style.display='none';
+  showPinScreen();
 }
 
-// ─── DRIVE ────────────────────────────────────────────────
-async function driveRequest(method, url, params, body){
-  if(!token) return null;
-  const qs = params ? '?'+new URLSearchParams(params) : '';
-  const opts = { method, headers: { Authorization:'Bearer '+token.access_token } };
-  if(body instanceof FormData){ opts.body=body; }
-  else if(body){ opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
-  const r = await fetch(url+qs, opts);
-  if(!r.ok) return null;
-  return r.json().catch(()=>null);
-}
-
-async function getOrCreateFolder(){
-  const res = await driveRequest('GET','https://www.googleapis.com/drive/v3/files',{
-    q:`name='${FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-    fields:'files(id,name)'
+// ═══════════════════════════════════════════════
+// GOOGLE DRIVE SYNC
+// ═══════════════════════════════════════════════
+function setSyncBtn(cls,lbl){ const b=$id('syncBtn'); b.className='hbtn'+(cls?' '+cls:''); b.textContent=lbl; }
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    try{
+      await gapi.client.init({apiKey:API_KEY,discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']});
+      tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:async r=>{
+        if(r.error){ setSyncBtn('','● Drive unavailable'); return; }
+        localStorage.setItem('pokebinder_gtoken',JSON.stringify(gapi.client.getToken()));
+        await syncWithDrive();
+      }});
+      gapiOk=true;
+    }catch(e){ console.error('GAPI init:',e); }
   });
-  if(res&&res.files&&res.files.length) return res.files[0].id;
-  const cr = await driveRequest('POST','https://www.googleapis.com/drive/v3/files',null,{
-    name:FOLDER, mimeType:'application/vnd.google-apps.folder'
-  });
-  return cr ? cr.id : null;
 }
-
-async function driveLoad(){
-  try{
-    if(!driveFileId){
-      const folderId = await getOrCreateFolder();
-      const res = await driveRequest('GET','https://www.googleapis.com/drive/v3/files',{
-        q:`name='${FILE_NAME}' and '${folderId}' in parents and trashed=false`,
-        fields:'files(id,name)'
-      });
-      if(res&&res.files&&res.files.length){ driveFileId=res.files[0].id; localStorage.setItem(FILE_KEY,driveFileId); }
-    }
-    if(driveFileId){
-      const r = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{
-        headers:{ Authorization:'Bearer '+token.access_token }
-      });
-      if(r.ok){ const data=await r.json(); D=data; localStorage.setItem(CACHE_KEY,JSON.stringify(D)); }
-    }
-  }catch(e){ console.warn('Drive load error',e); }
+function gsiLoaded(){}
+async function connectDrive(){
+  if(!gapiOk){ let w=0; const wait=()=>new Promise(r=>setTimeout(r,200)); while(!gapiOk&&w<5000){await wait();w+=200;} if(!gapiOk){setSyncBtn('','● Drive unavailable');return;} }
+  const stored=localStorage.getItem('pokebinder_gtoken');
+  if(stored){ try{ gapi.client.setToken(JSON.parse(stored)); await syncWithDrive(); return; }catch(e){ localStorage.removeItem('pokebinder_gtoken'); } }
+  try{ tokenClient.requestAccessToken({prompt:''}); }catch(e){ setSyncBtn('','● Drive unavailable'); }
 }
-
-let saveTimer=null;
-function driveSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(_driveSave, 1500); setSyncBtn('saving'); }
-async function _driveSave(){
+async function syncWithDrive(){
+  setSyncBtn('saving','● Syncing…');
   try{
-    const blob = new Blob([JSON.stringify(D)],{type:'application/json'});
-    if(driveFileId){
-      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,{
-        method:'PATCH', headers:{ Authorization:'Bearer '+token.access_token,'Content-Type':'application/json' }, body:JSON.stringify(D)
-      });
+    let r=await gapi.client.drive.files.list({q:`name='${FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,fields:'files(id)',spaces:'drive'});
+    if(r.result.files.length) folderId=r.result.files[0].id;
+    else{ const c=await gapi.client.drive.files.create({resource:{name:FOLDER,mimeType:'application/vnd.google-apps.folder'},fields:'id'}); folderId=c.result.id; }
+    r=await gapi.client.drive.files.list({q:`name='${FILENAME}' and '${folderId}' in parents and trashed=false`,fields:'files(id)',spaces:'drive'});
+    if(r.result.files.length){
+      fileId=r.result.files[0].id;
+      const res=await gapi.client.drive.files.get({fileId,alt:'media'});
+      try{ const dd=JSON.parse(res.body); D=Object.assign({collection:{},ledger:[]},dd); localStorage.setItem(DATA_KEY,JSON.stringify(D)); renderAll(); }catch(e){}
     } else {
-      const folderId = await getOrCreateFolder();
-      const meta = {name:FILE_NAME,parents:[folderId]};
-      const form = new FormData();
-      form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
-      form.append('file',blob);
-      const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-        method:'POST', headers:{Authorization:'Bearer '+token.access_token}, body:form
-      });
-      const j = await r.json(); if(j.id){ driveFileId=j.id; localStorage.setItem(FILE_KEY,driveFileId); }
+      const c=await gapi.client.drive.files.create({resource:{name:FILENAME,parents:[folderId],mimeType:'application/json'},fields:'id'});
+      fileId=c.result.id; await writeToDrive();
     }
-    setSyncBtn('ok');
-  }catch(e){ console.warn('Drive save error',e); setSyncBtn(''); }
-}
-
-function setSyncBtn(state){
-  const b=$id('syncBtn'); b.className='hbtn';
-  if(state==='saving'){ b.classList.add('saving'); b.textContent='↻ SAVING'; }
-  else if(state==='ok'){ b.classList.add('ok'); b.textContent='✓ SYNCED'; setTimeout(()=>{ b.textContent='↻ SYNC'; b.className='hbtn'; },2000); }
-  else { b.textContent='↻ SYNC'; }
-}
-
-async function manualSync(){ await driveLoad(); renderAll(); toast('Synced from Drive','green'); }
-function startAutoSync(){ setInterval(()=>{ if(token) driveLoad().then(renderAll); }, 60000); }
-
-// ─── TCG API SEARCH ──────────────────────────────────────
-async function doSearch(){
-  const q = $id('searchInput').value.trim();
-  if(!q){ toast('Enter a search term','red'); return; }
-  const btn=$id('searchBtn'); btn.disabled=true; btn.textContent='Searching…';
-  $id('searchResults').innerHTML='';
-  $id('searchHint').textContent='Searching Pokémon TCG database…';
-
-  try{
-    // Build query — number format detection
-    let apiQ;
-    const numMatch = q.match(/^(\d+)\s*\/\s*(\d+)$/);
-    if(numMatch){ apiQ = `number:${numMatch[1]}`; }
-    else { apiQ = `name:"${q}"`; }
-    // Also try set search
-    const url = `${TCG_API}/cards?q=${encodeURIComponent(apiQ)}&pageSize=20&select=id,name,number,set,images,tcgplayer`;
-    const r = await fetch(url);
-    const data = await r.json();
-
-    if(!data.data || data.data.length===0){
-      // fallback: partial name search
-      const url2 = `${TCG_API}/cards?q=${encodeURIComponent('name:'+q+'*')}&pageSize=20&select=id,name,number,set,images,tcgplayer`;
-      const r2 = await fetch(url2);
-      const data2 = await r2.json();
-      renderSearchResults(data2.data||[]);
-    } else {
-      renderSearchResults(data.data);
-    }
+    driveReady=true;
+    setSyncBtn('ok','● Synced '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){
-    $id('searchHint').textContent='Search failed — check your connection.';
+    console.error('Sync error:',e);
+    const s=e?.result?.error?.status||'';
+    if(s==='UNAUTHENTICATED'||String(e).includes('401')){ localStorage.removeItem('pokebinder_gtoken'); try{tokenClient.requestAccessToken({prompt:''});}catch(err){setSyncBtn('','● Drive unavailable');} }
+    else setSyncBtn('','● Drive unavailable');
   }
-  btn.disabled=false; btn.textContent='Search';
+}
+async function writeToDrive(){
+  if(!fileId) return;
+  await gapi.client.request({path:`/upload/drive/v3/files/${fileId}`,method:'PATCH',params:{uploadType:'media'},headers:{'Content-Type':'application/json'},body:JSON.stringify(D,null,2)});
+}
+async function save(){
+  localStorage.setItem(DATA_KEY,JSON.stringify(D));
+  setSyncBtn('saving','● Saving…');
+  if(driveReady&&fileId){
+    try{ await writeToDrive(); setSyncBtn('ok','● Saved '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})); }
+    catch(e){ setSyncBtn('','● Local only'); }
+  } else { setSyncBtn('ok','● Saved locally'); }
+}
+async function manualSync(){ if(driveReady) await syncWithDrive(); else await connectDrive(); }
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function showTab(tab){
+  $id('viewCollection').style.display=tab==='collection'?'':'none';
+  $id('viewLedger').style.display=tab==='ledger'?'':'none';
+  $id('tabCollection').classList.toggle('on',tab==='collection');
+  $id('tabLedger').classList.toggle('on',tab==='ledger');
+  if(tab==='ledger') renderLedger();
 }
 
-function renderSearchResults(cards){
-  const el=$id('searchResults');
-  if(!cards.length){ $id('searchHint').textContent='No cards found. Try a different search.'; return; }
-  $id('searchHint').textContent=`${cards.length} result${cards.length!==1?'s':''} found — click to add`;
-  el.innerHTML = cards.map(c=>{
-    const img = c.images?.small||'';
-    const price = getCardMarketPrice(c);
-    const priceStr = price ? fmt(price) : '—';
-    return `<div class="sr-card" onclick="openAddModal(${JSON.stringify(esc(JSON.stringify(c))).slice(1,-1)})">
-      <div class="sr-img-wrap"><img src="${img}" alt="${esc(c.name)}" loading="lazy" onerror="this.style.display='none'"></div>
-      <div class="sr-info">
-        <div class="sr-name">${esc(c.name)}</div>
-        <div class="sr-num">${esc(c.number)}/${esc(c.set?.total||'?')} · ${esc(c.set?.name||'')}</div>
-        <div class="sr-price">${priceStr}</div>
-      </div>
-    </div>`;
-  }).join('');
+// ═══════════════════════════════════════════════
+// COLLECTION
+// ═══════════════════════════════════════════════
+function cardKey(setName,num){ return `${setName}|${num}`; }
+function getCard(setName,num){ return D.collection[cardKey(setName,num)]||null; }
+
+function renderAll(){
+  renderSetGrid();
+  renderBinder();
+  renderLedger();
+  populateLedgerSetFilter();
 }
 
-function getCardMarketPrice(card){
-  if(!card.tcgplayer) return null;
-  const prices = card.tcgplayer.prices;
-  if(!prices) return null;
-  // prefer holofoil, then normal, then first available
-  const order = ['holofoil','reverseHolofoil','normal','1stEditionHolofoil','1stEditionNormal','unlimitedHolofoil'];
-  for(const k of order){ if(prices[k]?.market) return prices[k].market; }
-  const first = Object.values(prices)[0];
-  return first?.market || first?.mid || null;
-}
-
-// ─── ADD MODAL ───────────────────────────────────────────
-function openAddModal(jsonStr){
-  const card = JSON.parse(jsonStr);
-  pendingCard = card;
-  const img = card.images?.small||'';
-  const price = getCardMarketPrice(card);
-  $id('addPreview').innerHTML = `
-    <div class="modal-card-img"><img src="${img}" alt="${esc(card.name)}" onerror="this.style.display='none'"></div>
-    <div class="modal-card-meta">
-      <div class="modal-card-name">${esc(card.name)}</div>
-      <div class="modal-card-sub">${esc(card.number)}/${esc(card.set?.total||'?')}<br>${esc(card.set?.name||'')} (${esc(card.set?.releaseDate?.slice(0,4)||'')})</div>
-      ${price?`<div class="modal-card-market">Market: ${fmt(price)}</div>`:'<div class="modal-card-market" style="color:var(--muted)">No market price available</div>'}
-    </div>`;
-  $id('addPrice').value = '';
-  $id('addDate').value = new Date().toISOString().slice(0,10);
-  $id('addQty').value = 1;
-  $id('addOverlay').classList.add('on');
-  setTimeout(()=>$id('addPrice').focus(),150);
-}
-
-function closeAddModal(){ $id('addOverlay').classList.remove('on'); pendingCard=null; }
-
-function confirmAdd(){
-  if(!pendingCard) return;
-  const price = parseFloat($id('addPrice').value);
-  const date  = $id('addDate').value;
-  const qty   = parseInt($id('addQty').value)||1;
-  if(!date){ toast('Please enter a purchase date','red'); return; }
-  const marketPrice = getCardMarketPrice(pendingCard);
-  for(let i=0;i<qty;i++){
-    D.collection.push({
-      id: uuid(),
-      name: pendingCard.name,
-      number: pendingCard.number,
-      setTotal: pendingCard.set?.total||'?',
-      set: pendingCard.set?.name||'',
-      setId: pendingCard.set?.id||'',
-      setRelease: pendingCard.set?.releaseDate||'',
-      image: pendingCard.images?.small||'',
-      imageLarge: pendingCard.images?.large||'',
-      purchasePrice: isNaN(price)?null:price,
-      purchaseDate: date,
-      marketPrice: marketPrice,
-      marketPriceUpdated: marketPrice ? new Date().toISOString().slice(0,10) : null,
-      tcgplayerUrl: pendingCard.tcgplayer?.url||null,
-      apiId: pendingCard.id
-    });
-  }
-  closeAddModal();
-  save();
-  toast(`Added ${qty>1?qty+'× ':''}${pendingCard.name}`,'green');
-  $id('searchInput').value='';
-  $id('searchResults').innerHTML='';
-  $id('searchHint').textContent='Type a card name or number to search the Pokémon TCG database';
-}
-
-// ─── DETAIL MODAL ─────────────────────────────────────────
-function openDetail(id){
-  viewingId = id;
-  renderDetail();
-  $id('detailOverlay').classList.add('on');
-}
-function closeDetail(){ $id('detailOverlay').classList.remove('on'); viewingId=null; }
-
-function renderDetail(){
-  const card = D.collection.find(c=>c.id===viewingId); if(!card) return;
-  const pnl = (card.marketPrice!=null&&card.purchasePrice!=null) ? card.marketPrice-card.purchasePrice : null;
-  const pnlPct = pnl!=null&&card.purchasePrice>0 ? ((pnl/card.purchasePrice)*100).toFixed(1) : null;
-  const cls = pnl==null?'neutral':pnl>0?'pos':'neg';
-  const pnlStr = pnl!=null ? (pnl>=0?'+':'')+fmt(pnl) : '—';
-  const pctStr = pnlPct!=null ? (pnl>=0?'+':'')+pnlPct+'%' : '';
-
-  $id('detailBody').innerHTML = `
-    <div class="modal-title">${esc(card.name)}</div>
-    <div class="modal-card-preview">
-      <div class="modal-card-img" style="width:100px;">
-        <img src="${esc(card.imageLarge||card.image)}" alt="${esc(card.name)}" onerror="this.src='${esc(card.image)}'">
-      </div>
-      <div class="modal-card-meta">
-        <div class="modal-card-name">${esc(card.name)}</div>
-        <div class="modal-card-sub">${esc(card.number)}/${esc(card.setTotal)} · ${esc(card.set)}<br>${card.setRelease?esc(card.setRelease.slice(0,4)):''}</div>
-        ${card.tcgplayerUrl?`<a href="${esc(card.tcgplayerUrl)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);text-decoration:none;margin-top:6px;display:inline-block;">View on TCGPlayer ↗</a>`:''}
-      </div>
-    </div>
-    <div class="detail-pnl ${cls}">
-      <div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Profit / Loss</div>
-        <div class="pnl-main ${cls}">${pnlStr}</div>
-      </div>
-      <div class="pnl-pct ${cls}">${pctStr}</div>
-    </div>
-    <div class="detail-row"><span class="detail-lbl">Purchase Price</span><span class="detail-val">${fmt(card.purchasePrice)}</span></div>
-    <div class="detail-row"><span class="detail-lbl">Purchase Date</span><span class="detail-val">${card.purchaseDate||'—'}</span></div>
-    <div class="detail-row">
-      <span class="detail-lbl">Market Price${card.marketPriceUpdated?`<br><span style="font-size:9px;opacity:.6;">${card.marketPriceUpdated}</span>`:''}</span>
-      <span class="detail-val" style="display:flex;align-items:center;">
-        <span id="detailMarket">${fmt(card.marketPrice)}</span>
-        <button class="refresh-btn" onclick="refreshMarketPrice('${card.id}')">↻ REFRESH</button>
-      </span>
-    </div>
-    <div class="manual-price-row">
-      <input class="manual-price-input" id="manualPriceInput" type="number" step="0.01" min="0" placeholder="Set price manually…">
-      <button class="btn-set-price" onclick="setManualPrice('${card.id}')">SET</button>
-    </div>
-    <div class="modal-actions" style="margin-top:20px;">
-      <button class="btn-danger" onclick="deleteCard('${card.id}')">Delete</button>
-      <button class="btn-secondary" onclick="closeDetail()">Close</button>
-    </div>`;
-}
-
-async function refreshMarketPrice(id){
-  const card = D.collection.find(c=>c.id===id); if(!card||!card.apiId) return;
-  $id('detailMarket').textContent='…';
-  try{
-    const r = await fetch(`${TCG_API}/cards/${card.apiId}?select=tcgplayer`);
-    const data = await r.json();
-    const price = getCardMarketPrice(data.data||{});
-    card.marketPrice = price;
-    card.marketPriceUpdated = new Date().toISOString().slice(0,10);
-    save();
-    $id('detailMarket').textContent = fmt(price);
-    toast('Market price updated','green');
-    renderDetail();
-  }catch(e){ $id('detailMarket').textContent=fmt(card.marketPrice); toast('Could not refresh price','red'); }
-}
-
-function setManualPrice(id){
-  const val = parseFloat($id('manualPriceInput').value);
-  if(isNaN(val)){ toast('Enter a valid price','red'); return; }
-  const card = D.collection.find(c=>c.id===id); if(!card) return;
-  card.marketPrice = val;
-  card.marketPriceUpdated = new Date().toISOString().slice(0,10);
-  save();
-  toast('Price updated','green');
-  renderDetail();
-}
-
-function deleteCard(id){
-  if(!confirm('Remove this card from your collection?')) return;
-  D.collection = D.collection.filter(c=>c.id!==id);
-  closeDetail();
-  save();
-  toast('Card removed');
-}
-
-// ─── RENDER ───────────────────────────────────────────────
-function renderAll(){ renderStats(); renderCollection(); }
-
-function renderStats(){
-  const cards = D.collection||[];
-  const cost   = cards.reduce((s,c)=>s+(c.purchasePrice||0),0);
-  const market = cards.reduce((s,c)=>s+(c.marketPrice??c.purchasePrice??0),0);
-  const pnl    = market - cost;
-  $id('statCount').textContent  = cards.length;
-  $id('statCost').textContent   = fmt(cost);
-  $id('statMarket').textContent = fmt(market);
-  const pe=$id('statPnl'); pe.textContent=fmt(pnl);
-  pe.className='stat-val '+(pnl>0?'pos':pnl<0?'neg':'');
-}
-
-function renderCollection(){
-  const filter = ($id('filterInput').value||'').toLowerCase();
-  const cards  = (D.collection||[]).filter(c=>{
-    if(!filter) return true;
-    return c.name.toLowerCase().includes(filter)||
-           c.number.includes(filter)||
-           c.set.toLowerCase().includes(filter);
+function renderSetGrid(){
+  const grid=$id('setGrid'); grid.innerHTML='';
+  Object.entries(SETS).forEach(([setName,setData])=>{
+    const owned=setData.cards.filter(c=>{ const cd=getCard(setName,c.num); return cd&&cd.owned; }).length;
+    const pct=Math.round(owned/setData.total*100);
+    const div=document.createElement('div');
+    div.className='set-card'+(activeSet===setName?' on':'');
+    div.innerHTML=`
+      <div class="set-badge">${setData.icon}</div>
+      <div class="set-card-name">${esc(setName)}</div>
+      <div class="set-card-meta">${setData.total} cards</div>
+      <div class="set-progress"><div class="set-progress-bar" style="width:${pct}%"></div></div>
+      <div class="set-pct">${owned}/${setData.total} — ${pct}%</div>`;
+    div.onclick=()=>{ activeSet=setName; activeFilter='all'; $id('colSearch').value=''; renderSetGrid(); renderCollectionBody(); };
+    grid.appendChild(div);
   });
-  const el = $id('collectionGrid');
-  if(!cards.length){
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">🃏</div>${filter?'No cards match your filter.':'Your collection is empty.<br>Search for a card above to get started.'}</div>`;
-    return;
-  }
-  el.innerHTML = cards.map(c=>{
-    const pnl = (c.marketPrice!=null&&c.purchasePrice!=null)?c.marketPrice-c.purchasePrice:null;
-    const pnlPct = pnl!=null&&c.purchasePrice>0?((pnl/c.purchasePrice)*100).toFixed(0):null;
-    const cls = pnl==null?'neutral':pnl>0?'pos':'neg';
-    const badge = pnlPct!=null?(pnl>=0?'+':'')+pnlPct+'%':'—';
-    return `<div class="coll-card" onclick="openDetail('${c.id}')">
-      <div class="coll-img-wrap">
-        <img src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.style.opacity='.2'">
-        <div class="coll-pnl-badge ${cls}">${badge}</div>
-      </div>
-      <div class="coll-body">
-        <div class="coll-name">${esc(c.name)}</div>
-        <div class="coll-num">${esc(c.number)}/${esc(c.setTotal||'?')} · ${esc(c.set)}</div>
-        <div class="coll-prices">
-          <div class="coll-price-row">
-            <span class="coll-price-lbl">PAID</span>
-            <span class="coll-price-val">${fmt(c.purchasePrice)}</span>
-          </div>
-          <div class="coll-price-row">
-            <span class="coll-price-lbl">MKT</span>
-            <span class="coll-price-val market">${fmt(c.marketPrice)}</span>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
 }
 
-// close modals on backdrop click
-$id('addOverlay').addEventListener('click',e=>{ if(e.target===$id('addOverlay')) closeAddModal(); });
-$id('detailOverlay').addEventListener('click',e=>{ if(e.target===$id('detailOverlay')) closeDetail(); });
-</script>
+function renderCollectionBody(){
+  $id('collectionBody').style.display='';
+  $id('collectionSetTitle').textContent=activeSet;
+  renderColStats();
+  renderBinder();
+  // sync filter buttons
+  ['All','Owned','Missing','Upgrade'].forEach(f=>{
+    const id='filter'+f; const btn=$id(id);
+    if(btn) btn.classList.toggle('on',activeFilter===f.toLowerCase()||(f==='All'&&activeFilter==='all')||(f==='Upgrade'&&activeFilter==='upgrade'));
+  });
+}
 
+function renderColStats(){
+  const setData=SETS[activeSet];
+  const cards=setData.cards;
+  const owned=cards.filter(c=>{ const d=getCard(activeSet,c.num); return d&&d.owned; });
+  const upgrade=cards.filter(c=>{ const d=getCard(activeSet,c.num); return d&&d.owned&&d.upgrade; });
+  const totalPaid=owned.reduce((s,c)=>{ const e=D.ledger.find(l=>l.collectionKey===cardKey(activeSet,c.num)); return s+(e?e.paid:0); },0);
+  const totalNM=owned.reduce((s,c)=>{ const d=getCard(activeSet,c.num); return s+(d&&d.nmPrice?parseFloat(d.nmPrice):0); },0);
+  $id('colStats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Owned</div><div class="stat-val g">${owned.length}<span style="font-size:14px;color:var(--muted);"> / ${setData.total}</span></div></div>
+    <div class="stat-card"><div class="stat-label">Missing</div><div class="stat-val r">${setData.total-owned.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Needs Upgrade</div><div class="stat-val gold">${upgrade.length}</div></div>
+    <div class="stat-card"><div class="stat-label">NM Value</div><div class="stat-val">${fmt(totalNM)}</div></div>`;
+}
+
+function setFilter(f){
+  activeFilter=f;
+  ['filterAll','filterOwned','filterMissing','filterUpgrade'].forEach(id=>$id(id)&&$id(id).classList.remove('on'));
+  const map={all:'filterAll',owned:'filterOwned',missing:'filterMissing',upgrade:'filterUpgrade'};
+  if(map[f]) $id(map[f]).classList.add('on');
+  renderBinder();
+}
+
+function renderBinder(){
+  if(!$id('collectionBody').style.display===false) return;
+  const setData=SETS[activeSet];
+  if(!setData) return;
+  const search=($id('colSearch').value||'').toLowerCase().trim();
+  const grid=$id('binderGrid'); grid.innerHTML='';
+  let shown=0;
+  setData.cards.forEach(c=>{
+    const data=getCard(activeSet,c.num);
+    const owned=!!(data&&data.owned);
+    const needsUpgrade=!!(data&&data.owned&&data.upgrade);
+    if(activeFilter==='owned'&&!owned) return;
+    if(activeFilter==='missing'&&owned) return;
+    if(activeFilter==='upgrade'&&!needsUpgrade) return;
+    if(search&&!c.name.toLowerCase().includes(search)&&!c.num.toLowerCase().includes(search)) return;
+    shown++;
+    const slot=document.createElement('div');
+    const condClass=data&&data.cond?(data.cond.startsWith('NM')?'':'lp'):'' ;
+    slot.className='card-slot'+(owned?' owned':'')+(needsUpgrade?' upgrade':'')+(!owned?' missing':'');
+    let inner=`<div class="card-num">${esc(c.num)}</div><div class="card-name">${esc(c.name)}</div><div class="card-rarity">${esc(c.rarity)}</div>`;
+    if(owned&&data){
+      inner+=`<div class="card-owned-info">`;
+      if(data.cond) inner+=`<span class="card-cond ${condClass}">${esc(data.cond)}</span>`;
+      if(data.type==='slab'&&data.slabGrade) inner+=` <span class="card-cond" style="background:rgba(244,208,63,.12);color:var(--gold);">${esc(data.slabGrade)}</span>`;
+      if(data.nmPrice) inner+=`<div class="card-price">NM ${fmt(parseFloat(data.nmPrice))}</div>`;
+      inner+=`</div>`;
+      if(needsUpgrade) inner+=`<div class="card-upgrade-flag" title="Needs upgrade">⬆</div>`;
+      else inner+=`<div class="card-check">✓</div>`;
+      if(data.type==='slab') inner+=`<div class="card-type-badge">SLAB</div>`;
+    }
+    slot.innerHTML=inner;
+    slot.onclick=()=>openCardModal(activeSet,c.num);
+    grid.appendChild(slot);
+  });
+  if(!shown){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);font-size:13px;">No cards match your filter.</div>`;
+  }
+}
+
+// ── CARD MODAL ──
+function openCardModal(setName,num){
+  const setData=SETS[setName];
+  const cardDef=setData&&setData.cards.find(c=>c.num===num);
+  if(!cardDef) return;
+  editingCardKey=cardKey(setName,num);
+  const data=getCard(setName,num)||{};
+  $id('cardModalTitle').textContent=cardDef.name;
+  $id('cardModalSub').textContent=`${num} · ${setName} · ${cardDef.rarity}`;
+  $id('cardOwned').checked=!!(data.owned);
+  $id('cardCond').value=data.cond||'NM';
+  $id('cardType').value=data.type||'raw';
+  $id('cardSlabGrade').value=data.slabGrade||'';
+  $id('cardNMPrice').value=data.nmPrice||'';
+  $id('cardLPPrice').value=data.lpPrice||'';
+  $id('cardNotes').value=data.notes||'';
+  $id('cardUpgrade').checked=!!(data.upgrade);
+  toggleOwnedUI();
+  toggleSlabUI();
+  // hint about ledger
+  const hint=$id('cardLedgerHint');
+  const existingEntry=D.ledger.find(l=>l.collectionKey===editingCardKey);
+  if(existingEntry){
+    hint.style.display='';
+    hint.textContent=`💰 Linked ledger entry: paid ${fmt(existingEntry.paid)} on ${existingEntry.dateBought||'—'}`;
+  } else { hint.style.display='none'; }
+  $id('cardOv').classList.add('on');
+}
+function closeCardModal(){ $id('cardOv').classList.remove('on'); editingCardKey=null; }
+$id('cardOv').addEventListener('click',e=>{ if(e.target===$id('cardOv')) closeCardModal(); });
+$id('cardType').addEventListener('change',toggleSlabUI);
+
+function toggleOwnedUI(){
+  const owned=$id('cardOwned').checked;
+  $id('cardOwnedFields').style.opacity=owned?'1':'0.4';
+  $id('cardOwnedFields').style.pointerEvents=owned?'':'none';
+}
+function toggleSlabUI(){
+  $id('cardSlabGradeField').style.display=$id('cardType').value==='slab'?'':'none';
+}
+
+function saveCard(){
+  if(!editingCardKey) return;
+  const owned=$id('cardOwned').checked;
+  const prev=getCard(...editingCardKey.split('|'));
+  const wasOwned=!!(prev&&prev.owned);
+  const entry={
+    owned, cond:$id('cardCond').value, type:$id('cardType').value,
+    slabGrade:$id('cardSlabGrade').value.trim(),
+    nmPrice:parseFloat($id('cardNMPrice').value)||null,
+    lpPrice:parseFloat($id('cardLPPrice').value)||null,
+    notes:$id('cardNotes').value.trim(),
+    upgrade:$id('cardUpgrade').checked
+  };
+  if(!owned) entry.upgrade=false;
+  D.collection[editingCardKey]=entry;
+  // Auto-create ledger prompt if newly marked as owned
+  if(owned&&!wasOwned){
+    const existingEntry=D.ledger.find(l=>l.collectionKey===editingCardKey);
+    if(!existingEntry){
+      save();
+      closeCardModal();
+      renderSetGrid();
+      renderCollectionBody();
+      // Ask to log a purchase
+      const parts=editingCardKey.split('|');
+      setTimeout(()=>openAddLedgerFromCollection(parts[0],parts[1]),200);
+      return;
+    }
+  }
+  save();
+  closeCardModal();
+  renderSetGrid();
+  renderCollectionBody();
+}
+
+// ═══════════════════════════════════════════════
+// LEDGER
+// ═══════════════════════════════════════════════
+function populateLedgerSetFilter(){
+  const sel=$id('lSet'); if(!sel) return;
+  const existing=sel.value;
+  sel.innerHTML='<option value="">All sets</option>';
+  Object.keys(SETS).forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; if(s===existing) o.selected=true; sel.appendChild(o); });
+  const o=document.createElement('option'); o.value='Other / Modern'; o.textContent='Other / Modern'; sel.appendChild(o);
+  const ob=document.createElement('option'); ob.value='Mixed / Bulk Lot'; ob.textContent='Mixed / Bulk Lot'; sel.appendChild(ob);
+}
+
+function openAddLedger(){
+  editingLedgerId=null;
+  $id('ledgerModalTitle').textContent='Add Purchase';
+  $id('lDelBtn').style.display='none';
+  $id('lName').value=''; $id('lEntrySet').value=''; $id('lEntryType').value='raw';
+  $id('lSlabGradeField').style.display='none'; $id('lSlabGrade').value='';
+  $id('lDateBought').value=new Date().toISOString().slice(0,10);
+  $id('lPlatformEntry').value='eBay'; $id('lPaid').value='';
+  $id('lDateSold').value=''; $id('lSoldPrice').value=''; $id('lSoldPlatform').value=''; $id('lNotes').value='';
+  $id('ledgerOv').classList.add('on');
+  setTimeout(()=>$id('lName').focus(),100);
+}
+
+function openAddLedgerFromCollection(setName,num){
+  const setData=SETS[setName];
+  const cardDef=setData&&setData.cards.find(c=>c.num===num);
+  openAddLedger();
+  if(cardDef){
+    $id('lName').value=`${cardDef.name} ${num}`;
+    $id('lEntrySet').value=setName;
+    const data=getCard(setName,num);
+    if(data) $id('lEntryType').value=data.type||'raw';
+    $id('ledgerOv')._collectionKey=cardKey(setName,num);
+  }
+}
+
+function openEditLedger(id){
+  const entry=D.ledger.find(l=>l.id===id); if(!entry) return;
+  editingLedgerId=id;
+  $id('ledgerModalTitle').textContent='Edit Entry';
+  $id('lDelBtn').style.display='';
+  $id('lName').value=entry.name||''; $id('lEntrySet').value=entry.set||'';
+  $id('lEntryType').value=entry.type||'raw';
+  $id('lSlabGradeField').style.display=entry.type==='slab'?'':'none';
+  $id('lSlabGrade').value=entry.slabGrade||'';
+  $id('lDateBought').value=entry.dateBought||''; $id('lPlatformEntry').value=entry.platform||'eBay';
+  $id('lPaid').value=entry.paid||'';
+  $id('lDateSold').value=entry.dateSold||''; $id('lSoldPrice').value=entry.soldPrice||'';
+  $id('lSoldPlatform').value=entry.soldPlatform||''; $id('lNotes').value=entry.notes||'';
+  $id('ledgerOv').classList.add('on');
+}
+
+function closeLedgerModal(){ $id('ledgerOv').classList.remove('on'); editingLedgerId=null; delete $id('ledgerOv')._collectionKey; }
+$id('ledgerOv').addEventListener('click',e=>{ if(e.target===$id('ledgerOv')) closeLedgerModal(); });
+$id('lEntryType').addEventListener('change',()=>{
+  $id('lSlabGradeField').style.display=$id('lEntryType').value==='slab'?'':'none';
+});
+
+function saveLedgerEntry(){
+  const name=$id('lName').value.trim();
+  const paid=parseFloat($id('lPaid').value);
+  if(!name){ alert('Please enter a card name.'); return; }
+  if(isNaN(paid)||paid<0){ alert('Please enter a valid price paid.'); return; }
+  const soldPrice=$id('lSoldPrice').value!==''?parseFloat($id('lSoldPrice').value):null;
+  const ov=$id('ledgerOv');
+  const entry={
+    id:editingLedgerId||Date.now().toString()+'_'+Math.random().toString(36).slice(2,5),
+    name, set:$id('lEntrySet').value, type:$id('lEntryType').value,
+    slabGrade:$id('lSlabGrade').value.trim(),
+    dateBought:$id('lDateBought').value, platform:$id('lPlatformEntry').value,
+    paid, dateSold:$id('lDateSold').value||null,
+    soldPrice:soldPrice, soldPlatform:$id('lSoldPlatform').value||null,
+    notes:$id('lNotes').value.trim(),
+    collectionKey:ov._collectionKey||null
+  };
+  if(editingLedgerId){ const idx=D.ledger.findIndex(l=>l.id===editingLedgerId); if(idx>=0) D.ledger[idx]=entry; }
+  else D.ledger.push(entry);
+  save(); closeLedgerModal(); renderLedger();
+}
+
+function deleteLedgerEntry(){
+  if(!editingLedgerId) return;
+  if(!confirm('Delete this ledger entry?')) return;
+  D.ledger=D.ledger.filter(l=>l.id!==editingLedgerId);
+  save(); closeLedgerModal(); renderLedger();
+}
+
+function lSort(col){
+  if(lSortCol===col) lSortDir=lSortDir==='asc'?'desc':'asc';
+  else { lSortCol=col; lSortDir='desc'; }
+  renderLedger();
+}
+
+function clearLedgerFilters(){
+  $id('lSearch').value=''; $id('lType').value=''; $id('lSet').value='';
+  $id('lPlatform').value=''; $id('lStatus').value='';
+  renderLedger();
+}
+
+function renderLedger(){
+  // Stats
+  const totalSpent=D.ledger.reduce((s,l)=>s+(l.paid||0),0);
+  const sold=D.ledger.filter(l=>l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='');
+  const totalRevenue=sold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0),0);
+  const totalProfit=sold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0)-(l.paid||0),0);
+  const open=D.ledger.filter(l=>!l.soldPrice).length;
+  $id('ledgerStats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-val r">${fmt(totalSpent)}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-val g">${fmt(totalRevenue)}</div></div>
+    <div class="stat-card"><div class="stat-label">Realised P&L</div><div class="stat-val ${totalProfit>=0?'g':'r'}">${fmtSign(totalProfit)}</div></div>
+    <div class="stat-card"><div class="stat-label">Open Positions</div><div class="stat-val gold">${open}</div></div>`;
+
+  // Filter
+  const search=($id('lSearch').value||'').toLowerCase();
+  const typeF=$id('lType').value;
+  const setF=$id('lSet').value;
+  const platF=$id('lPlatform').value;
+  const statusF=$id('lStatus').value;
+
+  let filtered=D.ledger.filter(l=>{
+    if(search&&!l.name.toLowerCase().includes(search)) return false;
+    if(typeF&&l.type!==typeF) return false;
+    if(setF&&l.set!==setF) return false;
+    if(platF&&l.platform!==platF) return false;
+    if(statusF==='sold'&&(!l.soldPrice)) return false;
+    if(statusF==='open'&&l.soldPrice) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a,b)=>{
+    let va,vb;
+    if(lSortCol==='paid'){ va=a.paid||0; vb=b.paid||0; }
+    else if(lSortCol==='profit'){ va=(a.soldPrice||0)-(a.paid||0); vb=(b.soldPrice||0)-(b.paid||0); }
+    else if(lSortCol==='name'){ va=a.name||''; vb=b.name||''; }
+    else { va=a.dateBought||''; vb=b.dateBought||''; }
+    const cmp=va<vb?-1:va>vb?1:0;
+    return lSortDir==='asc'?cmp:-cmp;
+  });
+
+  // Sort indicators
+  ['date','name','paid','profit'].forEach(c=>{
+    const el=$id('lSort'+c.charAt(0).toUpperCase()+c.slice(1));
+    if(el) el.textContent=lSortCol===c?(lSortDir==='asc'?'↑':'↓'):'';
+  });
+
+  // Summary row
+  const filtSpent=filtered.reduce((s,l)=>s+(l.paid||0),0);
+  const filtSold=filtered.filter(l=>l.soldPrice);
+  const filtPL=filtSold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0)-(l.paid||0),0);
+  $id('ledgerSummaryRow').innerHTML=`<span>${filtered.length} entries</span><span style="color:var(--red);">spent ${fmt(filtSpent)}</span>${filtSold.length?`<span style="color:${filtPL>=0?'var(--green)':'var(--red)'};">P&L ${fmtSign(filtPL)}</span>`:''}`;
+
+  const tbody=$id('ledgerBody');
+  const empty=$id('ledgerEmpty');
+  if(!filtered.length&&!D.ledger.length){ tbody.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display='none';
+  tbody.innerHTML='';
+
+  filtered.forEach(l=>{
+    const isSold=l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='';
+    const pl=isSold?(parseFloat(l.soldPrice)||0)-(l.paid||0):null;
+    const dateStr=l.dateBought?new Date(l.dateBought+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}):'—';
+    const soldStr=l.dateSold?new Date(l.dateSold+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}):'';
+    const tr=document.createElement('tr'); tr.style.cursor='pointer';
+    tr.innerHTML=`
+      <td style="white-space:nowrap;font-family:'DM Mono',monospace;font-size:11px;">${dateStr}</td>
+      <td><div style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(l.name)}">${esc(l.name)}</div>${l.slabGrade?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);">${esc(l.slabGrade)}</div>`:''}</td>
+      <td style="font-size:11px;color:var(--muted);">${esc(l.set||'—')}</td>
+      <td><span class="type-badge ${l.type||'raw'}">${l.type==='bulk'?'Bulk':l.type==='slab'?'Slab':'Raw'}</span></td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;">${fmt(l.paid)}</td>
+      <td style="font-size:11px;color:var(--muted);">${esc(l.platform||'')}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;">${isSold?`<div>${fmt(parseFloat(l.soldPrice))}</div><div style="color:var(--muted);font-size:10px;">${soldStr}${l.soldPlatform?' · '+l.soldPlatform:''}</div>`:'<span style="color:var(--muted);">open</span>'}</td>
+      <td style="text-align:right;" class="${pl===null?'profit-open':pl>=0?'profit-pos':'profit-neg'}">${pl===null?'—':fmtSign(pl)}</td>
+      <td style="text-align:right;"><button onclick="event.stopPropagation();openEditLedger('${l.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">edit</button></td>`;
+    tr.onclick=()=>openEditLedger(l.id);
+    tbody.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  applyTheme();
+  showPinScreen();
+  // Show first set on load
+  setTimeout(()=>{
+    if($id('collectionBody').style.display!=='none'||true){
+      renderCollectionBody();
+    }
+  },50);
+});
+</script>
 <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
 <script src="https://accounts.google.com/gsi/client" onload="gsiLoaded()" async defer></script>
 </body>
