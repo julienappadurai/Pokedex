@@ -332,8 +332,8 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
     <div class="modal-sub">One-time import from your master inventory Excel file</div>
     <div style="background:var(--s2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.9;">
       Expected sheets:<br>
-      <span style="color:var(--text);">Pokémon Complete Master Inventory V5 - Full Analysis 🃏</span> — Collection data<br>
-      <span style="color:var(--text);">All purchases</span> — Ledger / purchase log
+      <span style="color:var(--text);">Pokemon Complete Set</span> — Collection data<br>
+      <span style="color:var(--text);">All Purchases</span> — Ledger / purchase log
     </div>
     <div style="border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:12px;" id="importDropZone" onclick="$id('importFi').click()" ondragover="event.preventDefault();this.style.borderColor='var(--red)'" ondragleave="this.style.borderColor=''" ondrop="importHandleDrop(event)">
       <div style="font-size:28px;margin-bottom:8px;">📊</div>
@@ -1561,8 +1561,8 @@ function parseImportWorkbook(wb){
   const result={ collection:[], ledger:[], errors:[] };
 
   // ── SHEET 1: Collection inventory ──
-  // Sheet name contains "Full Analysis" — find it flexibly
-  const collSheetName=wb.SheetNames.find(n=>n.includes('Full Analysis')||n.includes('Inventory'));
+  // Find collection sheet — matches "Pokemon Complete Set" (case-insensitive, ignores accents)
+  const collSheetName=wb.SheetNames.find(n=>n.toLowerCase().replace(/[éèê]/g,'e').includes('pokemon complete set')||n.toLowerCase().includes('complete set')||n.toLowerCase().includes('full analysis')||n.toLowerCase().includes('inventory'));
   if(collSheetName){
     const ws=wb.Sheets[collSheetName];
     const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
@@ -1618,11 +1618,11 @@ function parseImportWorkbook(wb){
       result.collection.push({ key:ck, owned:true, cond:condNorm, type:'raw', nmPrice, lpPrice, upgrade, paid });
     });
   } else {
-    result.errors.push('Could not find collection sheet — check sheet name contains "Full Analysis"');
+    result.errors.push('Could not find collection sheet — rename it to "Pokemon Complete Set"');
   }
 
   // ── SHEET 2: All purchases ──
-  const purchSheetName=wb.SheetNames.find(n=>n.toLowerCase().includes('all purchases')||n.toLowerCase().includes('purchase'));
+  const purchSheetName=wb.SheetNames.find(n=>n.toLowerCase().includes('all purchases')||n.toLowerCase().includes('purchases'));
   if(purchSheetName){
     const ws=wb.Sheets[purchSheetName];
     const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
