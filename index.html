@@ -216,6 +216,8 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
       <div class="logo">Pokédex Binder <small>TCG Collection Tracker</small></div>
     </div>
     <div class="hbtns">
+      <button class="hbtn" onclick="openImport()" style="color:var(--gold);border-color:rgba(244,208,63,.3);">⬆ Import Spreadsheet</button>
+      <button class="hbtn" onclick="openSettingsModal()">⚙ Settings</button>
       <button class="hbtn" id="themeBtn" onclick="toggleTheme()">☀</button>
       <button class="hbtn" id="syncBtn" onclick="manualSync()">● Connecting…</button>
       <button class="hbtn" onclick="signOut()">⏻ Sign out</button>
@@ -321,6 +323,55 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
   </div>
 
 </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="ov" id="importOv">
+  <div class="modal" style="max-width:520px;">
+    <h2>Import Spreadsheet</h2>
+    <div class="modal-sub">One-time import from your master inventory Excel file</div>
+    <div style="background:var(--s2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.9;">
+      Expected sheets:<br>
+      <span style="color:var(--text);">Pokémon Complete Master Inventory V5 - Full Analysis 🃏</span> — Collection data<br>
+      <span style="color:var(--text);">All purchases</span> — Ledger / purchase log
+    </div>
+    <div style="border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:12px;" id="importDropZone" onclick="$id('importFi').click()" ondragover="event.preventDefault();this.style.borderColor='var(--red)'" ondragleave="this.style.borderColor=''" ondrop="importHandleDrop(event)">
+      <div style="font-size:28px;margin-bottom:8px;">📊</div>
+      <div style="font-size:13px;color:var(--muted);">Tap to choose your .xlsx file</div>
+    </div>
+    <input type="file" id="importFi" accept=".xlsx,.xls" style="display:none;" onchange="importHandleFile(this.files[0])">
+    <div id="importStatus" style="font-size:12px;color:var(--muted);margin-bottom:12px;min-height:18px;"></div>
+    <div id="importPreview" style="display:none;margin-bottom:16px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Preview</div>
+      <div id="importPreviewContent" style="background:var(--s2);border-radius:8px;padding:12px;font-size:12px;line-height:2;max-height:200px;overflow-y:auto;"></div>
+    </div>
+    <div class="mbtns">
+      <button class="mbtn-g" onclick="closeImport()">Cancel</button>
+      <button class="mbtn-p" id="importConfirmBtn" onclick="confirmImport()" style="display:none;">✓ Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="ov" id="settingsOv">
+  <div class="modal" style="max-width:420px;">
+    <h2>Settings</h2>
+    <div class="modal-sub">Data management</div>
+    <div style="background:var(--s2);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Data Summary</div>
+      <div id="settingsDataSummary" style="font-size:13px;line-height:2;color:var(--text);"></div>
+    </div>
+    <div style="background:var(--s2);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid rgba(230,57,70,.2);">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:8px;">Danger Zone</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">Permanently deletes all collection and/or ledger data. Use before re-importing. Cannot be undone (your Drive backup will remain).</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button onclick="resetCollection()" style="padding:9px;background:transparent;border:1px solid rgba(230,57,70,.4);border-radius:7px;color:var(--red);cursor:pointer;font-size:12px;transition:all .15s;" onmouseover="this.style.background='rgba(230,57,70,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear Collection</button>
+        <button onclick="resetLedger()" style="padding:9px;background:transparent;border:1px solid rgba(230,57,70,.4);border-radius:7px;color:var(--red);cursor:pointer;font-size:12px;transition:all .15s;" onmouseover="this.style.background='rgba(230,57,70,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear Ledger</button>
+      </div>
+      <button onclick="resetAll()" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1px solid rgba(230,57,70,.4);border-radius:7px;color:var(--red);cursor:pointer;font-size:12px;transition:all .15s;" onmouseover="this.style.background='rgba(230,57,70,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear ALL Data</button>
+    </div>
+    <div class="mbtns"><button class="mbtn-p" onclick="closeSettingsModal()">Done</button></div>
+  </div>
 </div>
 
 <!-- CARD DETAIL MODAL -->
@@ -465,9 +516,20 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
         <option>Other</option>
       </select>
     </div>
-    <div class="field">
-      <label>Notes</label>
-      <input id="lNotes" placeholder="Optional notes…">
+    <div class="two-col">
+      <div class="field">
+        <label>Language</label>
+        <select id="lLanguage">
+          <option value="English">English</option>
+          <option value="Japanese">Japanese</option>
+          <option value="Korean">Korean</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <input id="lNotes" placeholder="Optional notes…">
+      </div>
     </div>
 
     <div class="mbtns">
@@ -1351,6 +1413,334 @@ function renderLedger(){
   });
 }
 
+
+// ═══════════════════════════════════════════════
+// SETTINGS MODAL
+// ═══════════════════════════════════════════════
+function openSettingsModal(){
+  const collectionCount=Object.values(D.collection).filter(c=>c.owned).length;
+  const totalCards=Object.keys(D.collection).length;
+  const upgradeCount=Object.values(D.collection).filter(c=>c.owned&&c.upgrade).length;
+  $id('settingsDataSummary').innerHTML=
+    `<div>${collectionCount} cards marked owned across all sets</div>` +
+    `<div>${upgradeCount} cards flagged for upgrade</div>` +
+    `<div>${D.ledger.length} ledger entries</div>`;
+  $id('settingsOv').classList.add('on');
+}
+function closeSettingsModal(){ $id('settingsOv').classList.remove('on'); }
+$id('settingsOv').addEventListener('click',e=>{ if(e.target===$id('settingsOv')) closeSettingsModal(); });
+
+function resetCollection(){
+  if(!confirm('Delete ALL collection data?\n\nThis clears every owned/condition/price entry. Your ledger is not affected.')) return;
+  D.collection={};
+  save(); closeSettingsModal(); renderAll();
+  alert('✓ Collection cleared.');
+}
+function resetLedger(){
+  if(!confirm('Delete ALL ledger entries?\n\nThis removes every purchase and sale record. Your collection is not affected.')) return;
+  D.ledger=[];
+  save(); closeSettingsModal(); renderAll();
+  alert('✓ Ledger cleared.');
+}
+function resetAll(){
+  if(!confirm('Delete ALL data — collection AND ledger?\n\nThis cannot be undone (your Drive backup will remain).')) return;
+  D.collection={}; D.ledger=[];
+  save(); closeSettingsModal(); renderAll();
+  alert('✓ All data cleared. You can now re-import your spreadsheet.');
+}
+
+// ═══════════════════════════════════════════════
+// XLSX IMPORT
+// ═══════════════════════════════════════════════
+// Set name normalisation — maps spreadsheet values to app set names
+const SET_MAP = {
+  'base set':           'Base Set',
+  'base set unlimited': 'Base Set',
+  'base set shadowless':'Base Set',
+  'base set 1st edition':'Base Set',
+  'jungle':             'Jungle',
+  'fossil':             'Fossil',
+  'fossil set':         'Fossil',
+  'wotc black star promos': 'WOTC Black Star Promos',
+  'wotc promos':        'WOTC Black Star Promos',
+  'promos':             'WOTC Black Star Promos',
+  'black star promos':  'WOTC Black Star Promos',
+};
+
+function normaliseSet(raw){
+  if(!raw) return null;
+  const key=String(raw).toLowerCase().trim();
+  return SET_MAP[key]||null;
+}
+
+// Card number normalisation — match spreadsheet num like "1/102" or "#1" to SETS card list
+function findCardInSet(setName,numRaw,nameRaw){
+  const setData=SETS[setName]; if(!setData) return null;
+  const numStr=String(numRaw||'').trim();
+  const nameStr=String(nameRaw||'').toLowerCase().trim();
+  // Exact number match first
+  let found=setData.cards.find(c=>c.num===numStr);
+  if(found) return found;
+  // Normalise: "1/102" vs "01/102" etc
+  found=setData.cards.find(c=>c.num.split('/')[0]===numStr.split('/')[0]);
+  if(found) return found;
+  // Name match fallback
+  if(nameStr) found=setData.cards.find(c=>c.name.toLowerCase()===nameStr);
+  return found||null;
+}
+
+// Parse Excel date serial or DD/MM/YYYY string → YYYY-MM-DD
+function parseXlDate(val){
+  if(!val) return null;
+  const s=String(val).trim();
+  // DD/MM/YYYY or D/M/YYYY
+  let m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  // "12 June 2026" or "12-Jun-2026"
+  m=s.match(/^(\d{1,2})[- ]([A-Za-z]+)[- ](\d{4})$/);
+  if(m){
+    const months={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+    const mo=months[m[2].toLowerCase().slice(0,3)];
+    if(mo) return `${m[3]}-${String(mo).padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  }
+  // YYYY-MM-DD already
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // Excel serial number
+  if(/^\d+(\.\d+)?$/.test(s)){
+    const d=new Date((parseFloat(s)-25569)*86400*1000);
+    if(!isNaN(d)) return d.toISOString().slice(0,10);
+  }
+  return null;
+}
+
+function parseAmount(val){
+  if(val===null||val===undefined||val==='') return null;
+  const n=parseFloat(String(val).replace(/[£$,\s]/g,''));
+  return isNaN(n)?null:n;
+}
+
+let importParsedData=null;
+
+function openImport(){
+  importParsedData=null;
+  $id('importFi').value='';
+  $id('importStatus').textContent='';
+  $id('importPreview').style.display='none';
+  $id('importConfirmBtn').style.display='none';
+  $id('importOv').classList.add('on');
+}
+function closeImport(){ $id('importOv').classList.remove('on'); }
+$id('importOv').addEventListener('click',e=>{ if(e.target===$id('importOv')) closeImport(); });
+
+function importHandleDrop(e){
+  e.preventDefault();
+  if(e.dataTransfer.files[0]) importHandleFile(e.dataTransfer.files[0]);
+}
+
+async function importHandleFile(file){
+  if(!file) return;
+  $id('importStatus').textContent='Reading '+file.name+'…';
+  $id('importStatus').style.color='var(--muted)';
+  $id('importPreview').style.display='none';
+  $id('importConfirmBtn').style.display='none';
+  try{
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array',cellDates:false});
+    importParsedData=parseImportWorkbook(wb);
+    showImportPreview(importParsedData);
+    $id('importStatus').textContent='✓ '+file.name+' parsed successfully';
+    $id('importStatus').style.color='var(--green)';
+  }catch(e){
+    $id('importStatus').textContent='✗ '+e.message;
+    $id('importStatus').style.color='var(--red)';
+    console.error('Import error:',e);
+  }
+}
+
+function parseImportWorkbook(wb){
+  const result={ collection:[], ledger:[], errors:[] };
+
+  // ── SHEET 1: Collection inventory ──
+  // Sheet name contains "Full Analysis" — find it flexibly
+  const collSheetName=wb.SheetNames.find(n=>n.includes('Full Analysis')||n.includes('Inventory'));
+  if(collSheetName){
+    const ws=wb.Sheets[collSheetName];
+    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    // Parse section by section — detect set headers like "BASE SET 🔴"
+    let currentSet=null;
+    raw.forEach((row,ri)=>{
+      if(!row||!row.length) return;
+      // Detect set header rows — first non-empty cell contains set name, second cell is empty or cost
+      const firstCell=String(row[0]||'').trim();
+      const secondCell=String(row[1]||'').trim();
+      // Set header: cell contains known set keyword and has no card number pattern
+      const setKey=Object.keys(SET_MAP).find(k=>firstCell.toLowerCase().includes(k));
+      if(setKey&&!firstCell.match(/^\d+\//)){
+        currentSet=SET_MAP[setKey]; return;
+      }
+      if(!currentSet) return;
+      // Card rows: column layout from PDF:
+      // Col0=Id#, Col1=CardName, Col2=Type/Rarity, Col3=Paid, Col4=NMMarket£,
+      // Col5=NMMarket$, Col6=Difference, Col7=AvgMktLP, Col8=Condition, Col9=Upgrade?
+      // Row must have an Id# (numeric) in col0
+      const idNum=String(row[0]||'').trim();
+      const cardName=String(row[1]||'').trim();
+      const rarity=String(row[2]||'').trim();
+      const paid=parseAmount(row[3]);
+      const nmPrice=parseAmount(row[4]);
+      const lpPrice=parseAmount(row[7]);
+      const cond=String(row[8]||'').trim();
+      const upgradeRaw=String(row[9]||'').trim().toUpperCase();
+      const upgrade=upgradeRaw==='Y'||upgradeRaw==='YES';
+      // Skip if no name or it looks like a header/total row
+      if(!cardName||cardName.toLowerCase()==='card name'||cardName.toLowerCase().includes('non-holo')) return;
+      if(!idNum||isNaN(parseInt(idNum))) return;
+      // Try to find the card in SETS by name+set
+      const setData=SETS[currentSet];
+      if(!setData) return;
+      const cardDef=setData.cards.find(c=>c.name.toLowerCase()===cardName.toLowerCase())||
+                    setData.cards.find(c=>c.name.toLowerCase().includes(cardName.toLowerCase()));
+      if(!cardDef){
+        // Could be a bulk row like "17-102 All Non-Holos"
+        return;
+      }
+      const ck=cardKey(currentSet,cardDef.num);
+      // Normalise condition
+      let condNorm='NM';
+      const cu=cond.toUpperCase().replace(/\s/g,'');
+      if(cu==='NM'||cu==='') condNorm='NM';
+      else if(cu==='LP+'||cu==='LP+') condNorm='LP+';
+      else if(cu==='LP-') condNorm='LP-';
+      else if(cu==='LP') condNorm='LP';
+      else if(cu==='MP') condNorm='MP';
+      else if(cu==='HP') condNorm='HP';
+      else condNorm=cond||'NM';
+      result.collection.push({ key:ck, owned:true, cond:condNorm, type:'raw', nmPrice, lpPrice, upgrade, paid });
+    });
+  } else {
+    result.errors.push('Could not find collection sheet — check sheet name contains "Full Analysis"');
+  }
+
+  // ── SHEET 2: All purchases ──
+  const purchSheetName=wb.SheetNames.find(n=>n.toLowerCase().includes('all purchases')||n.toLowerCase().includes('purchase'));
+  if(purchSheetName){
+    const ws=wb.Sheets[purchSheetName];
+    const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+    rows.forEach((row,i)=>{
+      // Expected columns (from PDF): Type, Card Name (pokemon name), Set, Language, TCG link, Amount paid, Date, Where Sold, Sold Price, Profit/Loss
+      const type=String(row['Type']||row['type']||'').trim().toLowerCase();
+      const name=String(row['Card Name']||row['Name']||row['Pokemon']||row['Card']||Object.values(row)[1]||'').trim();
+      const setRaw=String(row['Set']||row['set']||'').trim();
+      const lang=String(row['Language']||row['language']||row['Lang']||'English').trim();
+      const paidRaw=row['Amount paid']||row['Amount Paid']||row['Paid']||row['Cost']||'';
+      const dateRaw=row['Date']||row['Date Bought']||'';
+      const platform=String(row['Where']||row['Where Sold']||row['Platform']||'').trim()||'eBay';
+      const soldPriceRaw=row['Sold Price']||row['Sale Price']||row['Sold']||'';
+      const plRaw=row['Profit/Loss']||row['P/L']||row['Profit']||'';
+      if(!name||name.toLowerCase()==='card name') return;
+      const paid=parseAmount(paidRaw);
+      if(paid===null&&!name) return;
+      const soldPrice=parseAmount(soldPriceRaw);
+      const dateBought=parseXlDate(dateRaw);
+      // Normalise set
+      const setNorm=normaliseSet(setRaw)||setRaw||'Other / Modern';
+      // Normalise type
+      let entryType='raw';
+      if(type==='slab') entryType='slab';
+      else if(type==='other') entryType='bulk';
+      // Platform normalise
+      let platNorm='eBay';
+      const pl=platform.toLowerCase();
+      if(pl.includes('whatnot')) platNorm='Whatnot';
+      else if(pl.includes('ebay')) platNorm='eBay';
+      else if(pl.includes('local')) platNorm='Local';
+      else if(platform) platNorm=platform;
+      result.ledger.push({
+        id:Date.now().toString()+'_'+i+'_'+Math.random().toString(36).slice(2,4),
+        name, set:setNorm, type:entryType, language:lang,
+        dateBought, platform:platNorm,
+        paid:paid||0,
+        soldPrice:soldPrice!==null?soldPrice:null,
+        dateSold:soldPrice!==null?dateBought:null, // sold date not always separate
+        soldPlatform:soldPrice!==null?platNorm:null,
+        notes:'',slabGrade:'',collectionKey:null
+      });
+    });
+  } else {
+    result.errors.push('Could not find "All purchases" sheet');
+  }
+
+  return result;
+}
+
+function showImportPreview(data){
+  const lines=[];
+  if(data.collection.length) lines.push(`<div style="color:var(--green);">✓ ${data.collection.length} collection entries found</div>`);
+  else lines.push(`<div style="color:var(--muted);">— No collection data found</div>`);
+  if(data.ledger.length) lines.push(`<div style="color:var(--green);">✓ ${data.ledger.length} ledger/purchase entries found</div>`);
+  else lines.push(`<div style="color:var(--muted);">— No ledger data found</div>`);
+  // Sold count
+  const soldCount=data.ledger.filter(l=>l.soldPrice!==null).length;
+  if(soldCount) lines.push(`<div style="color:var(--blue);">↳ ${soldCount} with sale prices</div>`);
+  if(data.errors.length) data.errors.forEach(e=>lines.push(`<div style="color:var(--red);">⚠ ${esc(e)}</div>`));
+  if(!data.collection.length&&!data.ledger.length){
+    lines.push(`<div style="color:var(--red);">No data found — check the sheet names match exactly.</div>`);
+    $id('importConfirmBtn').style.display='none';
+  } else {
+    $id('importConfirmBtn').style.display='';
+  }
+  $id('importPreviewContent').innerHTML=lines.join('');
+  $id('importPreview').style.display='';
+}
+
+function confirmImport(){
+  if(!importParsedData) return;
+  let collAdded=0, collUpdated=0, ledgerAdded=0;
+  // Merge collection — existing entries kept unless overwritten
+  importParsedData.collection.forEach(entry=>{
+    const existing=D.collection[entry.key];
+    if(existing){
+      // Update prices + condition but don't overwrite manually-set slab grades
+      Object.assign(existing,{owned:entry.owned,cond:entry.cond,nmPrice:entry.nmPrice,lpPrice:entry.lpPrice,upgrade:entry.upgrade});
+      collUpdated++;
+    } else {
+      D.collection[entry.key]={owned:entry.owned,cond:entry.cond,type:entry.type,nmPrice:entry.nmPrice,lpPrice:entry.lpPrice,upgrade:entry.upgrade,notes:'',slabGrade:''};
+      collAdded++;
+    }
+  });
+  // Merge ledger — deduplicate by name+date+paid
+  importParsedData.ledger.forEach(entry=>{
+    const dup=D.ledger.find(l=>l.name===entry.name&&l.dateBought===entry.dateBought&&Math.abs((l.paid||0)-(entry.paid||0))<0.01);
+    if(!dup){ D.ledger.push(entry); ledgerAdded++; }
+  });
+  save(); closeImport(); renderAll();
+  alert(`Import complete!\n✓ ${collAdded} collection cards added\n✓ ${collUpdated} updated\n✓ ${ledgerAdded} ledger entries added`);
+}
+
+// ── Update openAddLedger to include language field ──
+const _origOpenAddLedger=openAddLedger;
+openAddLedger=function(){
+  _origOpenAddLedger();
+  if($id('lLanguage')) $id('lLanguage').value='English';
+};
+const _origOpenEditLedger=openEditLedger;
+openEditLedger=function(id){
+  _origOpenEditLedger(id);
+  const entry=D.ledger.find(l=>l.id===id);
+  if(entry&&$id('lLanguage')) $id('lLanguage').value=entry.language||'English';
+};
+const _origSaveLedgerEntry=saveLedgerEntry;
+saveLedgerEntry=function(){
+  // Patch language into entry before saving
+  const lang=$id('lLanguage')?$id('lLanguage').value:'English';
+  _origSaveLedgerEntry();
+  // Find the most recently saved entry and add language
+  if(D.ledger.length){
+    const last=editingLedgerId?D.ledger.find(l=>l.id===editingLedgerId):D.ledger[D.ledger.length-1];
+    if(last) last.language=lang;
+  }
+};
+
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
@@ -1365,6 +1755,7 @@ window.addEventListener('load',()=>{
   },50);
 });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
 <script src="https://accounts.google.com/gsi/client" onload="gsiLoaded()" async defer></script>
 </body>
