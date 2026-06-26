@@ -1432,6 +1432,9 @@ function saveLedgerEntry(){
     dateBought:$id('lDateBought').value, platform:$id('lPlatformEntry').value,
     paid, dateSold:$id('lDateSold').value||null,
     soldPrice:soldPrice, soldPlatform:$id('lSoldPlatform').value||null,
+    language:($id('lLanguage')?$id('lLanguage').value:'English'),
+    tcgUrl:($id('lTcgUrl')?$id('lTcgUrl').value.trim():''),
+    tcgSetName:($id('lTcgSetName')?$id('lTcgSetName').value.trim():''),
     notes:$id('lNotes').value.trim(),
     collectionKey:ov._collectionKey||null
   };
