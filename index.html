@@ -1742,17 +1742,27 @@ function updatePickerCount(){
 }
 
 function pickerSelectRarity(rarity){
-  _pickerCards.forEach(c=>{
-    if(rarity==='Holo Rare') c.checked = c.rarity.toLowerCase().includes('holo');
-    else c.checked = c.rarity === rarity;
+  const isHolo = rarity==='Holo Rare';
+  const matches = _pickerCards.filter(c=>isHolo?c.rarity.toLowerCase().includes('holo'):c.rarity===rarity);
+  const allChecked = matches.length>0 && matches.every(c=>c.checked);
+  _pickerCards.forEach((c,idx)=>{
+    const isMatch = isHolo?c.rarity.toLowerCase().includes('holo'):c.rarity===rarity;
+    if(isMatch){
+      c.checked = !allChecked;
+      // Update existing checkbox in DOM directly — no re-render
+      const cb = document.getElementById('pcb_'+idx);
+      if(cb) cb.checked = c.checked;
+    }
   });
-  renderPickerList();
   updatePickerCount();
 }
 
 function pickerSelectAll(val){
-  _pickerCards.forEach(c=>{ c.checked = val; });
-  renderPickerList();
+  _pickerCards.forEach((c,idx)=>{
+    c.checked = val;
+    const cb = document.getElementById('pcb_'+idx);
+    if(cb) cb.checked = val;
+  });
   updatePickerCount();
 }
 
@@ -1760,8 +1770,11 @@ function onCardPickerChange(){ updatePickerCount(); }
 
 // Pre-select a single card (called from openAddLedgerFromCollection)
 function pickerPreSelect(num){
-  _pickerCards.forEach(c=>{ c.checked = c.num===num; });
-  renderPickerList();
+  _pickerCards.forEach((c,idx)=>{
+    c.checked = c.num===num;
+    const cb = document.getElementById('pcb_'+idx);
+    if(cb) cb.checked = c.checked;
+  });
   updatePickerCount();
 }
 
