@@ -673,11 +673,23 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
       </div>
     </div>
     <!-- Card picker: appears when a collection set is chosen -->
-    <div id="lCardPickerWrap" style="display:none;" class="field">
-      <label>Select Card from Set</label>
-      <select id="lCardPicker" onchange="onCardPickerChange()">
-        <option value="">— Choose card —</option>
-      </select>
+    <div id="lCardPickerWrap" style="display:none;">
+      <div class="field">
+        <label>Select Cards from Set <span id="lPickerCount" style="color:var(--yellow);font-weight:700;"></span></label>
+        <!-- Rarity quick-select buttons -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;" id="lRarityBtns">
+          <button type="button" onclick="pickerSelectRarity('Holo Rare')" class="filter-btn">⭐ Holos</button>
+          <button type="button" onclick="pickerSelectRarity('Rare')" class="filter-btn">💎 Rares</button>
+          <button type="button" onclick="pickerSelectRarity('Uncommon')" class="filter-btn">🔵 Uncommons</button>
+          <button type="button" onclick="pickerSelectRarity('Common')" class="filter-btn">⚪ Commons</button>
+          <button type="button" onclick="pickerSelectRarity('Promo')" class="filter-btn">🌟 Promos</button>
+          <button type="button" onclick="pickerSelectRarity('Trainer')" class="filter-btn">🃏 Trainers</button>
+          <button type="button" onclick="pickerSelectAll(true)" class="filter-btn" style="color:var(--green);border-color:rgba(74,222,128,.4);">✓ All</button>
+          <button type="button" onclick="pickerSelectAll(false)" class="filter-btn" style="color:var(--red);border-color:rgba(255,61,71,.3);">✗ None</button>
+        </div>
+        <!-- Scrollable card checkbox list -->
+        <div id="lCardPickerList" style="max-height:220px;overflow-y:auto;background:var(--navy3);border:1.5px solid var(--border);border-radius:10px;padding:6px 0;"></div>
+      </div>
     </div>
     <div class="field"><label>TCG Set Name <span style="color:var(--muted);font-weight:400;">(e.g. Obsidian Flames, Generations)</span></label><input id="lTcgSetName" placeholder="Specific set name…"></div>
     <div class="field" id="lSlabGradeField" style="display:none;"><label>Slab Grade</label><input id="lSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10"></div>
@@ -1432,7 +1444,9 @@ function openAddLedger(){
   $id('lDateSold').value=''; $id('lSoldPrice').value=''; $id('lSoldPlatform').value=''; $id('lNotes').value='';
   if($id('lTcgUrl')){ $id('lTcgUrl').value=''; $id('lTcgLink').style.display='none'; $id('lAutofillBanner').style.display='none'; }
   if($id('lCardPickerWrap')) $id('lCardPickerWrap').style.display='none';
-  if($id('lCardPicker')) $id('lCardPicker').innerHTML='<option value="">— Choose card —</option>';
+  if($id('lCardPickerList')) $id('lCardPickerList').innerHTML='';
+  if($id('lPickerCount')) $id('lPickerCount').textContent='';
+  $id('ledgerOv')._collectionKeys=[];
   if($id('lTcgSetName')) $id('lTcgSetName').value='';
   _autofillParsed=null;
   $id('ledgerOv').classList.add('on');
@@ -1446,8 +1460,12 @@ function openAddLedgerFromCollection(setName,num){
   if(cardDef){
     $id('lName').value=`${cardDef.name} ${num}`;
     $id('lEntrySet').value=setName;
-    onLedgerSetChange(); // populate card picker
-    $id('lCardPicker').value=num; // pre-select the card
+    onLedgerSetChange(); // populate card picker + build list
+    // Pre-check the card in the multi-select list
+    setTimeout(()=>{
+      const cb = $id('lCardPickerList').querySelector(`input[value="${CSS.escape(num)}"]`);
+      if(cb){ cb.checked=true; updatePickerCount(); }
+    },50);
     const data=getCard(setName,num);
     if(data) $id('lEntryType').value=data.type||'raw';
     $id('ledgerOv')._collectionKey=cardKey(setName,num);
@@ -1500,12 +1518,16 @@ function saveLedgerEntry(){
   };
   if(editingLedgerId){ const idx=D.ledger.findIndex(l=>l.id===editingLedgerId); if(idx>=0) D.ledger[idx]=entry; }
   else D.ledger.push(entry);
-  // If linked to collection card, mark it as owned
-  if(entry.collectionKey&&D.collection[entry.collectionKey]){
-    D.collection[entry.collectionKey].owned=true;
-  } else if(entry.collectionKey){
-    D.collection[entry.collectionKey]={owned:true};
-  }
+  // Mark single or multiple collection cards as owned
+  const ck = ov._collectionKey;
+  const cks = ov._collectionKeys && ov._collectionKeys.length ? ov._collectionKeys : (ck ? [ck] : []);
+  cks.forEach(k=>{
+    if(D.collection[k]) D.collection[k].owned=true;
+    else D.collection[k]={owned:true};
+  });
+  // Store all keys on entry for reference
+  entry.collectionKeys = cks;
+  if(cks.length===1) entry.collectionKey = cks[0];
   save(); closeLedgerModal(); renderSetGrid(); renderCollectionBody(); renderLedger();
 }
 
@@ -1652,39 +1674,94 @@ const COLLECTION_SETS = ['Base Set', 'Jungle', 'Fossil', 'WOTC Black Star Promos
 function onLedgerSetChange(){
   const setName = $id('lEntrySet').value;
   const wrap = $id('lCardPickerWrap');
-  const picker = $id('lCardPicker');
   if(COLLECTION_SETS.includes(setName)){
-    // Populate picker with cards from this set
-    picker.innerHTML = '<option value="">— Choose card —</option>';
-    const setData = SETS[setName];
-    if(setData) setData.cards.forEach(c=>{
-      const o = document.createElement('option');
-      o.value = c.num;
-      o.textContent = `${c.num} — ${c.name} (${c.rarity})`;
-      picker.appendChild(o);
-    });
+    buildCardPickerList(setName);
     wrap.style.display = '';
+    // Single card? clear name so user picks; bulk = name auto-set on save
+    $id('lName').value = '';
+    $id('ledgerOv')._collectionKeys = [];
+    $id('ledgerOv')._collectionKey = null;
+    updatePickerCount();
   } else {
     wrap.style.display = 'none';
-    picker.innerHTML = '';
+    $id('lCardPickerList').innerHTML = '';
+    $id('ledgerOv')._collectionKeys = [];
+    $id('ledgerOv')._collectionKey = null;
   }
 }
 
-function onCardPickerChange(){
-  const setName = $id('lEntrySet').value;
-  const num = $id('lCardPicker').value;
-  if(!setName||!num) return;
+function buildCardPickerList(setName){
+  const list = $id('lCardPickerList');
+  list.innerHTML = '';
   const setData = SETS[setName];
   if(!setData) return;
-  const cardDef = setData.cards.find(c=>c.num===num);
-  if(!cardDef) return;
-  // Auto-fill name
-  $id('lName').value = `${cardDef.name} ${num}`;
-  // Link to collection
-  $id('ledgerOv')._collectionKey = cardKey(setName, num);
-  // Pre-fill type if card already in collection
-  const colData = getCard(setName, num);
-  if(colData && colData.type) $id('lEntryType').value = colData.type;
+  setData.cards.forEach(c=>{
+    const alreadyOwned = getCard(setName, c.num)&&getCard(setName, c.num).owned;
+    const row = document.createElement('label');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;transition:background .1s;';
+    row.onmouseover = ()=>row.style.background='rgba(255,203,5,.05)';
+    row.onmouseout = ()=>row.style.background='';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = c.num;
+    cb.dataset.rarity = c.rarity;
+    cb.dataset.name = c.name;
+    cb.style.cssText = 'width:16px;height:16px;accent-color:var(--yellow);flex-shrink:0;cursor:pointer;';
+    cb.onchange = updatePickerCount;
+    const _rc = c.rarity.toLowerCase().includes('holo')?'rarity-holo':c.rarity==='Rare'?'rarity-rare':c.rarity==='Uncommon'?'rarity-uncommon':c.rarity==='Promo'?'rarity-promo':c.rarity==='Trainer'?'rarity-trainer':'rarity-common';
+    row.innerHTML = ``;
+    row.appendChild(cb);
+    const txt = document.createElement('span');
+    txt.innerHTML = `<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-right:4px;">${esc(c.num)}</span>${esc(c.name)} <span class="card-rarity ${_rc}" style="margin-left:4px;">${esc(c.rarity)}</span>${alreadyOwned?` <span style="font-size:9px;color:var(--green);font-family:'DM Mono',monospace;">✓owned</span>`:''}`;
+    row.appendChild(txt);
+    list.appendChild(row);
+  });
+}
+
+function updatePickerCount(){
+  const checks = $id('lCardPickerList').querySelectorAll('input[type=checkbox]:checked');
+  const n = checks.length;
+  $id('lPickerCount').textContent = n>0 ? `(${n} selected)` : '';
+  // Update collectionKeys
+  const setName = $id('lEntrySet').value;
+  $id('ledgerOv')._collectionKeys = Array.from(checks).map(cb=>cardKey(setName,cb.value));
+  // If exactly one card, also set name
+  if(n===1){
+    const cb = checks[0];
+    $id('lName').value = `${cb.dataset.name} ${cb.value}`;
+    $id('ledgerOv')._collectionKey = cardKey(setName, cb.value);
+  } else if(n>1){
+    const setName2 = $id('lEntrySet').value;
+    $id('lName').value = `${setName2} — ${n} cards`;
+    $id('ledgerOv')._collectionKey = null;
+  } else {
+    $id('lName').value = '';
+    $id('ledgerOv')._collectionKey = null;
+  }
+}
+
+function pickerSelectRarity(rarity){
+  const boxes = $id('lCardPickerList').querySelectorAll('input[type=checkbox]');
+  boxes.forEach(cb=>{
+    const r = cb.dataset.rarity||'';
+    // Match partial: 'Holo Rare' includes 'Holo', 'Rare' matches exact
+    if(rarity==='Holo Rare') cb.checked = r.toLowerCase().includes('holo');
+    else cb.checked = r===rarity;
+  });
+  updatePickerCount();
+}
+
+function pickerSelectAll(val){
+  $id('lCardPickerList').querySelectorAll('input[type=checkbox]').forEach(cb=>{ cb.checked=val; });
+  updatePickerCount();
+}
+
+// onCardPickerChange kept for single-card compat (called from openAddLedgerFromCollection)
+function onCardPickerChange(){
+  const setName = $id('lEntrySet').value;
+  if(!setName) return;
+  // Find the checked box for this num (from pre-select)
+  updatePickerCount();
 }
 
 // ── Update openAddLedger to include language field ──
