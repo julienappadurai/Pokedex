@@ -370,6 +370,190 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
 .owned-toggle span{font-size:14px;font-weight:700;color:var(--text2);}
 
 
+
+/* ── POKÉBALL PIN ANIMATION ── */
+.pokeball-anim{
+  width:80px;height:80px;border-radius:50%;position:relative;
+  margin:0 auto 16px;display:none;
+  animation:pokeball-spin .4s ease-in-out forwards;
+}
+.pokeball-anim.show{display:block;}
+.pokeball-top{
+  position:absolute;top:0;left:0;right:0;height:50%;
+  background:var(--red);border-radius:80px 80px 0 0;
+}
+.pokeball-bot{
+  position:absolute;bottom:0;left:0;right:0;height:50%;
+  background:white;border-radius:0 0 80px 80px;
+}
+.pokeball-band{
+  position:absolute;top:50%;left:0;right:0;height:6px;
+  background:#222;transform:translateY(-50%);z-index:2;
+}
+.pokeball-btn{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:20px;height:20px;border-radius:50%;background:white;
+  border:4px solid #222;z-index:3;transition:all .3s;
+}
+.pokeball-anim.open .pokeball-top{animation:pb-open-top .4s ease-out forwards;}
+.pokeball-anim.open .pokeball-bot{animation:pb-open-bot .4s ease-out forwards;}
+.pokeball-anim.open .pokeball-btn{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 12px rgba(255,215,0,.8);}
+@keyframes pb-open-top{0%{transform:translateY(0);}100%{transform:translateY(-8px) rotate(-20deg);}}
+@keyframes pb-open-bot{0%{transform:translateY(0);}100%{transform:translateY(8px) rotate(20deg);}}
+@keyframes pokeball-spin{0%{transform:rotate(0);}25%{transform:rotate(-15deg);}75%{transform:rotate(15deg);}100%{transform:rotate(0);}}
+
+/* ── DARK/LIGHT TOGGLE SWITCH ── */
+.theme-toggle{
+  position:relative;width:44px;height:24px;flex-shrink:0;cursor:pointer;
+}
+.theme-toggle input{opacity:0;width:0;height:0;position:absolute;}
+.theme-track{
+  position:absolute;inset:0;border-radius:12px;
+  background:var(--navy3);border:2px solid rgba(255,255,255,.1);
+  transition:background .3s;overflow:hidden;
+}
+.theme-track::before{
+  content:'☀';position:absolute;left:3px;top:50%;transform:translateY(-50%);
+  font-size:13px;line-height:1;transition:all .3s;
+}
+.theme-track::after{
+  content:'🌙';position:absolute;right:3px;top:50%;transform:translateY(-50%);
+  font-size:11px;line-height:1;opacity:.5;transition:all .3s;
+}
+.theme-knob{
+  position:absolute;top:3px;left:3px;width:18px;height:18px;
+  border-radius:50%;background:var(--yellow);
+  box-shadow:0 0 6px rgba(255,215,0,.5);transition:transform .3s;
+}
+body.light .theme-knob{transform:translateX(20px);}
+body.light .theme-track{background:rgba(59,76,202,.2);}
+
+/* ── SET CARD IMPROVEMENTS ── */
+.set-card[data-set="Base Set"]::after{content:'🔥';position:absolute;right:-8px;bottom:-12px;font-size:90px;opacity:.07;pointer-events:none;line-height:1;filter:drop-shadow(0 0 20px rgba(255,61,71,.3));}
+.set-card[data-set="Jungle"]::after{content:'🌿';position:absolute;right:-8px;bottom:-12px;font-size:90px;opacity:.09;pointer-events:none;line-height:1;filter:drop-shadow(0 0 20px rgba(86,211,100,.3));}
+.set-card[data-set="Fossil"]::after{content:'💀';position:absolute;right:-8px;bottom:-12px;font-size:90px;opacity:.07;pointer-events:none;line-height:1;filter:drop-shadow(0 0 20px rgba(144,164,174,.3));}
+.set-card[data-set="WOTC Black Star Promos"]::after{content:'⭐';position:absolute;right:-8px;bottom:-12px;font-size:90px;opacity:.1;pointer-events:none;line-height:1;filter:drop-shadow(0 0 20px rgba(255,215,0,.4));}
+
+/* ── CARD SLEEVE BINDER LOOK ── */
+.card-slot{
+  background:linear-gradient(160deg,var(--navy2) 0%,var(--navy3) 100%);
+  border:1.5px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 2px 4px rgba(0,0,0,.3);
+}
+.card-slot.missing{
+  background:repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,.015) 0px,rgba(255,255,255,.015) 1px,
+    transparent 1px,transparent 8px
+  );
+  border:1.5px dashed rgba(255,255,255,.08);
+  box-shadow:none;
+  opacity:.55;
+}
+.card-slot.owned{
+  background:linear-gradient(160deg,rgba(86,211,100,.06) 0%,var(--navy2) 100%);
+  border:1.5px solid rgba(86,211,100,.25);
+  box-shadow:inset 0 1px 0 rgba(86,211,100,.08),0 2px 8px rgba(0,0,0,.3);
+}
+/* Sleeve sheen */
+.card-slot::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 100%);
+  border-radius:inherit;pointer-events:none;
+}
+
+/* ── STAT CARD COLOURS ── */
+.stat-card.stat-owned{border-color:rgba(86,211,100,.3);background:linear-gradient(135deg,rgba(86,211,100,.06),var(--navy2));}
+.stat-card.stat-owned .stat-label::before{content:'✓ ';}
+.stat-card.stat-owned .stat-val{color:var(--green);}
+.stat-card.stat-missing{border-color:rgba(255,61,71,.3);background:linear-gradient(135deg,rgba(255,61,71,.06),var(--navy2));}
+.stat-card.stat-missing .stat-label::before{content:'✗ ';}
+.stat-card.stat-missing .stat-val{color:var(--red);}
+.stat-card.stat-upgrade{border-color:rgba(255,140,66,.3);background:linear-gradient(135deg,rgba(255,140,66,.06),var(--navy2));}
+.stat-card.stat-upgrade .stat-label::before{content:'↑ ';}
+.stat-card.stat-upgrade .stat-val{color:var(--orange);}
+.stat-card.stat-value{border-color:rgba(192,132,252,.3);background:linear-gradient(135deg,rgba(192,132,252,.06),var(--navy2));}
+.stat-card.stat-value .stat-label::before{content:'◆ ';}
+.stat-card.stat-value .stat-val{color:var(--purple);}
+
+/* ── LEDGER STAT OVERRIDES ── */
+.stat-card.stat-spent{border-color:rgba(255,61,71,.3);background:linear-gradient(135deg,rgba(255,61,71,.06),var(--navy2));}
+.stat-card.stat-revenue{border-color:rgba(86,211,100,.3);background:linear-gradient(135deg,rgba(86,211,100,.06),var(--navy2));}
+.stat-card.stat-pl .stat-val.pos{color:var(--green);}
+.stat-card.stat-pl .stat-val.neg{color:var(--red);}
+.stat-card.stat-open{border-color:rgba(255,215,0,.3);background:linear-gradient(135deg,rgba(255,215,0,.06),var(--navy2));}
+
+/* ── IMPROVED TAB BAR — Pokéball icon style ── */
+.tab.on{color:var(--yellow);border-bottom-color:var(--yellow);font-weight:800;}
+.tab-icon{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.08);
+  transition:all .2s;flex-shrink:0;
+}
+.tab.on .tab-icon{
+  background:var(--yellow);border-color:var(--yellow);
+  box-shadow:0 0 10px rgba(255,215,0,.4);
+  filter:grayscale(1) brightness(.1);
+}
+/* Pokéball SVG tab icon for collection */
+.tab-pokeball{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(180deg,var(--red) 0%,var(--red) 46%,#333 46%,#333 54%,white 54%);
+  position:relative;border:2px solid rgba(255,255,255,.15);
+  transition:all .2s;
+}
+.tab-pokeball::after{
+  content:'';position:absolute;width:7px;height:7px;border-radius:50%;
+  background:white;border:2px solid #333;top:50%;left:50%;transform:translate(-50%,-50%);
+}
+.tab.on .tab-pokeball{box-shadow:0 0 10px rgba(255,61,71,.5);border-color:rgba(255,255,255,.4);}
+
+/* ── EMPTY STATE ── */
+.set-empty-state{
+  text-align:center;padding:40px 20px;
+  grid-column:1/-1;
+}
+.set-empty-state .empty-icon{font-size:48px;margin-bottom:12px;animation:float 3s ease-in-out infinite;}
+.set-empty-state .empty-title{
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  color:var(--yellow);margin-bottom:8px;line-height:1.6;
+}
+.set-empty-state .empty-sub{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* ── PROGRESS BAR ANIMATION ── */
+.set-progress-bar{transition:width .8s cubic-bezier(.4,0,.2,1);}
+.set-progress-bar.animate{width:0!important;}
+
+/* ── MOBILE LEDGER CARDS ── */
+@media(max-width:640px){
+  .ledger-table-wrap{border:none;border-radius:0;overflow:visible;}
+  .ledger-table{display:none;}
+  .ledger-card-list{display:flex;flex-direction:column;gap:10px;}
+}
+@media(min-width:641px){
+  .ledger-card-list{display:none;}
+}
+.ledger-card-row{
+  background:var(--navy2);border:1.5px solid var(--navy3);border-radius:14px;
+  padding:14px 16px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+}
+.ledger-card-row:hover{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.03);}
+.ledger-card-row .lcr-name{font-weight:800;font-size:14px;color:var(--text);margin-bottom:2px;}
+.ledger-card-row .lcr-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;}
+.ledger-card-row .lcr-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.lcr-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
+.lcr-badge.raw{background:rgba(79,195,247,.12);color:var(--blue);}
+.lcr-badge.slab{background:rgba(255,215,0,.12);color:var(--yellow);}
+.lcr-badge.bulk{background:rgba(192,132,252,.12);color:var(--purple);}
+.lcr-amount{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;}
+.lcr-pl{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;}
+.lcr-pl.pos{color:var(--green);}
+.lcr-pl.neg{color:var(--red);}
+.lcr-pl.open{color:var(--muted);}
+.lcr-sold-bar{position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--green);border-radius:14px 0 0 14px;}
+.lcr-open-bar{position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--muted);border-radius:14px 0 0 14px;}
+
 /* ── FINANCE BLUR ── */
 .fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
 .fin-blur:hover{filter:blur(4px);}
@@ -412,12 +596,24 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
       <div class="pin-dots" id="pinDots1"></div>
       <div class="pin-pad" id="pinPad1"></div>
       <div class="pin-msg" id="pinSetupMsg"></div>
+    <div class="pokeball-anim" id="setupPokeAnim">
+      <div class="pokeball-top"></div>
+      <div class="pokeball-bot"></div>
+      <div class="pokeball-band"></div>
+      <div class="pokeball-btn"></div>
+    </div>
     </div>
     <div id="pinLoginWrap" style="display:none;">
       <p>Enter your PIN to continue.</p>
       <div class="pin-dots" id="pinDots2"></div>
       <div class="pin-pad" id="pinPad2"></div>
       <div class="pin-msg" id="pinLoginMsg" style="color:var(--red);"></div>
+    <div class="pokeball-anim" id="loginPokeAnim">
+      <div class="pokeball-top"></div>
+      <div class="pokeball-bot"></div>
+      <div class="pokeball-band"></div>
+      <div class="pokeball-btn"></div>
+    </div>
     </div>
     <div id="pinLoadingWrap"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;">Loading…</div></div>
   </div>
@@ -444,7 +640,11 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
       </div>
       <div class="hbtns">
         <button class="hbtn" onclick="openSettingsModal()">⚙ Settings</button>
-        <button class="hbtn" id="themeBtn" onclick="toggleTheme()">☀</button>
+        <label class="theme-toggle" title="Toggle theme">
+  <input type="checkbox" id="themeChk" onchange="toggleTheme()">
+  <div class="theme-track"></div>
+  <div class="theme-knob"></div>
+</label>
         <button class="hbtn" id="syncBtn" onclick="manualSync()">● Connecting…</button>
         <button class="hbtn" onclick="signOut()">⏻ Sign out</button>
       </div>
@@ -458,8 +658,12 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
 
   <div class="tab-wrap">
     <div class="tab-bar">
-      <button class="tab on" id="tabCollection" onclick="showTab('collection')">📦 Collection</button>
-      <button class="tab" id="tabLedger" onclick="showTab('ledger')">💰 Ledger</button>
+      <button class="tab on" id="tabCollection" onclick="showTab('collection')">
+        <div class="tab-pokeball"></div> Collection
+      </button>
+      <button class="tab" id="tabLedger" onclick="showTab('ledger')">
+        <span class="tab-icon">💰</span> Ledger
+      </button>
     </div>
   </div>
 
@@ -514,6 +718,7 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
         <tbody id="ledgerBody"></tbody>
       </table>
     </div>
+    <div id="ledgerCardList" class="ledger-card-list"></div>
     <div id="ledgerEmpty" class="ledger-empty" style="display:none;">
       <div style="font-size:48px;margin-bottom:16px;">📭</div>
       No entries yet — tap <strong style="color:var(--yellow);">+ Add Entry</strong> to log a purchase.
@@ -1064,12 +1269,12 @@ function fmtSign(n){ const a=Math.abs(n).toLocaleString('en-GB',{minimumFraction
 function toggleTheme(){
   const l=document.body.classList.toggle('light');
   localStorage.setItem('pokebinder_theme',l?'light':'dark');
-  $id('themeBtn').textContent=l?'🌙':'☀';
+  const chk=$id('themeChk'); if(chk) chk.checked=l;
 }
 function applyTheme(){
   if(localStorage.getItem('pokebinder_theme')==='light'){
     document.body.classList.add('light');
-    const b=$id('themeBtn'); if(b) b.textContent='🌙';
+    const chk=$id('themeChk'); if(chk) chk.checked=true;
   }
 }
 
@@ -1122,7 +1327,7 @@ function handleSetupKey(k){
     } else {
       if(pinBuffer===pinFirst){
         localStorage.setItem(PIN_KEY,btoa(pinBuffer));
-        enterApp();
+        showPokeballAnim('setupPokeAnim'); setTimeout(enterApp,400);
       } else {
         updateDots('pinDots1',4,4,true);
         $id('pinSetupMsg').textContent='PINs don\'t match — try again';
@@ -1148,12 +1353,20 @@ function handleLoginKey(k){
 function enterApp(){
   const cached=localStorage.getItem(DATA_KEY);
   if(cached){ try{ const l=JSON.parse(cached); D=Object.assign({collection:{},ledger:[]},l); }catch(e){} }
-  $id('authWrap').style.display='none';
-  $id('appWrap').style.display='block';
-  $id('loadWrap').style.display='none';
-  setSyncBtn('saving','● Connecting…');
-  renderAll();
-  connectDrive();
+  // Show Pokéball open animation then enter
+  setTimeout(()=>{
+    $id('authWrap').style.display='none';
+    $id('appWrap').style.display='block';
+    $id('loadWrap').style.display='none';
+    setSyncBtn('saving','● Connecting…');
+    renderAll();
+    connectDrive();
+  }, 600);
+}
+function showPokeballAnim(id){
+  const el=$id(id); if(!el) return;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.add('open'), 50);
 }
 function signOut(){
   if(!confirm('Lock Pokédex Binder?')) return;
@@ -1271,6 +1484,13 @@ function renderCollectionBody(){
   $id('collectionSetTitle').textContent=activeSet;
   renderColStats();
   renderBinder();
+  // Animate progress bars
+  setTimeout(()=>{
+    document.querySelectorAll('.set-progress-bar').forEach(b=>{
+      const w=b.style.width; b.style.width='0'; b.classList.add('animate');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ b.classList.remove('animate'); b.style.width=w; }));
+    });
+  },50);
   // sync filter buttons
   ['All','Owned','Missing','Upgrade'].forEach(f=>{
     const id='filter'+f; const btn=$id(id);
@@ -1341,7 +1561,18 @@ function renderBinder(){
     grid.appendChild(slot);
   });
   if(!shown){
-    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);font-size:13px;">No cards match your filter.</div>`;
+    const emptyMsgs={
+      all:['🎴','No Cards Caught Yet!','Start your collection by tapping any card slot.'],
+      owned:['📭','None Owned Yet!','Mark cards as owned to see them here.'],
+      missing:['✅','Set Complete!','You own every card in this set — amazing!'],
+      upgrade:['⭐','All Cards Top Quality!','No cards flagged for upgrade.'],
+    };
+    const [icon,title,sub]=(emptyMsgs[activeFilter]||emptyMsgs.all);
+    grid.innerHTML=`<div class="set-empty-state" style="grid-column:1/-1;">
+      <div class="empty-icon">${icon}</div>
+      <div class="empty-title">${title}</div>
+      <div class="empty-sub">${sub}</div>
+    </div>`;
   }
 }
 
@@ -1555,10 +1786,10 @@ function renderLedger(){
   const totalProfit=sold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0)-(l.paid||0),0);
   const open=D.ledger.filter(l=>!l.soldPrice).length;
   $id('ledgerStats').innerHTML=`
-    <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-val r">${finWrap(fmt(totalSpent))}</div></div>
-    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-val g">${finWrap(fmt(totalRevenue))}</div></div>
-    <div class="stat-card"><div class="stat-label">Realised P&L</div><div class="stat-val ${totalProfit>=0?'g':'r'}">${finWrap(fmtSign(totalProfit))}</div></div>
-    <div class="stat-card"><div class="stat-label">Open Positions</div><div class="stat-val gold">${open}</div></div>`;
+    <div class="stat-card stat-spent"><div class="stat-label">Total Spent</div><div class="stat-val">${finWrap(fmt(totalSpent))}</div></div>
+    <div class="stat-card stat-revenue"><div class="stat-label">Total Revenue</div><div class="stat-val">${finWrap(fmt(totalRevenue))}</div></div>
+    <div class="stat-card stat-pl"><div class="stat-label">Realised P&L</div><div class="stat-val ${totalProfit>=0?'pos':'neg'}">${finWrap(fmtSign(totalProfit))}</div></div>
+    <div class="stat-card stat-open"><div class="stat-label">Open Positions</div><div class="stat-val">${open}</div></div>`;
 
   // Filter
   const search=($id('lSearch').value||'').toLowerCase();
@@ -1601,10 +1832,12 @@ function renderLedger(){
   $id('ledgerSummaryRow').innerHTML=`<span>${filtered.length} entries</span><span style="color:var(--red);">spent ${finWrap(fmt(filtSpent))}</span>${filtSold.length?`<span style="color:${filtPL>=0?'var(--green)':'var(--red)'};">P&L ${finWrap(fmtSign(filtPL))}</span>`:''}`;
 
   const tbody=$id('ledgerBody');
+  const cardList=$id('ledgerCardList');
   const empty=$id('ledgerEmpty');
-  if(!filtered.length&&!D.ledger.length){ tbody.innerHTML=''; empty.style.display=''; return; }
+  if(!filtered.length&&!D.ledger.length){ tbody.innerHTML=''; if(cardList)cardList.innerHTML=''; empty.style.display=''; return; }
   empty.style.display='none';
   tbody.innerHTML='';
+  if(cardList)cardList.innerHTML='';
 
   filtered.forEach(l=>{
     const isSold=l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='';
@@ -1625,6 +1858,32 @@ function renderLedger(){
       <td style="text-align:right;"><button onclick="event.stopPropagation();openEditLedger('${l.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">edit</button></td>`;
     tr.onclick=()=>openEditLedger(l.id);
     tbody.appendChild(tr);
+    // Mobile card row
+    if(cardList){
+      const isSoldM=l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='';
+      const plM=isSoldM?(parseFloat(l.soldPrice)||0)-(l.paid||0):null;
+      const card=document.createElement('div');
+      card.className='ledger-card-row';
+      const bar=document.createElement('div');
+      bar.className=isSoldM?'lcr-sold-bar':'lcr-open-bar';
+      card.appendChild(bar);
+      card.innerHTML+=`
+        <div class="lcr-name">${esc(l.name)}</div>
+        <div class="lcr-meta">
+          <span>${esc(l.set||'—')}</span>
+          <span>${esc(l.language||'')}</span>
+          <span>${dateStr}</span>
+          <span>${esc(l.platform||'')}</span>
+        </div>
+        <div class="lcr-row">
+          <span class="lcr-badge ${l.type||'raw'}">${l.type==='bulk'?'Bulk':l.type==='slab'?'Slab':'Raw'}</span>
+          <span class="lcr-amount fin-blur" onclick="if(!this.classList.contains('fin-revealed'))openFinPin()">${fmt(l.paid)}</span>
+          <span class="lcr-pl ${plM===null?'open':plM>=0?'pos':'neg'} fin-blur" onclick="if(!this.classList.contains('fin-revealed'))openFinPin()">${plM===null?'Open':fmtSign(plM)}</span>
+          <button onclick="event.stopPropagation();openEditLedger('${l.id}')" style="background:none;border:1px solid var(--navy3);border-radius:8px;color:var(--muted);cursor:pointer;font-size:11px;padding:4px 10px;font-family:'Nunito',sans-serif;font-weight:700;">Edit</button>
+        </div>`;
+      card.onclick=()=>openEditLedger(l.id);
+      cardList.appendChild(card);
+    }
   });
 }
 
@@ -1967,9 +2226,9 @@ function blurFinancials(){
 function revealFinancials(){
   finRevealed = true;
   document.querySelectorAll('.fin-blur').forEach(el => {
-    let p = el;
-    while(p && p !== document.body){ p.classList.add('fin-revealed'); p = p.parentElement; }
     el.classList.add('fin-revealed');
+    let p = el.parentElement;
+    while(p && p !== document.body){ p.classList.add('fin-revealed'); p = p.parentElement; }
   });
   if(finBlurTimer) clearTimeout(finBlurTimer);
   finBlurTimer = setTimeout(()=>{ blurFinancials(); }, 10000);
