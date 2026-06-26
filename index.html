@@ -4,336 +4,384 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pokédex Binder</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ── GBA POKEMON THEME ── */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
-
-:root {
-  /* Deep midnight Pokémon blue — GBA night palette */
-  --bg:#0a0c1a;
-  --s1:#111428;
-  --s2:#181b30;
-  --border:#252840;
-  /* Pokémon accent colours */
-  --red:#ff3d4a;        /* Pokédex red */
-  --yellow:#ffe033;     /* Pikachu yellow */
-  --blue:#4fc3f7;       /* Water type */
-  --purple:#b39ddb;     /* Psychic / Mewtwo */
-  --green:#66bb6a;      /* HP bar green */
-  --orange:#ff8a50;     /* Fire / Charizard */
-  /* Text */
-  --text:#eef0ff;
-  --muted:#6b7280;
-  --r:10px;
-  /* Pixel glow effects */
-  --glow-red:0 0 12px rgba(255,61,74,.4);
-  --glow-yellow:0 0 12px rgba(255,224,51,.35);
-  --glow-purple:0 0 12px rgba(179,157,219,.35);
+/* ═══════════════════════════════════════════
+   POKÉDEX BINDER — Inspired by Pokémon GO / 
+   Pokémon Trainer Hub aesthetic
+   Navy + Yellow + Clean cards
+═══════════════════════════════════════════ */
+:root{
+  --navy:#1a2340;       /* Pokémon Trainer Hub dark navy */
+  --navy2:#232f52;      /* lighter navy for cards */
+  --navy3:#2d3a63;      /* borders / dividers */
+  --yellow:#ffd700;     /* Pikachu / official Pokémon yellow */
+  --yellow2:#ffeb4d;    /* hover yellow */
+  --red:#ff3d47;        /* Pokédex red */
+  --blue:#4fc3f7;       /* water type */
+  --green:#56d364;      /* grass / HP */
+  --orange:#ff8c42;     /* fire / Charizard */
+  --purple:#c084fc;     /* psychic / Mewtwo */
+  --pink:#f472b6;
+  --bg:#111827;         /* deep background */
+  --text:#ffffff;
+  --text2:#c8d0e8;      /* secondary text */
+  --muted:#7a85a3;
+  --r:14px;
 }
-
-body.light {
-  --bg:#e8eaf6; --s1:#ffffff; --s2:#f0f0fa; --border:#c5c8e8;
-  --red:#d32f2f; --yellow:#f9a825; --blue:#1976d2; --purple:#7b1fa2;
-  --green:#388e3c; --orange:#e64a19; --text:#1a1c2e; --muted:#6b7280;
+body.light{
+  --navy:#3b4cca;--navy2:#ffffff;--navy3:#e8eaf6;
+  --bg:#f4f6ff;--text:#1a2340;--text2:#3b4cca;--muted:#6b7280;
 }
-
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;}
-
-/* ── PIXEL SCANLINES overlay (subtle retro GBA feel) ── */
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
-}
-body.light::before{display:none;}
-#appWrap,#authWrap{position:relative;z-index:1;}
-
-/* ── POKÉMON SVG SPRITES (inline CSS art) ── */
-.poke-deco{position:absolute;opacity:.07;pointer-events:none;user-select:none;font-size:120px;line-height:1;}
-.poke-deco.charizard{bottom:-10px;right:-20px;font-size:160px;opacity:.06;}
-.poke-deco.pikachu{top:10px;left:-10px;font-size:80px;opacity:.08;}
-.poke-deco.mewtwo{top:-20px;right:10px;font-size:140px;opacity:.05;}
+html,body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;min-height:100vh;}
 
 /* ── AUTH ── */
-#authWrap{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+#authWrap{
+  position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:var(--navy);
+  overflow:hidden;
+}
+/* Big decorative Pokéball behind auth */
+#authWrap::before{
+  content:'';position:absolute;width:600px;height:600px;border-radius:50%;
+  border:80px solid rgba(255,215,0,.06);top:-200px;right:-200px;pointer-events:none;
+}
+#authWrap::after{
+  content:'';position:absolute;width:400px;height:400px;border-radius:50%;
+  border:60px solid rgba(255,61,71,.06);bottom:-150px;left:-150px;pointer-events:none;
+}
 .auth-card{
-  background:var(--s1);border:2px solid var(--red);border-radius:16px;
-  padding:36px 28px;max-width:380px;width:100%;text-align:center;
-  position:relative;overflow:hidden;
-  box-shadow:var(--glow-red),inset 0 0 40px rgba(255,61,74,.03);
+  background:var(--navy2);border-radius:24px;padding:36px 28px 32px;
+  max-width:360px;width:100%;text-align:center;position:relative;z-index:1;
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
 }
-.auth-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--red),var(--yellow),var(--purple),var(--blue));
+/* Pokémon logo text — yellow/blue stripe style from image 1 */
+.poke-logo{
+  font-family:'Press Start 2P',monospace;font-size:20px;
+  color:var(--yellow);text-shadow:3px 3px 0 #b8860b,-1px -1px 0 rgba(0,0,0,.4);
+  letter-spacing:1px;line-height:1.5;display:block;margin-bottom:2px;
 }
-.auth-title{
-  font-family:'Press Start 2P',monospace;font-size:16px;color:var(--red);
-  margin-bottom:4px;line-height:1.6;text-shadow:var(--glow-red);
-  letter-spacing:1px;
+.poke-sub{
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;
+  letter-spacing:6px;text-transform:uppercase;color:var(--text2);
+  display:block;margin-bottom:20px;
 }
-.auth-sub{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;}
-.auth-pokemon{font-size:52px;margin-bottom:16px;display:block;animation:float 3s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
-.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all .15s;}
-.pin-dot.filled{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 8px rgba(255,224,51,.5);}
+.auth-mascots{
+  display:flex;justify-content:center;gap:6px;margin-bottom:20px;
+  font-size:34px;
+}
+.auth-mascots span{display:inline-block;animation:float 3s ease-in-out infinite;}
+.auth-mascots span:nth-child(2){animation-delay:.6s;}
+.auth-mascots span:nth-child(3){animation-delay:1.2s;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+#authWrap p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7;}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:22px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--navy3);background:transparent;transition:all .15s;}
+.pin-dot.filled{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 10px rgba(255,215,0,.5);}
 .pin-dot.error{background:var(--red);border-color:var(--red);}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto;}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:230px;margin:0 auto;}
 .pin-key{
-  background:var(--s2);border:1px solid var(--border);border-radius:8px;
-  padding:14px;font-size:18px;font-family:'Press Start 2P',monospace;
-  cursor:pointer;transition:all .1s;color:var(--text);text-align:center;user-select:none;
+  background:var(--navy3);border:2px solid rgba(255,255,255,.07);border-radius:12px;
+  padding:15px 10px;font-family:'Press Start 2P',monospace;font-size:14px;
+  cursor:pointer;transition:all .12s;color:var(--text);text-align:center;user-select:none;
 }
-.pin-key:hover{border-color:var(--yellow);color:var(--yellow);box-shadow:0 0 8px rgba(255,224,51,.2);}
-.pin-key:active{transform:scale(.9);}
-.pin-key.del{font-size:14px;color:var(--muted);font-family:'DM Mono',monospace;}
-.pin-msg{font-size:11px;color:var(--muted);min-height:18px;margin-top:10px;font-family:'DM Mono',monospace;}
+.pin-key:hover{background:rgba(255,215,0,.12);border-color:var(--yellow);color:var(--yellow);}
+.pin-key:active{transform:scale(.88);}
+.pin-key.del{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;}
+.pin-msg{font-size:11px;color:var(--muted);min-height:18px;margin-top:12px;font-family:'DM Mono',monospace;}
 
-/* ── LOAD ── */
-#loadWrap{position:fixed;inset:0;background:var(--bg);z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;}
+/* ── LOADING ── */
+#loadWrap{position:fixed;inset:0;background:var(--navy);z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,215,0,.2);border-top-color:var(--yellow);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
+@keyframes bounce{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-8px) scale(1.05);}}
+#loadWrap .load-lbl{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--yellow);letter-spacing:3px;margin-top:4px;}
 
 /* ── APP SHELL ── */
 #appWrap{display:none;}
-.app{max-width:1100px;margin:0 auto;padding:0 0 80px;}
+.app{max-width:1100px;margin:0 auto;padding:0 0 90px;}
 
-/* ── HEADER BANNER ── */
-.poke-header{
-  background:linear-gradient(135deg,#0d0f1e 0%,#1a0a0a 40%,#0a0d1a 100%);
-  border-bottom:2px solid var(--border);
-  padding:16px 20px;margin-bottom:0;
-  position:relative;overflow:hidden;
+/* ── SITE HEADER — Pokémon GO / Trainer Hub navy bar ── */
+.site-header{
+  background:var(--navy);
+  border-bottom:3px solid var(--yellow);
+  padding:0;position:relative;overflow:hidden;
 }
-.poke-header::after{
-  content:'';position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse at 80% 50%,rgba(255,61,74,.12) 0%,transparent 60%),
-    radial-gradient(ellipse at 20% 50%,rgba(255,224,51,.06) 0%,transparent 50%),
-    radial-gradient(ellipse at 50% 100%,rgba(179,157,219,.08) 0%,transparent 50%);
-  pointer-events:none;
+/* Subtle circles like Pokéballs */
+.site-header::before{
+  content:'';position:absolute;width:300px;height:300px;right:-80px;top:-120px;
+  border-radius:50%;border:45px solid rgba(255,215,0,.05);pointer-events:none;
 }
-.header-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:relative;z-index:1;}
-.logo-wrap{display:flex;align-items:center;gap:12px;}
-.logo-icon{font-size:32px;animation:float 4s ease-in-out infinite;}
-.logo-text{}
-.logo-title{
-  font-family:'Press Start 2P',monospace;font-size:13px;color:var(--red);
-  display:block;line-height:1.5;text-shadow:var(--glow-red);letter-spacing:1px;
+.site-header::after{
+  content:'';position:absolute;width:180px;height:180px;left:60%;top:-60px;
+  border-radius:50%;border:30px solid rgba(255,61,71,.06);pointer-events:none;
 }
-.logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:3px;display:block;}
-/* Decorative Pokémon silhouettes in header */
-.header-pokes{position:absolute;right:0;top:0;bottom:0;width:220px;pointer-events:none;overflow:hidden;opacity:.12;}
-.header-pokes span{position:absolute;font-size:72px;line-height:1;}
-.header-pokes .hp1{bottom:-8px;right:10px;font-size:88px;}
-.header-pokes .hp2{top:-10px;right:80px;font-size:56px;opacity:.7;}
-.header-pokes .hp3{bottom:0;right:130px;font-size:48px;opacity:.5;}
+.header-inner{
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:10px;padding:14px 20px;position:relative;z-index:1;
+}
+/* Logo block */
+.site-logo{display:flex;align-items:center;gap:12px;}
+.logo-pokeball{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(180deg,var(--red) 0%,var(--red) 46%,#222 46%,#222 54%,white 54%,white 100%);
+  position:relative;flex-shrink:0;box-shadow:0 0 12px rgba(255,61,71,.4);
+  border:2px solid rgba(255,255,255,.15);
+}
+.logo-pokeball::after{
+  content:'';position:absolute;width:10px;height:10px;border-radius:50%;
+  background:white;border:2px solid #333;top:50%;left:50%;transform:translate(-50%,-50%);
+}
+.logo-text{display:flex;flex-direction:column;gap:1px;}
+.logo-name{
+  font-family:'Press Start 2P',monospace;font-size:11px;
+  color:var(--yellow);text-shadow:2px 2px 0 rgba(0,0,0,.5);
+  letter-spacing:1px;line-height:1.5;display:block;
+}
+.logo-tagline{font-family:'Nunito',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);display:block;margin-top:1px;}
 
-.hbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;position:relative;z-index:1;}
+/* Header right — Pokémon silhouettes */
+.header-sprites{position:absolute;right:160px;top:0;bottom:0;display:flex;align-items:flex-end;pointer-events:none;gap:2px;overflow:hidden;}
+.hs{font-size:52px;line-height:1;opacity:.13;padding-bottom:2px;animation:float 4s ease-in-out infinite;}
+.hs:nth-child(2){font-size:36px;opacity:.09;animation-delay:1s;}
+.hs:nth-child(3){font-size:28px;opacity:.07;animation-delay:2s;}
+
+.hbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;position:relative;z-index:2;}
 .hbtn{
-  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;
-  padding:6px 12px;border-radius:6px;border:1px solid var(--border);
-  background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;
+  font-family:'Nunito',sans-serif;font-weight:700;font-size:11px;
+  padding:7px 13px;border-radius:20px;border:2px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.06);color:var(--text2);cursor:pointer;
   transition:all .15s;white-space:nowrap;
 }
-.hbtn:hover{border-color:var(--yellow);color:var(--yellow);background:rgba(255,224,51,.05);}
-.hbtn.ok{color:var(--green);border-color:rgba(102,187,106,.3);}
-.hbtn.saving{color:var(--yellow);border-color:rgba(255,224,51,.3);}
+.hbtn:hover{border-color:var(--yellow);color:var(--yellow);background:rgba(255,215,0,.08);}
+.hbtn.ok{color:var(--green);border-color:rgba(86,211,100,.3);}
+.hbtn.saving{color:var(--yellow);border-color:rgba(255,215,0,.3);}
 
 /* ── TAB BAR ── */
-.tab-wrap{padding:16px 20px 0;background:var(--s1);border-bottom:1px solid var(--border);}
-.tab-bar{display:flex;gap:0;width:fit-content;}
+.tab-wrap{background:var(--navy);padding:0 20px;border-bottom:1px solid var(--navy3);}
+.tab-bar{display:flex;gap:4px;}
 .tab{
-  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;
-  padding:10px 20px;border:none;background:transparent;color:var(--muted);
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;
+  padding:12px 20px;border:none;background:transparent;color:var(--muted);
   cursor:pointer;transition:all .15s;text-transform:uppercase;
-  border-bottom:2px solid transparent;margin-bottom:-1px;
+  border-bottom:3px solid transparent;margin-bottom:-1px;
+  display:flex;align-items:center;gap:7px;
 }
-.tab:hover{color:var(--text);}
+.tab:hover{color:var(--text2);}
 .tab.on{color:var(--yellow);border-bottom-color:var(--yellow);}
 
-/* ── MAIN CONTENT AREA ── */
+/* ── CONTENT ── */
 .content-area{padding:20px;}
 
-/* ── SET CARDS (type-element inspired) ── */
-.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:24px;}
+/* ── SEC DIVIDER ── */
+.sec{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:20px 0 14px;display:flex;align-items:center;gap:10px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--navy3);}
+
+/* ── SET CARDS — type pill inspired ── */
+.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;}
 .set-card{
-  background:var(--s1);border:1px solid var(--border);border-radius:12px;
-  padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+  background:var(--navy2);border:2px solid var(--navy3);border-radius:18px;
+  padding:18px 18px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
 }
-.set-card::before{
-  content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;
-  background:linear-gradient(135deg,rgba(255,224,51,.06),transparent);
-}
-.set-card:hover::before,.set-card.on::before{opacity:1;}
-.set-card:hover{border-color:var(--yellow);transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,224,51,.1);}
-.set-card.on{border-color:var(--yellow);box-shadow:0 0 0 1px var(--yellow),var(--glow-yellow);}
-/* Per-set colour accents */
+/* Accent stripe top */
+.set-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--sc,var(--yellow));border-radius:18px 18px 0 0;}
+/* Glow on hover */
+.set-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.3),0 0 0 2px var(--sc,var(--yellow));}
+.set-card.on{box-shadow:0 8px 24px rgba(0,0,0,.25),0 0 0 2px var(--sc,var(--yellow));border-color:var(--sc,var(--yellow));}
+/* Per-set colours */
 .set-card[data-set="Base Set"]{--sc:var(--red);}
 .set-card[data-set="Jungle"]{--sc:var(--green);}
 .set-card[data-set="Fossil"]{--sc:#90a4ae;}
 .set-card[data-set="WOTC Black Star Promos"]{--sc:var(--yellow);}
-.set-card:hover{border-color:var(--sc,var(--yellow));}
-.set-card.on{border-color:var(--sc,var(--yellow));box-shadow:0 0 0 1px var(--sc,var(--yellow));}
-.set-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-.set-card-name{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text);}
-.set-badge{font-size:22px;}
-.set-card-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:10px;letter-spacing:1px;}
-.set-progress{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:6px;}
-.set-progress-bar{height:100%;background:var(--sc,var(--green));border-radius:3px;transition:width .5s ease;}
-.set-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--sc,var(--green));}
-
-/* ── SECTION LABEL ── */
-.sec{
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);
-  text-transform:uppercase;margin:20px 0 12px;display:flex;align-items:center;gap:10px;
-}
-.sec::after{content:'';flex:1;height:1px;background:var(--border);}
-
-/* ── COLLECTION FILTERS ── */
-.col-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
-.filter-btn{
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
-  padding:5px 12px;border-radius:5px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;
-}
-.filter-btn:hover{border-color:var(--yellow);color:var(--yellow);}
-.filter-btn.on{background:rgba(255,224,51,.1);color:var(--yellow);border-color:var(--yellow);}
-.col-search{
-  background:var(--s2);border:1px solid var(--border);border-radius:6px;
-  padding:6px 12px;color:var(--text);font-family:'DM Sans',sans-serif;
-  font-size:13px;outline:none;transition:border-color .15s;width:160px;
-}
-.col-search:focus{border-color:var(--yellow);}
-
-/* ── BINDER GRID ── */
-.binder{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
-.card-slot{
-  background:var(--s1);border:1px solid var(--border);border-radius:8px;
-  padding:11px;cursor:pointer;transition:all .15s;position:relative;
-  min-height:90px;
-}
-.card-slot:hover{border-color:var(--yellow);transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,224,51,.12);}
-.card-slot.owned{border-color:rgba(102,187,106,.6);background:rgba(102,187,106,.04);}
-.card-slot.owned:hover{border-color:var(--green);box-shadow:0 4px 12px rgba(102,187,106,.15);}
-.card-slot.upgrade{border-color:rgba(255,138,80,.6);}
-.card-slot.upgrade:hover{border-color:var(--orange);}
-.card-slot.missing{opacity:.45;}
-.card-num{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;}
-.card-name{font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3;}
-.card-rarity{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);}
-.card-owned-info{margin-top:7px;padding-top:7px;border-top:1px solid var(--border);}
-.card-cond{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:rgba(102,187,106,.15);color:var(--green);}
-.card-cond.lp{background:rgba(255,138,80,.12);color:var(--orange);}
-.card-cond.poor{background:rgba(255,61,74,.12);color:var(--red);}
-.card-price{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
-.card-upgrade-flag{position:absolute;top:5px;right:5px;font-size:11px;}
-.card-type-badge{position:absolute;bottom:5px;right:5px;font-family:'DM Mono',monospace;font-size:7px;padding:1px 4px;border-radius:3px;background:rgba(79,195,247,.15);color:var(--blue);}
-.card-check{position:absolute;top:5px;right:5px;width:14px;height:14px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;}
+.set-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.set-card-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--text);}
+.set-badge{font-size:26px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));}
+.set-card-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px;letter-spacing:1px;}
+.set-progress{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.set-progress-bar{height:100%;background:var(--sc,var(--green));border-radius:3px;transition:width .6s ease;}
+.set-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--sc,var(--green));font-weight:600;}
 
 /* ── STAT CARDS ── */
-.col-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
-@media(max-width:600px){.col-stats{grid-template-columns:1fr 1fr;}}
+.col-stats,.ledger-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+@media(max-width:600px){.col-stats,.ledger-stats{grid-template-columns:1fr 1fr;}}
 .stat-card{
-  background:var(--s1);border:1px solid var(--border);border-radius:10px;
-  padding:14px 16px;position:relative;overflow:hidden;
+  background:var(--navy2);border-radius:14px;padding:14px 16px;
+  border:1px solid var(--navy3);position:relative;overflow:hidden;
 }
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--yellow));}
-.stat-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
-.stat-val{font-family:'DM Mono',monospace;font-size:20px;color:var(--text);font-weight:500;}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green),var(--blue));}
+.stat-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.stat-val{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:var(--text);line-height:1;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
 .stat-val.g{color:var(--green);}
 .stat-val.r{color:var(--red);}
 .stat-val.gold{color:var(--yellow);}
 
-/* ── LEDGER ── */
-.ledger-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
-.ledger-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
-@media(max-width:600px){.ledger-stats{grid-template-columns:1fr 1fr;}}
+/* ── FILTERS ── */
+.col-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.filter-btn{
+  font-family:'Nunito',sans-serif;font-weight:700;font-size:11px;
+  padding:6px 14px;border-radius:20px;border:2px solid var(--navy3);
+  background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.filter-btn:hover{border-color:var(--yellow);color:var(--yellow);}
+.filter-btn.on{background:var(--yellow);color:var(--navy);border-color:var(--yellow);font-weight:800;}
+.col-search{
+  background:var(--navy2);border:2px solid var(--navy3);border-radius:20px;
+  padding:6px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-weight:600;
+  font-size:13px;outline:none;transition:all .15s;width:170px;
+}
+.col-search:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,215,0,.1);}
 
+/* ── BINDER GRID — card collector feel ── */
+.binder{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+.card-slot{
+  background:var(--navy2);border:2px solid var(--navy3);border-radius:12px;
+  padding:12px;cursor:pointer;transition:all .18s;position:relative;min-height:90px;
+}
+.card-slot:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.3);border-color:rgba(255,215,0,.4);}
+.card-slot.owned{
+  border-color:var(--green);
+  background:linear-gradient(135deg,rgba(86,211,100,.06),var(--navy2));
+}
+.card-slot.owned:hover{box-shadow:0 8px 20px rgba(86,211,100,.15);}
+.card-slot.upgrade{border-color:var(--orange);}
+.card-slot.upgrade:hover{box-shadow:0 8px 20px rgba(255,140,66,.15);}
+.card-slot.missing{opacity:.3;}
+.card-num{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;}
+.card-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;color:var(--text);margin-bottom:3px;line-height:1.3;}
+
+.card-owned-info{margin-top:8px;padding-top:8px;border-top:1px solid var(--navy3);}
+.card-cond{
+  display:inline-block;font-family:'DM Mono',monospace;font-size:8px;
+  padding:2px 7px;border-radius:10px;font-weight:700;
+  background:rgba(86,211,100,.15);color:var(--green);
+}
+.card-cond.lp{background:rgba(255,140,66,.15);color:var(--orange);}
+.card-cond.poor{background:rgba(255,61,71,.12);color:var(--red);}
+.card-price{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+.card-upgrade-flag{position:absolute;top:6px;right:6px;font-size:13px;}
+.card-type-badge{
+  position:absolute;bottom:6px;right:6px;font-family:'DM Mono',monospace;
+  font-size:7px;padding:2px 5px;border-radius:8px;
+  background:rgba(79,195,247,.15);color:var(--blue);font-weight:700;
+}
+.card-check{
+  position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;
+  background:var(--green);display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:900;color:#0a2010;
+  box-shadow:0 0 6px rgba(86,211,100,.4);
+}
+
+/* ── LEDGER ── */
+.ledger-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.ledger-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
 .ledger-filters{
-  background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  background:var(--navy2);border:1px solid var(--navy3);border-radius:14px;
   padding:14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
 }
 .ledger-filters .field{margin-bottom:0;}
-.ledger-filters label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.ledger-filters label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
 .ledger-filters input,.ledger-filters select{
-  background:var(--s2);border:1px solid var(--border);border-radius:6px;
-  padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;
+  background:var(--navy3);border:2px solid rgba(255,255,255,.06);border-radius:10px;
+  padding:7px 10px;color:var(--text);font-family:'Nunito',sans-serif;font-weight:600;
+  font-size:13px;outline:none;transition:all .15s;
 }
-.ledger-filters input:focus,.ledger-filters select:focus{border-color:var(--yellow);}
-.ledger-filters select option{background:var(--s2);}
-
-.ledger-table-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;overflow-x:auto;}
+.ledger-filters input:focus,.ledger-filters select:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,215,0,.08);}
+.ledger-filters select option{background:var(--navy2);}
+.ledger-table-wrap{border:1px solid var(--navy3);border-radius:14px;overflow:hidden;overflow-x:auto;}
 .ledger-table{width:100%;border-collapse:collapse;font-size:13px;min-width:750px;}
 .ledger-table th{
   font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);
-  text-transform:uppercase;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);
-  background:var(--s2);white-space:nowrap;cursor:pointer;user-select:none;
+  text-transform:uppercase;text-align:left;padding:12px 14px;border-bottom:1px solid var(--navy3);
+  background:var(--navy2);white-space:nowrap;cursor:pointer;user-select:none;
 }
 .ledger-table th:hover{color:var(--yellow);}
-.ledger-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.ledger-table td{padding:12px 14px;border-bottom:1px solid var(--navy3);color:var(--text);vertical-align:middle;}
 .ledger-table tr:last-child td{border-bottom:none;}
-.ledger-table tr:hover td{background:rgba(255,224,51,.03);}
-.type-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
-.type-badge.raw{background:rgba(79,195,247,.12);color:var(--blue);}
-.type-badge.slab{background:rgba(255,224,51,.12);color:var(--yellow);}
-.type-badge.bulk{background:rgba(179,157,219,.12);color:var(--purple);}
-.profit-pos{color:var(--green);font-family:'DM Mono',monospace;}
-.profit-neg{color:var(--red);font-family:'DM Mono',monospace;}
+.ledger-table tbody tr:hover td{background:rgba(255,215,0,.03);}
+.type-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.type-badge.raw{background:rgba(79,195,247,.15);color:var(--blue);}
+.type-badge.slab{background:rgba(255,215,0,.15);color:var(--yellow);}
+.type-badge.bulk{background:rgba(192,132,252,.15);color:var(--purple);}
+.profit-pos{color:var(--green);font-family:'DM Mono',monospace;font-weight:700;}
+.profit-neg{color:var(--red);font-family:'DM Mono',monospace;font-weight:700;}
 .profit-open{color:var(--muted);font-family:'DM Mono',monospace;}
-.ledger-empty{text-align:center;padding:48px;color:var(--muted);font-size:13px;}
+.ledger-empty{text-align:center;padding:60px;color:var(--muted);font-size:14px;}
+.summary-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.summary-row span{
+  padding:5px 12px;border-radius:20px;background:var(--navy2);border:1px solid var(--navy3);
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);
+}
 
-/* ── MODAL ── */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,10,.85);z-index:200;align-items:center;justify-content:center;padding:16px;}
+/* ── MODALS ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(10,14,30,.9);z-index:200;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
 .ov.on{display:flex;}
 .modal{
-  background:var(--s1);border:1px solid var(--border);border-radius:14px;
-  padding:26px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;
+  background:var(--navy2);border:1px solid var(--navy3);border-radius:20px;
+  padding:28px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;
   animation:su .18s ease;position:relative;
+  box-shadow:0 32px 80px rgba(0,0,0,.5);
 }
-.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--purple));border-radius:14px 14px 0 0;}
-@keyframes su{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal h2{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:var(--yellow);margin-bottom:4px;}
+/* Yellow accent top bar */
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));border-radius:20px 20px 0 0;}
+@keyframes su{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;color:var(--yellow);margin-bottom:4px;}
 .modal-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:18px;}
 .field{margin-bottom:14px;}
-.field label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
-.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--yellow);}
-.field select option{background:var(--s2);}
+.field label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--navy3);border:2px solid rgba(255,255,255,.06);
+  border-radius:10px;padding:10px 14px;color:var(--text);
+  font-family:'Nunito',sans-serif;font-weight:600;font-size:14px;outline:none;transition:all .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,215,0,.1);}
+.field select option{background:var(--navy2);}
 .field textarea{resize:vertical;min-height:60px;}
 .mbtns{display:flex;gap:8px;margin-top:20px;}
-.mbtn-p{flex:1;background:var(--yellow);color:#111;border:none;border-radius:7px;padding:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;}
-.mbtn-p:hover{background:#ffd700;box-shadow:var(--glow-yellow);}
-.mbtn-g{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
-.mbtn-g:hover{border-color:var(--muted);color:var(--text);}
-.mbtn-d{background:transparent;color:var(--red);border:1px solid rgba(255,61,74,.3);border-radius:7px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
-.mbtn-d:hover{border-color:var(--red);background:rgba(255,61,74,.05);}
+.mbtn-p{
+  flex:1;background:linear-gradient(135deg,var(--yellow),#ffa500);
+  color:var(--navy);border:none;border-radius:12px;padding:13px;
+  font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;cursor:pointer;
+  transition:all .15s;box-shadow:0 4px 16px rgba(255,215,0,.3);
+}
+.mbtn-p:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,215,0,.4);}
+.mbtn-g{
+  background:transparent;color:var(--muted);border:2px solid var(--navy3);
+  border-radius:12px;padding:13px 18px;font-family:'Nunito',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.mbtn-g:hover{border-color:var(--text2);color:var(--text);}
+.mbtn-d{
+  background:transparent;color:var(--red);border:2px solid rgba(255,61,71,.3);
+  border-radius:12px;padding:13px 18px;font-family:'Nunito',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.mbtn-d:hover{border-color:var(--red);background:rgba(255,61,71,.07);}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 input[type="date"],input[type="month"]{color-scheme:dark;}
 body.light input[type="date"],body.light input[type="month"]{color-scheme:light;}
-
-/* ── OWNED TOGGLE ── */
-.owned-toggle{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--border);}
-.owned-toggle input{width:17px;height:17px;accent-color:var(--yellow);cursor:pointer;}
-.owned-toggle span{font-size:13px;color:var(--text);}
-
-/* ── SUMMARY ROW ── */
-.summary-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
-.summary-row span{padding:4px 10px;border-radius:6px;background:var(--s2);border:1px solid var(--border);}
-
-/* ── SETTINGS DANGER ZONE ── */
-body.light .poke-header{background:linear-gradient(135deg,#e8eaf6,#fce4ec,#e8eaf6);}
-body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--yellow),var(--purple),var(--blue));}
-
-/* ── PIXEL DIVIDER ── */
-.pixel-div{height:2px;background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 4px,transparent 4px,transparent 8px);margin:16px 0;opacity:.25;}
+.owned-toggle{
+  display:flex;align-items:center;gap:12px;margin-bottom:14px;
+  padding:12px 14px;background:var(--navy3);border-radius:12px;
+  border:1px solid rgba(255,255,255,.06);cursor:pointer;
+}
+.owned-toggle input{width:18px;height:18px;accent-color:var(--yellow);cursor:pointer;}
+.owned-toggle span{font-size:14px;font-weight:700;color:var(--text2);}
 
 /* scrollbar */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+::-webkit-scrollbar-thumb{background:var(--navy3);border-radius:3px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--yellow);}
+
+/* Light mode adjustments */
+body.light .site-header{background:#3b4cca;}
+body.light .tab-wrap{background:#3b4cca;}
+body.light .set-card,.modal,body.light .stat-card,.ledger-filters{background:white;border-color:#e8eaf6;}
+body.light .pin-key{background:#f1f5f9;border-color:#e2e8f0;color:#1a2340;}
+body.light .auth-card{background:white;}
+body.light .hbtn{color:rgba(255,255,255,.8);}
 </style>
 </head>
 <body>
@@ -341,46 +389,61 @@ body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--
 <!-- AUTH -->
 <div id="authWrap">
   <div class="auth-card">
-    <div class="auth-title">Pokédex<br>Binder</div>
-    <div class="auth-sub">TCG Collection Tracker</div>
-    <span class="auth-pokemon">⚡</span>
+    <span class="poke-logo">POKÉDEX</span>
+    <span class="poke-sub">Binder · TCG Tracker</span>
+    <div class="auth-mascots">
+      <span title="Pikachu">⚡</span>
+      <span title="Charizard">🔥</span>
+      <span title="Mewtwo">🌀</span>
+    </div>
     <div id="pinSetupWrap" style="display:none;">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Set a 4-digit PIN to protect your collection.</p>
+      <p>Choose a 4-digit PIN to protect your collection.</p>
       <div class="pin-dots" id="pinDots1"></div>
       <div class="pin-pad" id="pinPad1"></div>
       <div class="pin-msg" id="pinSetupMsg"></div>
     </div>
     <div id="pinLoginWrap" style="display:none;">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Enter your PIN to continue.</p>
+      <p>Enter your PIN to continue.</p>
       <div class="pin-dots" id="pinDots2"></div>
       <div class="pin-pad" id="pinPad2"></div>
       <div class="pin-msg" id="pinLoginMsg" style="color:var(--red);"></div>
     </div>
-    <div id="pinLoadingWrap"><div style="color:var(--muted);font-size:13px;">Loading…</div></div>
+    <div id="pinLoadingWrap"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;">Loading…</div></div>
   </div>
 </div>
 
 <!-- LOADING -->
 <div id="loadWrap">
   <div class="spinner"></div>
-  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;" id="loadTxt">LOADING</div>
+  <div class="load-lbl">LOADING</div>
 </div>
 
 <!-- APP -->
 <div id="appWrap">
 <div class="app">
 
-  <header>
-    <div>
-      <div class="logo">Pokédex Binder <small>TCG Collection Tracker</small></div>
+  <div class="site-header">
+    <div class="header-inner">
+      <div class="site-logo">
+        <div class="logo-pokeball"></div>
+        <div class="logo-text">
+          <span class="logo-name">POKÉDEX BINDER</span>
+          <span class="logo-tagline">TCG Collection Tracker</span>
+        </div>
+      </div>
+      <div class="hbtns">
+        <button class="hbtn" onclick="openSettingsModal()">⚙ Settings</button>
+        <button class="hbtn" id="themeBtn" onclick="toggleTheme()">☀</button>
+        <button class="hbtn" id="syncBtn" onclick="manualSync()">● Connecting…</button>
+        <button class="hbtn" onclick="signOut()">⏻ Sign out</button>
+      </div>
     </div>
-    <div class="hbtns">
-<button class="hbtn" onclick="openSettingsModal()">⚙ Settings</button>
-      <button class="hbtn" id="themeBtn" onclick="toggleTheme()">☀</button>
-      <button class="hbtn" id="syncBtn" onclick="manualSync()">● Connecting…</button>
-      <button class="hbtn" onclick="signOut()">⏻ Sign out</button>
+    <div class="header-sprites" aria-hidden="true">
+      <span class="hs">🔥</span>
+      <span class="hs">⚡</span>
+      <span class="hs">🌀</span>
     </div>
-  </header>
+  </div>
 
   <div class="tab-wrap">
     <div class="tab-bar">
@@ -390,121 +453,83 @@ body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--
   </div>
 
   <div class="content-area">
-  <!-- ═══ COLLECTION TAB ═══ -->
+
+  <!-- COLLECTION TAB -->
   <div id="viewCollection">
-    <!-- Set selector -->
     <div class="sec">Sets</div>
     <div class="set-grid" id="setGrid"></div>
-
-    <!-- Collection for selected set -->
     <div id="collectionBody" style="display:none;">
       <div class="sec" id="collectionSetTitle">Base Set</div>
       <div class="col-stats" id="colStats"></div>
       <div class="col-filters">
         <button class="filter-btn on" id="filterAll" onclick="setFilter('all')">All</button>
-        <button class="filter-btn" id="filterOwned" onclick="setFilter('owned')">Owned</button>
+        <button class="filter-btn" id="filterOwned" onclick="setFilter('owned')">✓ Owned</button>
         <button class="filter-btn" id="filterMissing" onclick="setFilter('missing')">Missing</button>
-        <button class="filter-btn" id="filterUpgrade" onclick="setFilter('upgrade')">Needs Upgrade</button>
-        <input class="col-search" id="colSearch" placeholder="Search cards…" oninput="renderBinder()">
+        <button class="filter-btn" id="filterUpgrade" onclick="setFilter('upgrade')">⬆ Upgrade</button>
+        <input class="col-search" id="colSearch" placeholder="🔍 Search…" oninput="renderBinder()">
       </div>
       <div class="binder" id="binderGrid"></div>
     </div>
   </div>
 
-  <!-- ═══ LEDGER TAB ═══ -->
+  <!-- LEDGER TAB -->
   <div id="viewLedger" style="display:none;">
     <div class="ledger-top">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Purchase & Sales Log</div>
-      <button class="hbtn" onclick="openAddLedger()" style="color:var(--red);border-color:rgba(230,57,70,.3);">+ Add Entry</button>
+      <div class="ledger-title">Purchase &amp; Sales Log</div>
+      <button class="hbtn" onclick="openAddLedger()" style="color:var(--yellow);border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.07);font-weight:800;">＋ Add Entry</button>
     </div>
-
     <div class="ledger-stats" id="ledgerStats"></div>
-
     <div class="ledger-filters">
-      <div class="field">
-        <label>Search</label>
-        <input id="lSearch" placeholder="Card name…" oninput="renderLedger()" style="width:160px;">
-      </div>
-      <div class="field">
-        <label>Type</label>
-        <select id="lType" onchange="renderLedger()" style="width:110px;">
-          <option value="">All</option>
-          <option value="raw">Raw</option>
-          <option value="slab">Slab</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Set</label>
-        <select id="lSet" onchange="renderLedger()" style="width:150px;">
-          <option value="">All sets</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Platform</label>
-        <select id="lPlatform" onchange="renderLedger()" style="width:130px;">
-          <option value="">All</option>
-          <option>eBay</option>
-          <option>Whatnot</option>
-          <option>Local</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Status</label>
-        <select id="lStatus" onchange="renderLedger()" style="width:120px;">
-          <option value="">All</option>
-          <option value="open">Open</option>
-          <option value="sold">Sold</option>
-        </select>
-      </div>
+      <div class="field"><label>Search</label><input id="lSearch" placeholder="Card name…" oninput="renderLedger()" style="width:150px;"></div>
+      <div class="field"><label>Type</label><select id="lType" onchange="renderLedger()" style="width:100px;"><option value="">All</option><option value="raw">Raw</option><option value="slab">Slab</option></select></div>
+      <div class="field"><label>Set</label><select id="lSet" onchange="renderLedger()" style="width:140px;"><option value="">All sets</option></select></div>
+      <div class="field"><label>Platform</label><select id="lPlatform" onchange="renderLedger()" style="width:120px;"><option value="">All</option><option>eBay</option><option>Whatnot</option><option>Local</option><option>Other</option></select></div>
+      <div class="field"><label>Status</label><select id="lStatus" onchange="renderLedger()" style="width:110px;"><option value="">All</option><option value="open">Open</option><option value="sold">Sold</option></select></div>
       <button onclick="clearLedgerFilters()" class="hbtn" style="align-self:flex-end;">Clear</button>
     </div>
-
     <div class="summary-row" id="ledgerSummaryRow"></div>
-
-    <div class="ledger-table-wrap" style="overflow-x:auto;">
-      <table class="ledger-table" style="min-width:750px;">
-        <thead>
-          <tr>
-            <th onclick="lSort('date')">Date <span id="lSortDate"></span></th>
-            <th onclick="lSort('name')">Card <span id="lSortName"></span></th>
-            <th>Set</th>
-            <th>Lang</th>
-            <th>Type</th>
-            <th onclick="lSort('paid')" style="text-align:right;">Paid <span id="lSortPaid"></span></th>
-            <th>Platform</th>
-            <th style="text-align:right;">Sold</th>
-            <th onclick="lSort('profit')" style="text-align:right;">P&L <span id="lSortProfit"></span></th>
-            <th></th>
-          </tr>
-        </thead>
+    <div class="ledger-table-wrap">
+      <table class="ledger-table">
+        <thead><tr>
+          <th onclick="lSort('date')">Date <span id="lSortDate"></span></th>
+          <th onclick="lSort('name')">Card <span id="lSortName"></span></th>
+          <th>Set</th><th>Lang</th><th>Type</th>
+          <th onclick="lSort('paid')" style="text-align:right;">Paid <span id="lSortPaid"></span></th>
+          <th>Platform</th>
+          <th style="text-align:right;">Sold</th>
+          <th onclick="lSort('profit')" style="text-align:right;">P&amp;L <span id="lSortProfit"></span></th>
+          <th></th>
+        </tr></thead>
         <tbody id="ledgerBody"></tbody>
       </table>
     </div>
-    <div id="ledgerEmpty" class="ledger-empty" style="display:none;">No entries yet — tap + Add Entry to log a purchase.</div>
+    <div id="ledgerEmpty" class="ledger-empty" style="display:none;">
+      <div style="font-size:48px;margin-bottom:16px;">📭</div>
+      No entries yet — tap <strong style="color:var(--yellow);">+ Add Entry</strong> to log a purchase.
+    </div>
   </div>
 
-  </div><!-- end content-area -->
+  </div><!-- content-area -->
 </div>
 </div>
 
 <!-- SETTINGS MODAL -->
 <div class="ov" id="settingsOv">
   <div class="modal" style="max-width:420px;">
-    <h2>Settings</h2>
+    <h2>⚙ Settings</h2>
     <div class="modal-sub">Data management</div>
-    <div style="background:var(--s2);border-radius:8px;padding:14px;margin-bottom:16px;">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Data Summary</div>
-      <div id="settingsDataSummary" style="font-size:13px;line-height:2;color:var(--text);"></div>
+    <div style="background:var(--navy3);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Data Summary</div>
+      <div id="settingsDataSummary" style="font-size:14px;line-height:2.2;color:var(--text);font-weight:600;"></div>
     </div>
-    <div style="background:var(--s2);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid rgba(230,57,70,.2);">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:8px;">Danger Zone</div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">Permanently deletes all collection and/or ledger data. Use before re-importing. Cannot be undone (your Drive backup will remain).</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button onclick="resetCollection()" style="padding:9px;background:transparent;border:1px solid rgba(230,57,70,.4);border-radius:7px;color:var(--red);cursor:pointer;font-size:12px;transition:all .15s;" onmouseover="this.style.background='rgba(230,57,70,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear Collection</button>
-        <button onclick="resetLedger()" style="padding:9px;background:transparent;border:1px solid rgba(230,57,70,.4);border-radius:7px;color:var(--red);cursor:pointer;font-size:12px;transition:all .15s;" onmouseover="this.style.background='rgba(230,57,70,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear Ledger</button>
+    <div style="background:rgba(255,61,71,.06);border:1px solid rgba(255,61,71,.2);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:10px;">⚠ Danger Zone</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;">Permanently deletes data. Use before re-entering your collection. Cannot be undone.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <button onclick="resetCollection()" style="padding:10px;background:transparent;border:2px solid rgba(255,61,71,.4);border-radius:10px;color:var(--red);cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;" onmouseover="this.style.background='rgba(255,61,71,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear Collection</button>
+        <button onclick="resetLedger()" style="padding:10px;background:transparent;border:2px solid rgba(255,61,71,.4);border-radius:10px;color:var(--red);cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;" onmouseover="this.style.background='rgba(255,61,71,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear Ledger</button>
       </div>
-      <button onclick="resetAll()" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1px solid rgba(230,57,70,.4);border-radius:7px;color:var(--red);cursor:pointer;font-size:12px;transition:all .15s;" onmouseover="this.style.background='rgba(230,57,70,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear ALL Data</button>
+      <button onclick="resetAll()" style="width:100%;padding:10px;background:transparent;border:2px solid rgba(255,61,71,.4);border-radius:10px;color:var(--red);cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;" onmouseover="this.style.background='rgba(255,61,71,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear ALL Data</button>
     </div>
     <div class="mbtns"><button class="mbtn-p" onclick="closeSettingsModal()">Done</button></div>
   </div>
@@ -515,27 +540,23 @@ body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--
   <div class="modal">
     <h2 id="cardModalTitle">Card</h2>
     <div class="modal-sub" id="cardModalSub"></div>
-
     <div class="owned-toggle">
       <input type="checkbox" id="cardOwned" onchange="toggleOwnedUI()">
       <span>I own this card</span>
     </div>
-
     <div id="cardOwnedFields">
       <div class="two-col">
-        <div class="field">
-          <label>Condition</label>
+        <div class="field"><label>Condition</label>
           <select id="cardCond">
-            <option value="NM">NM (Near Mint)</option>
-            <option value="LP+">LP+ (Light Play+)</option>
-            <option value="LP">LP (Light Play)</option>
-            <option value="LP-">LP- (Light Play-)</option>
-            <option value="MP">MP (Moderate Play)</option>
-            <option value="HP">HP (Heavy Play)</option>
+            <option value="NM">NM — Near Mint</option>
+            <option value="LP+">LP+ — Light Play+</option>
+            <option value="LP">LP — Light Play</option>
+            <option value="LP-">LP- — Light Play-</option>
+            <option value="MP">MP — Moderate Play</option>
+            <option value="HP">HP — Heavy Play</option>
           </select>
         </div>
-        <div class="field">
-          <label>Type</label>
+        <div class="field"><label>Type</label>
           <select id="cardType">
             <option value="raw">Raw</option>
             <option value="slab">Slab</option>
@@ -543,34 +564,23 @@ body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--
         </div>
       </div>
       <div class="field" id="cardSlabGradeField" style="display:none;">
-        <label>Slab Grade (e.g. PSA 9, CGC 10)</label>
-        <input id="cardSlabGrade" placeholder="e.g. ACE 9">
+        <label>Slab Grade</label>
+        <input id="cardSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10">
       </div>
       <div class="two-col">
-        <div class="field">
-          <label>NM Market Price (£)</label>
-          <input type="number" id="cardNMPrice" step="0.01" placeholder="0.00">
-        </div>
-        <div class="field">
-          <label>Avg Market LP (£)</label>
-          <input type="number" id="cardLPPrice" step="0.01" placeholder="0.00">
-        </div>
+        <div class="field"><label>NM Market (£)</label><input type="number" id="cardNMPrice" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>Avg LP (£)</label><input type="number" id="cardLPPrice" step="0.01" placeholder="0.00"></div>
       </div>
-      <div class="field">
-        <label>Notes</label>
-        <input id="cardNotes" placeholder="Optional notes…">
-      </div>
+      <div class="field"><label>Notes</label><input id="cardNotes" placeholder="Optional notes…"></div>
       <div class="owned-toggle" style="margin-bottom:0;">
         <input type="checkbox" id="cardUpgrade">
-        <span>Needs upgrade (better condition)</span>
+        <span>⬆ Needs upgrade to better condition</span>
       </div>
     </div>
-
-    <div style="margin-top:14px;padding:12px;background:var(--s2);border-radius:8px;font-size:12px;color:var(--muted);" id="cardLedgerHint" style="display:none;"></div>
-
+    <div style="margin-top:14px;padding:12px 14px;background:var(--navy3);border-radius:10px;font-size:12px;color:var(--muted);display:none;" id="cardLedgerHint"></div>
     <div class="mbtns">
       <button class="mbtn-g" onclick="closeCardModal()">Cancel</button>
-      <button class="mbtn-p" onclick="saveCard()">Save</button>
+      <button class="mbtn-p" onclick="saveCard()">Save Card</button>
     </div>
   </div>
 </div>
@@ -580,26 +590,16 @@ body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--
   <div class="modal" style="max-width:480px;">
     <h2 id="ledgerModalTitle">Add Purchase</h2>
     <div class="modal-sub">Log a card purchase or sale</div>
-
-    <div class="field">
-      <label>Card Name / Description</label>
-      <input id="lName" placeholder="e.g. Charizard 4/102, Base Set Commons…">
-    </div>
+    <div class="field"><label>Card Name / Description</label><input id="lName" placeholder="e.g. Charizard 4/102, Base Set Commons…"></div>
     <div class="two-col">
-      <div class="field">
-        <label>Set</label>
+      <div class="field"><label>Set</label>
         <select id="lEntrySet">
           <option value="">— Select —</option>
-          <option>Base Set</option>
-          <option>Jungle</option>
-          <option>Fossil</option>
-          <option>WOTC Black Star Promos</option>
-          <option>Other / Modern</option>
-          <option>Mixed / Bulk Lot</option>
+          <option>Base Set</option><option>Jungle</option><option>Fossil</option>
+          <option>WOTC Black Star Promos</option><option>Other / Modern</option><option>Mixed / Bulk Lot</option>
         </select>
       </div>
-      <div class="field">
-        <label>Type</label>
+      <div class="field"><label>Type</label>
         <select id="lEntryType">
           <option value="raw">Raw Card</option>
           <option value="slab">Slab (Graded)</option>
@@ -607,71 +607,32 @@ body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--
         </select>
       </div>
     </div>
-    <div class="field" id="lSlabGradeField" style="display:none;">
-      <label>Slab Grade</label>
-      <input id="lSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10">
+    <div class="field" id="lSlabGradeField" style="display:none;"><label>Slab Grade</label><input id="lSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10"></div>
+    <div class="two-col">
+      <div class="field"><label>Date Bought</label><input type="date" id="lDateBought"></div>
+      <div class="field"><label>Platform</label>
+        <select id="lPlatformEntry"><option>eBay</option><option>Whatnot</option><option>Local</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Price Paid (£)</label><input type="number" id="lPaid" step="0.01" placeholder="0.00"></div>
+    <div class="sec" style="margin:16px 0 12px;">Sale details</div>
+    <div class="two-col">
+      <div class="field"><label>Date Sold</label><input type="date" id="lDateSold"></div>
+      <div class="field"><label>Sold Price (£)</label><input type="number" id="lSoldPrice" step="0.01" placeholder="0.00"></div>
     </div>
     <div class="two-col">
-      <div class="field">
-        <label>Date Bought</label>
-        <input type="date" id="lDateBought">
+      <div class="field"><label>Sold Platform</label>
+        <select id="lSoldPlatform"><option value="">— not sold —</option><option>eBay</option><option>Whatnot</option><option>Local</option><option>Other</option></select>
       </div>
-      <div class="field">
-        <label>Platform</label>
-        <select id="lPlatformEntry">
-          <option>eBay</option>
-          <option>Whatnot</option>
-          <option>Local</option>
-          <option>Other</option>
-        </select>
+      <div class="field"><label>Language</label>
+        <select id="lLanguage"><option value="English">English</option><option value="Japanese">Japanese</option><option value="Korean">Korean</option><option value="Other">Other</option></select>
       </div>
     </div>
-    <div class="field">
-      <label>Price Paid (£)</label>
-      <input type="number" id="lPaid" step="0.01" placeholder="0.00">
-    </div>
-
-    <div class="sec">Sale (if sold)</div>
-    <div class="two-col">
-      <div class="field">
-        <label>Date Sold</label>
-        <input type="date" id="lDateSold">
-      </div>
-      <div class="field">
-        <label>Sold Price (£)</label>
-        <input type="number" id="lSoldPrice" step="0.01" placeholder="0.00">
-      </div>
-    </div>
-    <div class="field">
-      <label>Sold Platform</label>
-      <select id="lSoldPlatform">
-        <option value="">— not sold —</option>
-        <option>eBay</option>
-        <option>Whatnot</option>
-        <option>Local</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <div class="two-col">
-      <div class="field">
-        <label>Language</label>
-        <select id="lLanguage">
-          <option value="English">English</option>
-          <option value="Japanese">Japanese</option>
-          <option value="Korean">Korean</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Notes</label>
-        <input id="lNotes" placeholder="Optional notes…">
-      </div>
-    </div>
-
+    <div class="field"><label>Notes</label><input id="lNotes" placeholder="Optional notes…"></div>
     <div class="mbtns">
       <button class="mbtn-g" onclick="closeLedgerModal()">Cancel</button>
       <button class="mbtn-d" id="lDelBtn" style="display:none;" onclick="deleteLedgerEntry()">Delete</button>
-      <button class="mbtn-p" onclick="saveLedgerEntry()">Save</button>
+      <button class="mbtn-p" onclick="saveLedgerEntry()">Save Entry</button>
     </div>
   </div>
 </div>
@@ -1273,7 +1234,9 @@ function renderBinder(){
     const slot=document.createElement('div');
     const condClass=data&&data.cond?(data.cond.startsWith('NM')?'':'lp'):'' ;
     slot.className='card-slot'+(owned?' owned':'')+(needsUpgrade?' upgrade':'')+(!owned?' missing':'');
-    let inner=`<div class="card-num">${esc(c.num)}</div><div class="card-name">${esc(c.name)}</div><div class="card-rarity">${esc(c.rarity)}</div>`;
+    let inner=`<div class="card-num">${esc(c.num)}</div><div class="card-name">${esc(c.name)}</div>`;
+    const _rc=c.rarity.toLowerCase().includes('holo')?'rarity-holo':c.rarity==='Rare'?'rarity-rare':c.rarity==='Uncommon'?'rarity-uncommon':c.rarity==='Promo'?'rarity-promo':c.rarity==='Trainer'?'rarity-trainer':'rarity-common';
+    inner+=`<span class="card-rarity ${_rc}">${esc(c.rarity)}</span>`;
     if(owned&&data){
       inner+=`<div class="card-owned-info">`;
       if(data.cond) inner+=`<span class="card-cond ${condClass}">${esc(data.cond)}</span>`;
