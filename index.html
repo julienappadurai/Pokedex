@@ -301,13 +301,14 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
 
     <div class="summary-row" id="ledgerSummaryRow"></div>
 
-    <div class="ledger-table-wrap">
-      <table class="ledger-table">
+    <div class="ledger-table-wrap" style="overflow-x:auto;">
+      <table class="ledger-table" style="min-width:750px;">
         <thead>
           <tr>
             <th onclick="lSort('date')">Date <span id="lSortDate"></span></th>
             <th onclick="lSort('name')">Card <span id="lSortName"></span></th>
             <th>Set</th>
+            <th>Lang</th>
             <th>Type</th>
             <th onclick="lSort('paid')" style="text-align:right;">Paid <span id="lSortPaid"></span></th>
             <th>Platform</th>
@@ -1400,11 +1401,12 @@ function renderLedger(){
     const tr=document.createElement('tr'); tr.style.cursor='pointer';
     tr.innerHTML=`
       <td style="white-space:nowrap;font-family:'DM Mono',monospace;font-size:11px;">${dateStr}</td>
-      <td><div style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(l.name)}">${esc(l.name)}</div>${l.slabGrade?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);">${esc(l.slabGrade)}</div>`:''}</td>
-      <td style="font-size:11px;color:var(--muted);">${esc(l.set||'—')}</td>
+      <td><div style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(l.name)}">${esc(l.name)}</div>${l.slabGrade?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);">${esc(l.slabGrade)}</div>`:''}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.set||'—')}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.language||'—')}</td>
       <td><span class="type-badge ${l.type||'raw'}">${l.type==='bulk'?'Bulk':l.type==='slab'?'Slab':'Raw'}</span></td>
       <td style="text-align:right;font-family:'DM Mono',monospace;">${fmt(l.paid)}</td>
-      <td style="font-size:11px;color:var(--muted);">${esc(l.platform||'')}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.platform||'')}</td>
       <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;">${isSold?`<div>${fmt(parseFloat(l.soldPrice))}</div><div style="color:var(--muted);font-size:10px;">${soldStr}${l.soldPlatform?' · '+l.soldPlatform:''}</div>`:'<span style="color:var(--muted);">open</span>'}</td>
       <td style="text-align:right;" class="${pl===null?'profit-open':pl>=0?'profit-pos':'profit-neg'}">${pl===null?'—':fmtSign(pl)}</td>
       <td style="text-align:right;"><button onclick="event.stopPropagation();openEditLedger('${l.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">edit</button></td>`;
@@ -1588,8 +1590,20 @@ function parseImportWorkbook(wb){
       // Skip header row, blank rows, bulk lot rows, and total rows
       if(!col2||col2==='Card Name'||col2==='nan') return;
       if(!col0||isNaN(parseInt(col0))) return;
-      // Skip bulk rows like "All Non-Holos", "Commons/UC"
-      if(col2.toLowerCase().includes('non-holo')||col2.toLowerCase().includes('common')||col2.toLowerCase().includes('c/uc')) return;
+      // Skip bulk rows like "All Non-Holos", "Commons/UC" — import as ledger bulk entries instead
+      if(col2.toLowerCase().includes('non-holo')||col2.toLowerCase().includes('common')||col2.toLowerCase().includes('c/uc')){
+        const bulkPaid=parseAmount(row[4]);
+        if(bulkPaid&&currentSet){
+          result.ledger.push({
+            id:Date.now().toString()+'_bulk_'+i+'_'+Math.random().toString(36).slice(2,4),
+            name:col2+' ('+col1+')',set:currentSet,type:'bulk',language:'English',
+            dateBought:null,platform:'',paid:bulkPaid,
+            soldPrice:null,dateSold:null,soldPlatform:null,
+            notes:'Bulk lot imported from collection sheet',slabGrade:'',collectionKey:null
+          });
+        }
+        return;
+      }
       // For promos: card number may be embedded in col2 (e.g. "Electabuzz #2") and col1 is empty
       // Extract it and normalise to match SETS format (#2)
       let cardNum=col1;
@@ -1717,10 +1731,12 @@ function confirmImport(){
       collAdded++;
     }
   });
-  // Merge ledger — deduplicate by name+date+paid
-  importParsedData.ledger.forEach(entry=>{
-    const dup=D.ledger.find(l=>l.name===entry.name&&l.dateBought===entry.dateBought&&Math.abs((l.paid||0)-(entry.paid||0))<0.01);
-    if(!dup){ D.ledger.push(entry); ledgerAdded++; }
+  // Merge ledger — deduplicate by row index position (not name+date, which breaks identical entries like two Psyduck slabs)
+  // Use a hash of name+date+paid+index to allow genuine duplicates on same day
+  const existingHashes=new Set(D.ledger.map(l=>`${l.name}|${l.dateBought}|${l.paid}|${l._importIdx||''}`));
+  importParsedData.ledger.forEach((entry,idx)=>{
+    const hash=`${entry.name}|${entry.dateBought}|${entry.paid}|${idx}`;
+    if(!existingHashes.has(hash)){ entry._importIdx=idx; D.ledger.push(entry); ledgerAdded++; }
   });
   save(); closeImport(); renderAll();
   alert(`Import complete!\n✓ ${collAdded} collection cards added\n✓ ${collUpdated} updated\n✓ ${ledgerAdded} ledger entries added`);
