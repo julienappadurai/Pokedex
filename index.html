@@ -1560,109 +1560,118 @@ async function importHandleFile(file){
 function parseImportWorkbook(wb){
   const result={ collection:[], ledger:[], errors:[] };
 
-  // ── SHEET 1: Collection inventory ──
-  // Find collection sheet — matches "Pokemon Complete Set" (case-insensitive, ignores accents)
-  const collSheetName=wb.SheetNames.find(n=>n.toLowerCase().replace(/[éèê]/g,'e').includes('pokemon complete set')||n.toLowerCase().includes('complete set')||n.toLowerCase().includes('full analysis')||n.toLowerCase().includes('inventory'));
+  // ── SHEET 1: Pokémon Complete Set ──
+  // Match flexibly: strip accents, look for "complete set" or "complete"
+  const collSheetName=wb.SheetNames.find(n=>{
+    const norm=n.toLowerCase().replace(/[éèêëe]/g,'e').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+    return norm.includes('complete set')||norm.includes('pokemon complete');
+  })||wb.SheetNames[0]; // fallback to first sheet
+
   if(collSheetName){
     const ws=wb.Sheets[collSheetName];
+    // Read as raw array — no header row, positional columns
+    // Confirmed layout: col0=Id#, col1=CardNum/SetHeader, col2=CardName, col3=Rarity,
+    // col4=Paid, col5=NMPrice£, col8=LPPrice, col12=Condition, col13=Upgrade(Y)
     const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-    // Parse section by section — detect set headers like "BASE SET 🔴"
     let currentSet=null;
-    raw.forEach((row,ri)=>{
-      if(!row||!row.length) return;
-      // Detect set header rows — first non-empty cell contains set name, second cell is empty or cost
-      const firstCell=String(row[0]||'').trim();
-      const secondCell=String(row[1]||'').trim();
-      // Set header: cell contains known set keyword and has no card number pattern
-      const setKey=Object.keys(SET_MAP).find(k=>firstCell.toLowerCase().includes(k));
-      if(setKey&&!firstCell.match(/^\d+\//)){
+    raw.forEach((row)=>{
+      if(!row||row.length<2) return;
+      const col0=String(row[0]||'').trim(); // Id#
+      const col1=String(row[1]||'').trim(); // Card num OR set header
+      const col2=String(row[2]||'').trim(); // Card name
+      // Detect set header: col1 contains set keyword, col2 is empty
+      const setKey=Object.keys(SET_MAP).find(k=>col1.toLowerCase().replace(/[^a-z0-9 ]/g,' ').trim().includes(k));
+      if(setKey&&col2===''){
         currentSet=SET_MAP[setKey]; return;
       }
       if(!currentSet) return;
-      // Card rows: column layout from PDF:
-      // Col0=Id#, Col1=CardName, Col2=Type/Rarity, Col3=Paid, Col4=NMMarket£,
-      // Col5=NMMarket$, Col6=Difference, Col7=AvgMktLP, Col8=Condition, Col9=Upgrade?
-      // Row must have an Id# (numeric) in col0
-      const idNum=String(row[0]||'').trim();
-      const cardName=String(row[1]||'').trim();
-      const rarity=String(row[2]||'').trim();
-      const paid=parseAmount(row[3]);
-      const nmPrice=parseAmount(row[4]);
-      const lpPrice=parseAmount(row[7]);
-      const cond=String(row[8]||'').trim();
-      const upgradeRaw=String(row[9]||'').trim().toUpperCase();
-      const upgrade=upgradeRaw==='Y'||upgradeRaw==='YES';
-      // Skip if no name or it looks like a header/total row
-      if(!cardName||cardName.toLowerCase()==='card name'||cardName.toLowerCase().includes('non-holo')) return;
-      if(!idNum||isNaN(parseInt(idNum))) return;
-      // Try to find the card in SETS by name+set
-      const setData=SETS[currentSet];
-      if(!setData) return;
-      const cardDef=setData.cards.find(c=>c.name.toLowerCase()===cardName.toLowerCase())||
-                    setData.cards.find(c=>c.name.toLowerCase().includes(cardName.toLowerCase()));
-      if(!cardDef){
-        // Could be a bulk row like "17-102 All Non-Holos"
-        return;
+      // Skip header row, blank rows, bulk lot rows, and total rows
+      if(!col2||col2==='Card Name'||col2==='nan') return;
+      if(!col0||isNaN(parseInt(col0))) return;
+      // Skip bulk rows like "All Non-Holos", "Commons/UC"
+      if(col2.toLowerCase().includes('non-holo')||col2.toLowerCase().includes('common')||col2.toLowerCase().includes('c/uc')) return;
+      // For promos: card number may be embedded in col2 (e.g. "Electabuzz #2") and col1 is empty
+      // Extract it and normalise to match SETS format (#2)
+      let cardNum=col1;
+      let cardName=col2;
+      if(!col1||!col1.match(/[\/\-#]/)){
+        // Try to extract #N from col2 name e.g. "Electabuzz #2" → num="#2", name="Electabuzz"
+        const promoMatch=col2.match(/^(.+?)\s+#(\d+)$/);
+        if(promoMatch){ cardName=promoMatch[1].trim(); cardNum='#'+promoMatch[2]; }
+        else if(col2.toLowerCase()==='ancient mew'){ cardName='Ancient Mew'; cardNum='#46'; }
+        else return; // genuinely no number — skip
       }
-      const ck=cardKey(currentSet,cardDef.num);
+      // Parse fields from confirmed column positions
+      const nmPrice=parseAmount(row[5]);   // col5 = NM Market £
+      const lpPrice=parseAmount(row[8]);   // col8 = Avg Mkt LP(£)
+      const cond=String(row[12]||'').trim(); // col12 = Condition
+      const upgradeRaw=String(row[13]||'').trim().toUpperCase(); // col13 = Upgrade?
+      const upgrade=upgradeRaw==='Y'||upgradeRaw==='YES';
       // Normalise condition
-      let condNorm='NM';
       const cu=cond.toUpperCase().replace(/\s/g,'');
-      if(cu==='NM'||cu==='') condNorm='NM';
-      else if(cu==='LP+'||cu==='LP+') condNorm='LP+';
+      let condNorm='NM';
+      if(cu==='LP+') condNorm='LP+';
       else if(cu==='LP-') condNorm='LP-';
       else if(cu==='LP') condNorm='LP';
       else if(cu==='MP') condNorm='MP';
       else if(cu==='HP') condNorm='HP';
-      else condNorm=cond||'NM';
-      result.collection.push({ key:ck, owned:true, cond:condNorm, type:'raw', nmPrice, lpPrice, upgrade, paid });
+      // Match card by number first, then name
+      const setData=SETS[currentSet];
+      if(!setData) return;
+      let cardDef=setData.cards.find(c=>c.num===cardNum)
+        ||setData.cards.find(c=>c.name.toLowerCase()===cardName.toLowerCase());
+      if(!cardDef) return;
+      const ck=cardKey(currentSet,cardDef.num);
+      result.collection.push({key:ck,owned:true,cond:condNorm,type:'raw',nmPrice,lpPrice,upgrade});
     });
+    if(!result.collection.length){
+      result.errors.push('Collection sheet found ("'+collSheetName+'") but no cards parsed — check format');
+    }
   } else {
-    result.errors.push('Could not find collection sheet — rename it to "Pokemon Complete Set"');
+    result.errors.push('Could not find collection sheet');
   }
 
   // ── SHEET 2: All purchases ──
-  const purchSheetName=wb.SheetNames.find(n=>n.toLowerCase().includes('all purchases')||n.toLowerCase().includes('purchases'));
+  // Confirmed: row 0 is a totals row, row 1 is the header row
+  // Columns: Type, Pokemon, Set, Language, TCG link, Amount paid , Date, Where, Sold Price, Profit/Loss
+  const purchSheetName=wb.SheetNames.find(n=>n.toLowerCase().includes('all purchases')||n.toLowerCase().includes('purchases'))
+    ||wb.SheetNames[1]; // fallback to second sheet
   if(purchSheetName){
     const ws=wb.Sheets[purchSheetName];
-    const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+    // Skip row 0 (totals), use row 1 as header
+    const rows=XLSX.utils.sheet_to_json(ws,{defval:'',range:1});
     rows.forEach((row,i)=>{
-      // Expected columns (from PDF): Type, Card Name (pokemon name), Set, Language, TCG link, Amount paid, Date, Where Sold, Sold Price, Profit/Loss
-      const type=String(row['Type']||row['type']||'').trim().toLowerCase();
-      const name=String(row['Card Name']||row['Name']||row['Pokemon']||row['Card']||Object.values(row)[1]||'').trim();
-      const setRaw=String(row['Set']||row['set']||'').trim();
-      const lang=String(row['Language']||row['language']||row['Lang']||'English').trim();
-      const paidRaw=row['Amount paid']||row['Amount Paid']||row['Paid']||row['Cost']||'';
-      const dateRaw=row['Date']||row['Date Bought']||'';
-      const platform=String(row['Where']||row['Where Sold']||row['Platform']||'').trim()||'eBay';
-      const soldPriceRaw=row['Sold Price']||row['Sale Price']||row['Sold']||'';
-      const plRaw=row['Profit/Loss']||row['P/L']||row['Profit']||'';
-      if(!name||name.toLowerCase()==='card name') return;
+      const type=String(row['Type']||'').trim().toLowerCase();
+      const name=String(row['Pokemon']||row['Card Name']||row['Name']||'').trim();
+      const setRaw=String(row['Set']||'').trim();
+      const lang=String(row['Language']||'English').trim()||'English';
+      const paidRaw=row['Amount paid ']||row['Amount paid']||row['Amount Paid']||row['Paid']||'';
+      const dateRaw=row['Date']||'';
+      const platform=String(row['Where']||row['Platform']||'').trim();
+      const soldPriceRaw=row['Sold Price']||'';
+      if(!name||name==='Pokemon'||name==='Card Name') return;
       const paid=parseAmount(paidRaw);
-      if(paid===null&&!name) return;
+      if(paid===null) return;
       const soldPrice=parseAmount(soldPriceRaw);
-      const dateBought=parseXlDate(dateRaw);
-      // Normalise set
+      // Handle date — may already be a JS Date object from XLSX parsing
+      let dateBought=null;
+      if(dateRaw instanceof Date) dateBought=dateRaw.toISOString().slice(0,10);
+      else dateBought=parseXlDate(dateRaw);
       const setNorm=normaliseSet(setRaw)||setRaw||'Other / Modern';
-      // Normalise type
       let entryType='raw';
       if(type==='slab') entryType='slab';
-      else if(type==='other') entryType='bulk';
-      // Platform normalise
+      else if(type==='other'||type==='bundle'||type==='bulk') entryType='bulk';
       let platNorm='eBay';
       const pl=platform.toLowerCase();
       if(pl.includes('whatnot')) platNorm='Whatnot';
-      else if(pl.includes('ebay')) platNorm='eBay';
       else if(pl.includes('local')) platNorm='Local';
       else if(platform) platNorm=platform;
       result.ledger.push({
         id:Date.now().toString()+'_'+i+'_'+Math.random().toString(36).slice(2,4),
-        name, set:setNorm, type:entryType, language:lang,
-        dateBought, platform:platNorm,
-        paid:paid||0,
-        soldPrice:soldPrice!==null?soldPrice:null,
-        dateSold:soldPrice!==null?dateBought:null, // sold date not always separate
-        soldPlatform:soldPrice!==null?platNorm:null,
+        name,set:setNorm,type:entryType,language:lang,
+        dateBought,platform:platNorm,paid,
+        soldPrice:soldPrice!==null&&soldPrice>0?soldPrice:null,
+        dateSold:null,soldPlatform:null,
         notes:'',slabGrade:'',collectionKey:null
       });
     });
