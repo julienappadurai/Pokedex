@@ -1446,6 +1446,7 @@ function openAddLedger(){
   if($id('lCardPickerWrap')) $id('lCardPickerWrap').style.display='none';
   if($id('lCardPickerList')) $id('lCardPickerList').innerHTML='';
   if($id('lPickerCount')) $id('lPickerCount').textContent='';
+  _pickerCards=[]; _pickerSetName='';
   $id('ledgerOv')._collectionKeys=[];
   if($id('lTcgSetName')) $id('lTcgSetName').value='';
   _autofillParsed=null;
@@ -1461,11 +1462,7 @@ function openAddLedgerFromCollection(setName,num){
     $id('lName').value=`${cardDef.name} ${num}`;
     $id('lEntrySet').value=setName;
     onLedgerSetChange(); // populate card picker + build list
-    // Pre-check the card in the multi-select list
-    setTimeout(()=>{
-      const cb = $id('lCardPickerList').querySelector(`input[value="${CSS.escape(num)}"]`);
-      if(cb){ cb.checked=true; updatePickerCount(); }
-    },50);
+    pickerPreSelect(num); // pre-check the single card
     const data=getCard(setName,num);
     if(data) $id('lEntryType').value=data.type||'raw';
     $id('ledgerOv')._collectionKey=cardKey(setName,num);
@@ -1671,68 +1668,72 @@ function resetAll(){
 // ── LEDGER CARD PICKER ──
 const COLLECTION_SETS = ['Base Set', 'Jungle', 'Fossil', 'WOTC Black Star Promos'];
 
+// ── CARD PICKER STATE (JS array — avoids querySelectorAll reliability issues) ──
+let _pickerCards = []; // [{num, name, rarity, checked}]
+let _pickerSetName = '';
+
 function onLedgerSetChange(){
   const setName = $id('lEntrySet').value;
   const wrap = $id('lCardPickerWrap');
   if(COLLECTION_SETS.includes(setName)){
-    buildCardPickerList(setName);
+    _pickerSetName = setName;
+    _pickerCards = (SETS[setName]||{cards:[]}).cards.map(c=>({...c, checked:false}));
+    renderPickerList();
     wrap.style.display = '';
-    // Single card? clear name so user picks; bulk = name auto-set on save
     $id('lName').value = '';
     $id('ledgerOv')._collectionKeys = [];
     $id('ledgerOv')._collectionKey = null;
     updatePickerCount();
   } else {
     wrap.style.display = 'none';
+    _pickerCards = [];
     $id('lCardPickerList').innerHTML = '';
     $id('ledgerOv')._collectionKeys = [];
     $id('ledgerOv')._collectionKey = null;
   }
 }
 
-function buildCardPickerList(setName){
+function renderPickerList(){
   const list = $id('lCardPickerList');
   list.innerHTML = '';
-  const setData = SETS[setName];
-  if(!setData) return;
-  setData.cards.forEach(c=>{
-    const alreadyOwned = getCard(setName, c.num)&&getCard(setName, c.num).owned;
-    const row = document.createElement('label');
-    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;transition:background .1s;';
-    row.onmouseover = ()=>row.style.background='rgba(255,203,5,.05)';
-    row.onmouseout = ()=>row.style.background='';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.value = c.num;
-    cb.dataset.rarity = c.rarity;
-    cb.dataset.name = c.name;
-    cb.style.cssText = 'width:16px;height:16px;accent-color:var(--yellow);flex-shrink:0;cursor:pointer;';
-    cb.onchange = updatePickerCount;
+  _pickerCards.forEach((c, idx)=>{
+    const alreadyOwned = !!(getCard(_pickerSetName, c.num)&&getCard(_pickerSetName, c.num).owned);
     const _rc = c.rarity.toLowerCase().includes('holo')?'rarity-holo':c.rarity==='Rare'?'rarity-rare':c.rarity==='Uncommon'?'rarity-uncommon':c.rarity==='Promo'?'rarity-promo':c.rarity==='Trainer'?'rarity-trainer':'rarity-common';
-    row.innerHTML = ``;
-    row.appendChild(cb);
-    const txt = document.createElement('span');
-    txt.innerHTML = `<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-right:4px;">${esc(c.num)}</span>${esc(c.name)} <span class="card-rarity ${_rc}" style="margin-left:4px;">${esc(c.rarity)}</span>${alreadyOwned?` <span style="font-size:9px;color:var(--green);font-family:'DM Mono',monospace;">✓owned</span>`:''}`;
-    row.appendChild(txt);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;user-select:none;';
+    row.innerHTML = `
+      <input type="checkbox" id="pcb_${idx}" style="width:18px;height:18px;accent-color:var(--yellow);flex-shrink:0;cursor:pointer;" ${c.checked?'checked':''}>
+      <label for="pcb_${idx}" style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;font-size:12px;font-weight:600;">
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);min-width:44px;">${esc(c.num)}</span>
+        <span>${esc(c.name)}</span>
+        <span class="card-rarity ${_rc}" style="margin-left:2px;">${esc(c.rarity)}</span>
+        ${alreadyOwned?`<span style="font-size:9px;color:var(--green);font-family:'DM Mono',monospace;">✓</span>`:''}
+      </label>`;
+    // Clicking the row div toggles the checkbox
+    row.addEventListener('click', e=>{
+      if(e.target.tagName==='INPUT') return; // native checkbox handles it
+      _pickerCards[idx].checked = !_pickerCards[idx].checked;
+      row.querySelector('input').checked = _pickerCards[idx].checked;
+      updatePickerCount();
+    });
+    row.querySelector('input').addEventListener('change', e=>{
+      _pickerCards[idx].checked = e.target.checked;
+      updatePickerCount();
+    });
     list.appendChild(row);
   });
 }
 
 function updatePickerCount(){
-  const checks = $id('lCardPickerList').querySelectorAll('input[type=checkbox]:checked');
-  const n = checks.length;
+  const selected = _pickerCards.filter(c=>c.checked);
+  const n = selected.length;
   $id('lPickerCount').textContent = n>0 ? `(${n} selected)` : '';
-  // Update collectionKeys
-  const setName = $id('lEntrySet').value;
-  $id('ledgerOv')._collectionKeys = Array.from(checks).map(cb=>cardKey(setName,cb.value));
-  // If exactly one card, also set name
+  $id('ledgerOv')._collectionKeys = selected.map(c=>cardKey(_pickerSetName, c.num));
   if(n===1){
-    const cb = checks[0];
-    $id('lName').value = `${cb.dataset.name} ${cb.value}`;
-    $id('ledgerOv')._collectionKey = cardKey(setName, cb.value);
+    $id('lName').value = `${selected[0].name} ${selected[0].num}`;
+    $id('ledgerOv')._collectionKey = cardKey(_pickerSetName, selected[0].num);
   } else if(n>1){
-    const setName2 = $id('lEntrySet').value;
-    $id('lName').value = `${setName2} — ${n} cards`;
+    $id('lName').value = `${_pickerSetName} — ${n} cards`;
     $id('ledgerOv')._collectionKey = null;
   } else {
     $id('lName').value = '';
@@ -1741,26 +1742,26 @@ function updatePickerCount(){
 }
 
 function pickerSelectRarity(rarity){
-  const boxes = $id('lCardPickerList').querySelectorAll('input[type=checkbox]');
-  boxes.forEach(cb=>{
-    const r = cb.dataset.rarity||'';
-    // Match partial: 'Holo Rare' includes 'Holo', 'Rare' matches exact
-    if(rarity==='Holo Rare') cb.checked = r.toLowerCase().includes('holo');
-    else cb.checked = r===rarity;
+  _pickerCards.forEach(c=>{
+    if(rarity==='Holo Rare') c.checked = c.rarity.toLowerCase().includes('holo');
+    else c.checked = c.rarity === rarity;
   });
+  renderPickerList();
   updatePickerCount();
 }
 
 function pickerSelectAll(val){
-  $id('lCardPickerList').querySelectorAll('input[type=checkbox]').forEach(cb=>{ cb.checked=val; });
+  _pickerCards.forEach(c=>{ c.checked = val; });
+  renderPickerList();
   updatePickerCount();
 }
 
-// onCardPickerChange kept for single-card compat (called from openAddLedgerFromCollection)
-function onCardPickerChange(){
-  const setName = $id('lEntrySet').value;
-  if(!setName) return;
-  // Find the checked box for this num (from pre-select)
+function onCardPickerChange(){ updatePickerCount(); }
+
+// Pre-select a single card (called from openAddLedgerFromCollection)
+function pickerPreSelect(num){
+  _pickerCards.forEach(c=>{ c.checked = c.num===num; });
+  renderPickerList();
   updatePickerCount();
 }
 
