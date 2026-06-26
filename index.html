@@ -590,9 +590,29 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
   <div class="modal" style="max-width:480px;">
     <h2 id="ledgerModalTitle">Add Purchase</h2>
     <div class="modal-sub">Log a card purchase or sale</div>
+    <div class="field">
+      <label>TCGPlayer Link (optional)</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="lTcgUrl" placeholder="Paste TCGPlayer URL to auto-fill…" oninput="onTcgUrlInput(this.value)" style="flex:1;">
+        <a id="lTcgLink" href="#" target="_blank" rel="noopener noreferrer"
+          style="display:none;padding:8px 12px;background:rgba(255,203,5,.1);border:1.5px solid rgba(255,203,5,.3);border-radius:10px;color:var(--yellow);font-size:12px;font-weight:700;white-space:nowrap;text-decoration:none;transition:all .15s;"
+          onmouseover="this.style.background='rgba(255,203,5,.2)'" onmouseout="this.style.background='rgba(255,203,5,.1)'">
+          🔗 View
+        </a>
+      </div>
+    </div>
+    <!-- Auto-fill preview banner -->
+    <div id="lAutofillBanner" style="display:none;background:rgba(255,203,5,.08);border:1.5px solid rgba(255,203,5,.3);border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--yellow);text-transform:uppercase;margin-bottom:10px;">⚡ Auto-fill Available</div>
+      <div id="lAutofillPreview" style="font-size:12px;color:var(--text);line-height:2;margin-bottom:12px;font-weight:600;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="applyAutofill()" style="flex:1;padding:8px;background:var(--yellow);color:var(--navy);border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">✓ Yes, Apply</button>
+        <button onclick="dismissAutofill()" style="padding:8px 14px;background:transparent;border:1.5px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">Dismiss</button>
+      </div>
+    </div>
     <div class="field"><label>Card Name / Description</label><input id="lName" placeholder="e.g. Charizard 4/102, Base Set Commons…"></div>
     <div class="two-col">
-      <div class="field"><label>Set</label>
+      <div class="field"><label>App Set</label>
         <select id="lEntrySet">
           <option value="">— Select —</option>
           <option>Base Set</option><option>Jungle</option><option>Fossil</option>
@@ -607,6 +627,7 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
         </select>
       </div>
     </div>
+    <div class="field"><label>TCG Set Name <span style="color:var(--muted);font-weight:400;">(e.g. Obsidian Flames, Generations)</span></label><input id="lTcgSetName" placeholder="Specific set name…"></div>
     <div class="field" id="lSlabGradeField" style="display:none;"><label>Slab Grade</label><input id="lSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10"></div>
     <div class="two-col">
       <div class="field"><label>Date Bought</label><input type="date" id="lDateBought"></div>
@@ -1353,6 +1374,9 @@ function openAddLedger(){
   $id('lDateBought').value=new Date().toISOString().slice(0,10);
   $id('lPlatformEntry').value='eBay'; $id('lPaid').value='';
   $id('lDateSold').value=''; $id('lSoldPrice').value=''; $id('lSoldPlatform').value=''; $id('lNotes').value='';
+  if($id('lTcgUrl')){ $id('lTcgUrl').value=''; $id('lTcgLink').style.display='none'; $id('lAutofillBanner').style.display='none'; }
+  if($id('lTcgSetName')) $id('lTcgSetName').value='';
+  _autofillParsed=null;
   $id('ledgerOv').classList.add('on');
   setTimeout(()=>$id('lName').focus(),100);
 }
@@ -1383,6 +1407,8 @@ function openEditLedger(id){
   $id('lPaid').value=entry.paid||'';
   $id('lDateSold').value=entry.dateSold||''; $id('lSoldPrice').value=entry.soldPrice||'';
   $id('lSoldPlatform').value=entry.soldPlatform||''; $id('lNotes').value=entry.notes||'';
+  if($id('lTcgUrl')){ $id('lTcgUrl').value=entry.tcgUrl||''; onTcgUrlInput(entry.tcgUrl||''); }
+  if($id('lTcgSetName')) $id('lTcgSetName').value=entry.tcgSetName||'';
   $id('ledgerOv').classList.add('on');
 }
 
@@ -1500,8 +1526,8 @@ function renderLedger(){
     const tr=document.createElement('tr'); tr.style.cursor='pointer';
     tr.innerHTML=`
       <td style="white-space:nowrap;font-family:'DM Mono',monospace;font-size:11px;">${dateStr}</td>
-      <td><div style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(l.name)}">${esc(l.name)}</div>${l.slabGrade?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);">${esc(l.slabGrade)}</div>`:''}</td>
-      <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.set||'—')}</td>
+      <td><div style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(l.name)}">${esc(l.name)}</div>${l.slabGrade?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);">${esc(l.slabGrade)}</div>`:''}${l.tcgUrl?`<a href="${esc(l.tcgUrl)}" target="_blank" rel="noopener" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--yellow);opacity:.7;text-decoration:none;display:block;margin-top:2px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">🔗 TCGPlayer</a>`:''}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.tcgSetName||l.set||'—')}</td>
       <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.language||'—')}</td>
       <td><span class="type-badge ${l.type||'raw'}">${l.type==='bulk'?'Bulk':l.type==='slab'?'Slab':'Raw'}</span></td>
       <td style="text-align:right;font-family:'DM Mono',monospace;">${fmt(l.paid)}</td>
@@ -1573,6 +1599,149 @@ saveLedgerEntry=function(){
     if(last) last.language=lang;
   }
 };
+
+
+// ═══════════════════════════════════════════════
+// TCGPLAYER URL PARSER
+// ═══════════════════════════════════════════════
+let _autofillParsed = null;
+
+function parseTCGUrl(url){
+  url=(url||'').trim();
+  if(!url||!url.includes('tcgplayer.com/product/')) return null;
+  try{
+    const u=new URL(url);
+    const pathM=u.pathname.match(/\/product\/\d+\/(.+)/);
+    if(!pathM) return null;
+    let slug=decodeURIComponent(pathM[1]).toLowerCase();
+    const langRaw=(u.searchParams.get('Language')||'English').toLowerCase();
+    let language=(langRaw==='all'||langRaw==='japanese')?'Japanese':'English';
+    slug=slug.replace(/^pokemon-/,'');
+    if(slug.startsWith('japan-')){ slug=slug.slice(6); language='Japanese'; }
+    const SET_SLUGS=[
+      ['scarlet-and-violet-promo-cards','Scarlet & Violet Promos','Other / Modern'],
+      ['mystery-of-the-fossils','Mystery of the Fossils','Other / Modern'],
+      ['ruler-of-the-black-flame','Ruler of the Black Flame','Other / Modern'],
+      ['scarlet-and-violet-151','Scarlet & Violet 151','Other / Modern'],
+      ['scarlet-and-violet','Scarlet & Violet','Other / Modern'],
+      ['trading-card-game-classic','TCG Classic','Other / Modern'],
+      ['miscellaneous-cards-and-products','Miscellaneous','Other / Modern'],
+      ['mega-evolution-promo','Mega Evolution Promo','Other / Modern'],
+      ['pokemon-tcg-classic','TCG Classic','Other / Modern'],
+      ['trick-or-trade','Trick or Trade','Other / Modern'],
+      ['rapid-strike-master','Rapid Strike Master','Other / Modern'],
+      ['shiny-treasure-ex','Shiny Treasure ex','Other / Modern'],
+      ['super-electric-breaker','Super Electric Breaker','Other / Modern'],
+      ['deck-exclusives','Deck Exclusives','Other / Modern'],
+      ['heartgold-soulsilver','HeartGold SoulSilver','Other / Modern'],
+      ['vstar-universe','VSTAR Universe','Other / Modern'],
+      ['double-blaze','Double Blaze','Other / Modern'],
+      ['vivid-voltage','Vivid Voltage','Other / Modern'],
+      ['lost-origin','Lost Origin','Other / Modern'],
+      ['surging-sparks','Surging Sparks','Other / Modern'],
+      ['stellar-crown','Stellar Crown','Other / Modern'],
+      ['ancient-roar','Ancient Roar','Other / Modern'],
+      ['nihil-zero','Nihil Zero','Other / Modern'],
+      ['ninja-spinner','Ninja Spinner','Other / Modern'],
+      ['mega-brave','Mega Brave','Other / Modern'],
+      ['perfect-order','Perfect Order','Other / Modern'],
+      ['phantasmal-flames','Phantasmal Flames','Other / Modern'],
+      ['black-bolt','Black Bolt','Other / Modern'],
+      ['expansion-pack','Expansion Pack (Japanese)','Other / Modern'],
+      ['pokemon-jungle','Jungle (Japanese)','Jungle'],
+      ['pokemon-go','Pokémon GO','Other / Modern'],
+      ['pokemon-card-151','Pokémon Card 151','Other / Modern'],
+      ['xy-breakpoint','XY BREAKpoint','Other / Modern'],
+      ['xy-evolutions','XY Evolutions','Other / Modern'],
+      ['team-rocket','Team Rocket','Other / Modern'],
+      ['sm-promos','SM Promos','Other / Modern'],
+      ['base-set','Base Set','Base Set'],
+      ['jungle','Jungle','Jungle'],
+      ['fossil','Fossil','Fossil'],
+      ['generations','Generations','Other / Modern'],
+      ['celebrations','Celebrations','Other / Modern'],
+      ['sv01','Scarlet & Violet','Other / Modern'],
+      ['sv03','Obsidian Flames','Other / Modern'],
+      ['sv07','Stellar Crown','Other / Modern'],
+      ['sv08','Surging Sparks','Other / Modern'],
+      ['sv11b','Black Bolt','Other / Modern'],
+      ['sv4k','Ancient Roar','Other / Modern'],
+      ['sv4a','Shiny Treasure ex','Other / Modern'],
+      ['sv2a','Pokémon Card 151','Other / Modern'],
+      ['sv3','Ruler of the Black Flame','Other / Modern'],
+      ['sv8','Super Electric Breaker','Other / Modern'],
+      ['sv','Scarlet & Violet','Other / Modern'],
+      ['swsh04','Vivid Voltage','Other / Modern'],
+      ['swsh11','Lost Origin','Other / Modern'],
+      ['swsh','Sword & Shield','Other / Modern'],
+      ['s5r','Rapid Strike Master','Other / Modern'],
+      ['s10b','Pokémon GO (Japanese)','Other / Modern'],
+      ['s12a','VSTAR Universe','Other / Modern'],
+      ['sm10','Double Blaze','Other / Modern'],
+      ['me03','Perfect Order','Other / Modern'],
+      ['me02','Phantasmal Flames','Other / Modern'],
+      ['me','Mega Evolution Promo','Other / Modern'],
+      ['m4','Ninja Spinner','Other / Modern'],
+      ['m3','Nihil Zero','Other / Modern'],
+      ['m1l','Mega Brave','Other / Modern'],
+    ];
+    let tcgSet=null,appSet='Other / Modern',cardSlug=slug;
+    for(const [key,display,app] of SET_SLUGS){
+      if(slug===key){tcgSet=display;appSet=app;cardSlug='';break;}
+      if(slug.startsWith(key+'-')){tcgSet=display;appSet=app;cardSlug=slug.slice(key.length+1);break;}
+    }
+    if(!tcgSet){cardSlug=slug;}
+    cardSlug=cardSlug
+      .replace(/-\d{1,3}-\d{2,3}$/,'')
+      .replace(/-\d{3,}$/,'')
+      .replace(/-sm\d+$/i,'')
+      .replace(/-\d+$/,'')
+      .replace(/-(full-art|secret|trainer-gallery|booster-bundle|shadowless)$/i,'');
+    const cardName=cardSlug.split('-').filter(Boolean)
+      .map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')
+      .replace(/\bEx\b/,'ex').replace(/\bGx\b/,'GX')
+      .replace(/\bVmax\b/,'VMAX').replace(/\bVstar\b/,'VSTAR');
+    return{name:cardName||'Unknown',tcgSet,appSet,language,url};
+  }catch(e){return null;}
+}
+
+function onTcgUrlInput(val){
+  const link=$id('lTcgLink');
+  const banner=$id('lAutofillBanner');
+  _autofillParsed=null;
+  if(!val||!val.includes('tcgplayer.com')){
+    link.style.display='none'; banner.style.display='none'; return;
+  }
+  // Show clickable link
+  link.href=val; link.style.display='';
+  // Try parse
+  const parsed=parseTCGUrl(val);
+  if(!parsed){banner.style.display='none';return;}
+  _autofillParsed=parsed;
+  // Build preview
+  let preview='';
+  if(parsed.name) preview+=`<div>📛 <strong>Name:</strong> ${esc(parsed.name)}</div>`;
+  if(parsed.tcgSet) preview+=`<div>📦 <strong>TCG Set:</strong> ${esc(parsed.tcgSet)}</div>`;
+  if(parsed.appSet) preview+=`<div>🗂 <strong>App Set:</strong> ${esc(parsed.appSet)}</div>`;
+  preview+=`<div>🌐 <strong>Language:</strong> ${esc(parsed.language)}</div>`;
+  $id('lAutofillPreview').innerHTML=preview;
+  banner.style.display='';
+}
+
+function applyAutofill(){
+  if(!_autofillParsed) return;
+  const p=_autofillParsed;
+  if(p.name&&!$id('lName').value) $id('lName').value=p.name;
+  if(p.appSet) $id('lEntrySet').value=p.appSet;
+  if(p.tcgSet) $id('lTcgSetName').value=p.tcgSet;
+  if(p.language) $id('lLanguage').value=p.language;
+  $id('lAutofillBanner').style.display='none';
+}
+
+function dismissAutofill(){
+  $id('lAutofillBanner').style.display='none';
+  _autofillParsed=null;
+}
 
 // ═══════════════════════════════════════════════
 // INIT
