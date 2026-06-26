@@ -369,6 +369,17 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
 .owned-toggle input{width:18px;height:18px;accent-color:var(--yellow);cursor:pointer;}
 .owned-toggle span{font-size:14px;font-weight:700;color:var(--text2);}
 
+
+/* ── FINANCE BLUR ── */
+.fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
+.fin-blur:hover{filter:blur(4px);}
+.fin-blur::after{content:'🔒';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;pointer-events:none;}
+.fin-blurwrap{position:relative;display:inline-block;}
+.fin-revealed .fin-blur{filter:none;cursor:default;}
+.fin-revealed .fin-blur::after{display:none;}
+/* For table cells */
+td.fin-blur{position:relative;}
+
 /* scrollbar */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
@@ -513,6 +524,22 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
 </div>
 </div>
 
+
+<!-- FINANCE PIN MODAL -->
+<div class="ov" id="finPinOv">
+  <div class="modal" style="max-width:340px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">💰</div>
+    <h2 id="finPinTitle" style="font-size:13px;margin-bottom:4px;">Finance PIN</h2>
+    <div class="modal-sub" id="finPinSub">Enter your finance PIN to reveal figures</div>
+    <div class="pin-dots" id="finPinDots" style="justify-content:center;margin:16px 0;"></div>
+    <div class="pin-pad" id="finPinPad" style="max-width:220px;margin:0 auto 12px;"></div>
+    <div id="finPinMsg" style="font-size:11px;color:var(--red);min-height:16px;font-family:'DM Mono',monospace;"></div>
+    <div class="mbtns" style="margin-top:16px;">
+      <button class="mbtn-g" onclick="closeFinPin()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div class="ov" id="settingsOv">
   <div class="modal" style="max-width:420px;">
@@ -530,6 +557,7 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
         <button onclick="resetLedger()" style="padding:10px;background:transparent;border:2px solid rgba(255,61,71,.4);border-radius:10px;color:var(--red);cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;" onmouseover="this.style.background='rgba(255,61,71,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear Ledger</button>
       </div>
       <button onclick="resetAll()" style="width:100%;padding:10px;background:transparent;border:2px solid rgba(255,61,71,.4);border-radius:10px;color:var(--red);cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;" onmouseover="this.style.background='rgba(255,61,71,.08)'" onmouseout="this.style.background='transparent'">🗑 Clear ALL Data</button>
+      <button onclick="resetFinancePin()" style="width:100%;margin-top:8px;padding:10px;background:transparent;border:2px solid rgba(255,203,5,.3);border-radius:10px;color:var(--yellow);cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;" onmouseover="this.style.background='rgba(255,203,5,.06)'" onmouseout="this.style.background='transparent'">🔑 Reset Finance PIN</button>
     </div>
     <div class="mbtns"><button class="mbtn-p" onclick="closeSettingsModal()">Done</button></div>
   </div>
@@ -540,11 +568,23 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
   <div class="modal">
     <h2 id="cardModalTitle">Card</h2>
     <div class="modal-sub" id="cardModalSub"></div>
-    <div class="owned-toggle">
-      <input type="checkbox" id="cardOwned" onchange="toggleOwnedUI()">
-      <span>I own this card</span>
+
+    <!-- Owned badge (shown when already owned, replaces checkbox) -->
+    <div id="cardOwnedBadge" style="display:none;margin-bottom:14px;padding:10px 14px;background:rgba(74,222,128,.1);border:1.5px solid rgba(74,222,128,.4);border-radius:10px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:16px;">✓</span>
+      <span style="font-weight:700;color:var(--green);font-size:13px;">Owned</span>
+      <span id="cardSoldBadge" style="display:none;margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:6px;background:rgba(255,61,71,.15);color:var(--red);letter-spacing:1px;text-transform:uppercase;">Sold</span>
     </div>
-    <div id="cardOwnedFields">
+
+    <!-- Own this card button (shown when not yet owned) -->
+    <div id="cardNotOwnedWrap" style="margin-bottom:14px;">
+      <button onclick="markCardOwned()" style="width:100%;padding:12px;background:rgba(74,222,128,.1);border:1.5px solid rgba(74,222,128,.4);border-radius:10px;color:var(--green);font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(74,222,128,.18)'" onmouseout="this.style.background='rgba(74,222,128,.1)'">
+        ＋ I own this card → Log purchase
+      </button>
+    </div>
+
+    <!-- Owned-only fields (condition, type, slab, notes, upgrade) -->
+    <div id="cardOwnedFields" style="display:none;">
       <div class="two-col">
         <div class="field"><label>Condition</label>
           <select id="cardCond">
@@ -567,20 +607,25 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
         <label>Slab Grade</label>
         <input id="cardSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10">
       </div>
-      <div class="two-col">
-        <div class="field"><label>NM Market (£)</label><input type="number" id="cardNMPrice" step="0.01" placeholder="0.00"></div>
-        <div class="field"><label>Avg LP (£)</label><input type="number" id="cardLPPrice" step="0.01" placeholder="0.00"></div>
-      </div>
       <div class="field"><label>Notes</label><input id="cardNotes" placeholder="Optional notes…"></div>
       <div class="owned-toggle" style="margin-bottom:0;">
         <input type="checkbox" id="cardUpgrade">
         <span>⬆ Needs upgrade to better condition</span>
       </div>
     </div>
-    <div style="margin-top:14px;padding:12px 14px;background:var(--navy3);border-radius:10px;font-size:12px;color:var(--muted);display:none;" id="cardLedgerHint"></div>
-    <div class="mbtns">
+
+    <!-- NM price always visible -->
+    <div class="field" style="margin-top:14px;">
+      <label>NM Market Price (£)</label>
+      <input type="number" id="cardNMPrice" step="0.01" placeholder="0.00">
+    </div>
+    <!-- Hidden LP price kept for data compatibility -->
+    <input type="hidden" id="cardLPPrice">
+
+    <div style="margin-top:8px;padding:10px 12px;background:var(--navy3);border-radius:10px;font-size:11px;color:var(--muted);display:none;" id="cardLedgerHint"></div>
+    <div class="mbtns" id="cardModalBtns">
       <button class="mbtn-g" onclick="closeCardModal()">Cancel</button>
-      <button class="mbtn-p" onclick="saveCard()">Save Card</button>
+      <button class="mbtn-p" onclick="saveCard()">Save</button>
     </div>
   </div>
 </div>
@@ -613,7 +658,7 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
     <div class="field"><label>Card Name / Description</label><input id="lName" placeholder="e.g. Charizard 4/102, Base Set Commons…"></div>
     <div class="two-col">
       <div class="field"><label>App Set</label>
-        <select id="lEntrySet">
+        <select id="lEntrySet" onchange="onLedgerSetChange()">
           <option value="">— Select —</option>
           <option>Base Set</option><option>Jungle</option><option>Fossil</option>
           <option>WOTC Black Star Promos</option><option>Other / Modern</option><option>Mixed / Bulk Lot</option>
@@ -626,6 +671,13 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
           <option value="bulk">Bulk Lot</option>
         </select>
       </div>
+    </div>
+    <!-- Card picker: appears when a collection set is chosen -->
+    <div id="lCardPickerWrap" style="display:none;" class="field">
+      <label>Select Card from Set</label>
+      <select id="lCardPicker" onchange="onCardPickerChange()">
+        <option value="">— Choose card —</option>
+      </select>
     </div>
     <div class="field"><label>TCG Set Name <span style="color:var(--muted);font-weight:400;">(e.g. Obsidian Flames, Generations)</span></label><input id="lTcgSetName" placeholder="Specific set name…"></div>
     <div class="field" id="lSlabGradeField" style="display:none;"><label>Slab Grade</label><input id="lSlabGrade" placeholder="e.g. PSA 9, CGC Pristine 10"></div>
@@ -1225,7 +1277,7 @@ function renderColStats(){
     <div class="stat-card"><div class="stat-label">Owned</div><div class="stat-val g">${owned.length}<span style="font-size:14px;color:var(--muted);"> / ${setData.total}</span></div></div>
     <div class="stat-card"><div class="stat-label">Missing</div><div class="stat-val r">${setData.total-owned.length}</div></div>
     <div class="stat-card"><div class="stat-label">Needs Upgrade</div><div class="stat-val gold">${upgrade.length}</div></div>
-    <div class="stat-card"><div class="stat-label">NM Value</div><div class="stat-val">${fmt(totalNM)}</div></div>`;
+    <div class="stat-card"><div class="stat-label">NM Value (owned)</div><div class="stat-val">${finWrap(fmt(totalNM))}</div></div>`;
 }
 
 function setFilter(f){
@@ -1262,9 +1314,13 @@ function renderBinder(){
       inner+=`<div class="card-owned-info">`;
       if(data.cond) inner+=`<span class="card-cond ${condClass}">${esc(data.cond)}</span>`;
       if(data.type==='slab'&&data.slabGrade) inner+=` <span class="card-cond" style="background:rgba(244,208,63,.12);color:var(--gold);">${esc(data.slabGrade)}</span>`;
-      if(data.nmPrice) inner+=`<div class="card-price">NM ${fmt(parseFloat(data.nmPrice))}</div>`;
+      if(data.nmPrice) inner+=`<div class="card-price" style="position:relative;">NM ${finWrap(fmt(parseFloat(data.nmPrice)))}</div>`;
       inner+=`</div>`;
-      if(needsUpgrade) inner+=`<div class="card-upgrade-flag" title="Needs upgrade">⬆</div>`;
+      const ck=cardKey(activeSet,c.num);
+      const linkedLedger=D.ledger.find(l=>l.collectionKey===ck);
+      const cardSold=linkedLedger&&linkedLedger.soldPrice;
+      if(cardSold) inner+=`<div style="position:absolute;top:5px;right:5px;font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:4px;background:rgba(255,61,71,.15);color:var(--red);text-transform:uppercase;letter-spacing:1px;">Sold</div>`;
+      else if(needsUpgrade) inner+=`<div class="card-upgrade-flag" title="Needs upgrade">⬆</div>`;
       else inner+=`<div class="card-check">✓</div>`;
       if(data.type==='slab') inner+=`<div class="card-type-badge">SLAB</div>`;
     }
@@ -1284,24 +1340,31 @@ function openCardModal(setName,num){
   if(!cardDef) return;
   editingCardKey=cardKey(setName,num);
   const data=getCard(setName,num)||{};
+  const owned=!!(data.owned);
   $id('cardModalTitle').textContent=cardDef.name;
   $id('cardModalSub').textContent=`${num} · ${setName} · ${cardDef.rarity}`;
-  $id('cardOwned').checked=!!(data.owned);
+  // Owned state UI
+  $id('cardOwnedBadge').style.display=owned?'flex':'none';
+  $id('cardNotOwnedWrap').style.display=owned?'none':'';
+  $id('cardOwnedFields').style.display=owned?'':'none';
+  // Sold badge
+  const linkedEntry=D.ledger.find(l=>l.collectionKey===editingCardKey);
+  const isSold=linkedEntry&&linkedEntry.soldPrice;
+  $id('cardSoldBadge').style.display=isSold?'':'none';
+  // Owned fields
   $id('cardCond').value=data.cond||'NM';
   $id('cardType').value=data.type||'raw';
   $id('cardSlabGrade').value=data.slabGrade||'';
-  $id('cardNMPrice').value=data.nmPrice||'';
-  $id('cardLPPrice').value=data.lpPrice||'';
   $id('cardNotes').value=data.notes||'';
   $id('cardUpgrade').checked=!!(data.upgrade);
-  toggleOwnedUI();
   toggleSlabUI();
-  // hint about ledger
+  // NM price always visible
+  $id('cardNMPrice').value=data.nmPrice||'';
+  // Ledger hint
   const hint=$id('cardLedgerHint');
-  const existingEntry=D.ledger.find(l=>l.collectionKey===editingCardKey);
-  if(existingEntry){
+  if(linkedEntry){
     hint.style.display='';
-    hint.textContent=`💰 Linked ledger entry: paid ${fmt(existingEntry.paid)} on ${existingEntry.dateBought||'—'}`;
+    hint.innerHTML=`💰 Paid ${fmt(linkedEntry.paid)} · ${linkedEntry.dateBought||'—'} · ${linkedEntry.platform||''}${isSold?` · <span style="color:var(--red);">Sold ${fmt(linkedEntry.soldPrice)}</span>`:''}`;
   } else { hint.style.display='none'; }
   $id('cardOv').classList.add('on');
 }
@@ -1309,44 +1372,37 @@ function closeCardModal(){ $id('cardOv').classList.remove('on'); editingCardKey=
 $id('cardOv').addEventListener('click',e=>{ if(e.target===$id('cardOv')) closeCardModal(); });
 $id('cardType').addEventListener('change',toggleSlabUI);
 
-function toggleOwnedUI(){
-  const owned=$id('cardOwned').checked;
-  $id('cardOwnedFields').style.opacity=owned?'1':'0.4';
-  $id('cardOwnedFields').style.pointerEvents=owned?'':'none';
+function markCardOwned(){
+  // Save NM price first, then open ledger modal
+  if(!editingCardKey) return;
+  const prev=getCard(...editingCardKey.split('|'))||{};
+  D.collection[editingCardKey]=Object.assign({},prev,{
+    nmPrice:parseFloat($id('cardNMPrice').value)||prev.nmPrice||null,
+    owned:false // not yet — only mark owned after ledger save
+  });
+  save();
+  const parts=editingCardKey.split('|');
+  closeCardModal();
+  setTimeout(()=>openAddLedgerFromCollection(parts[0],parts[1]),150);
 }
+
 function toggleSlabUI(){
   $id('cardSlabGradeField').style.display=$id('cardType').value==='slab'?'':'none';
 }
 
 function saveCard(){
   if(!editingCardKey) return;
-  const owned=$id('cardOwned').checked;
-  const prev=getCard(...editingCardKey.split('|'));
-  const wasOwned=!!(prev&&prev.owned);
+  const data=getCard(...editingCardKey.split('|'))||{};
   const entry={
-    owned, cond:$id('cardCond').value, type:$id('cardType').value,
+    owned:data.owned||false,
+    cond:$id('cardCond').value,
+    type:$id('cardType').value,
     slabGrade:$id('cardSlabGrade').value.trim(),
     nmPrice:parseFloat($id('cardNMPrice').value)||null,
-    lpPrice:parseFloat($id('cardLPPrice').value)||null,
     notes:$id('cardNotes').value.trim(),
     upgrade:$id('cardUpgrade').checked
   };
-  if(!owned) entry.upgrade=false;
   D.collection[editingCardKey]=entry;
-  // Auto-create ledger prompt if newly marked as owned
-  if(owned&&!wasOwned){
-    const existingEntry=D.ledger.find(l=>l.collectionKey===editingCardKey);
-    if(!existingEntry){
-      save();
-      closeCardModal();
-      renderSetGrid();
-      renderCollectionBody();
-      // Ask to log a purchase
-      const parts=editingCardKey.split('|');
-      setTimeout(()=>openAddLedgerFromCollection(parts[0],parts[1]),200);
-      return;
-    }
-  }
   save();
   closeCardModal();
   renderSetGrid();
@@ -1375,6 +1431,8 @@ function openAddLedger(){
   $id('lPlatformEntry').value='eBay'; $id('lPaid').value='';
   $id('lDateSold').value=''; $id('lSoldPrice').value=''; $id('lSoldPlatform').value=''; $id('lNotes').value='';
   if($id('lTcgUrl')){ $id('lTcgUrl').value=''; $id('lTcgLink').style.display='none'; $id('lAutofillBanner').style.display='none'; }
+  if($id('lCardPickerWrap')) $id('lCardPickerWrap').style.display='none';
+  if($id('lCardPicker')) $id('lCardPicker').innerHTML='<option value="">— Choose card —</option>';
   if($id('lTcgSetName')) $id('lTcgSetName').value='';
   _autofillParsed=null;
   $id('ledgerOv').classList.add('on');
@@ -1388,6 +1446,8 @@ function openAddLedgerFromCollection(setName,num){
   if(cardDef){
     $id('lName').value=`${cardDef.name} ${num}`;
     $id('lEntrySet').value=setName;
+    onLedgerSetChange(); // populate card picker
+    $id('lCardPicker').value=num; // pre-select the card
     const data=getCard(setName,num);
     if(data) $id('lEntryType').value=data.type||'raw';
     $id('ledgerOv')._collectionKey=cardKey(setName,num);
@@ -1440,7 +1500,13 @@ function saveLedgerEntry(){
   };
   if(editingLedgerId){ const idx=D.ledger.findIndex(l=>l.id===editingLedgerId); if(idx>=0) D.ledger[idx]=entry; }
   else D.ledger.push(entry);
-  save(); closeLedgerModal(); renderLedger();
+  // If linked to collection card, mark it as owned
+  if(entry.collectionKey&&D.collection[entry.collectionKey]){
+    D.collection[entry.collectionKey].owned=true;
+  } else if(entry.collectionKey){
+    D.collection[entry.collectionKey]={owned:true};
+  }
+  save(); closeLedgerModal(); renderSetGrid(); renderCollectionBody(); renderLedger();
 }
 
 function deleteLedgerEntry(){
@@ -1470,9 +1536,9 @@ function renderLedger(){
   const totalProfit=sold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0)-(l.paid||0),0);
   const open=D.ledger.filter(l=>!l.soldPrice).length;
   $id('ledgerStats').innerHTML=`
-    <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-val r">${fmt(totalSpent)}</div></div>
-    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-val g">${fmt(totalRevenue)}</div></div>
-    <div class="stat-card"><div class="stat-label">Realised P&L</div><div class="stat-val ${totalProfit>=0?'g':'r'}">${fmtSign(totalProfit)}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-val r">${finWrap(fmt(totalSpent))}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-val g">${finWrap(fmt(totalRevenue))}</div></div>
+    <div class="stat-card"><div class="stat-label">Realised P&L</div><div class="stat-val ${totalProfit>=0?'g':'r'}">${finWrap(fmtSign(totalProfit))}</div></div>
     <div class="stat-card"><div class="stat-label">Open Positions</div><div class="stat-val gold">${open}</div></div>`;
 
   // Filter
@@ -1513,7 +1579,7 @@ function renderLedger(){
   const filtSpent=filtered.reduce((s,l)=>s+(l.paid||0),0);
   const filtSold=filtered.filter(l=>l.soldPrice);
   const filtPL=filtSold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0)-(l.paid||0),0);
-  $id('ledgerSummaryRow').innerHTML=`<span>${filtered.length} entries</span><span style="color:var(--red);">spent ${fmt(filtSpent)}</span>${filtSold.length?`<span style="color:${filtPL>=0?'var(--green)':'var(--red)'};">P&L ${fmtSign(filtPL)}</span>`:''}`;
+  $id('ledgerSummaryRow').innerHTML=`<span>${filtered.length} entries</span><span style="color:var(--red);">spent ${finWrap(fmt(filtSpent))}</span>${filtSold.length?`<span style="color:${filtPL>=0?'var(--green)':'var(--red)'};">P&L ${finWrap(fmtSign(filtPL))}</span>`:''}`;
 
   const tbody=$id('ledgerBody');
   const empty=$id('ledgerEmpty');
@@ -1533,10 +1599,10 @@ function renderLedger(){
       <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.tcgSetName||l.set||'—')}</td>
       <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.language||'—')}</td>
       <td><span class="type-badge ${l.type||'raw'}">${l.type==='bulk'?'Bulk':l.type==='slab'?'Slab':'Raw'}</span></td>
-      <td style="text-align:right;font-family:'DM Mono',monospace;">${fmt(l.paid)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;position:relative;">${finWrap(fmt(l.paid))}</td>
       <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${esc(l.platform||'')}</td>
-      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;">${isSold?`<div>${fmt(parseFloat(l.soldPrice))}</div><div style="color:var(--muted);font-size:10px;">${soldStr}${l.soldPlatform?' · '+l.soldPlatform:''}</div>`:'<span style="color:var(--muted);">open</span>'}</td>
-      <td style="text-align:right;" class="${pl===null?'profit-open':pl>=0?'profit-pos':'profit-neg'}">${pl===null?'—':fmtSign(pl)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;position:relative;">${isSold?`<div>${finWrap(fmt(parseFloat(l.soldPrice)))}</div><div style="color:var(--muted);font-size:10px;">${soldStr}${l.soldPlatform?' · '+l.soldPlatform:''}</div>`:'<span style="color:var(--muted);">open</span>'}</td>
+      <td style="text-align:right;position:relative;" class="${pl===null?'profit-open':pl>=0?'profit-pos':'profit-neg'}">${pl===null?'—':finWrap(fmtSign(pl))}</td>
       <td style="text-align:right;"><button onclick="event.stopPropagation();openEditLedger('${l.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">edit</button></td>`;
     tr.onclick=()=>openEditLedger(l.id);
     tbody.appendChild(tr);
@@ -1577,6 +1643,48 @@ function resetAll(){
   D.collection={}; D.ledger=[];
   save(); closeSettingsModal(); renderAll();
   alert('✓ All data cleared. You can now re-import your spreadsheet.');
+}
+
+
+// ── LEDGER CARD PICKER ──
+const COLLECTION_SETS = ['Base Set', 'Jungle', 'Fossil', 'WOTC Black Star Promos'];
+
+function onLedgerSetChange(){
+  const setName = $id('lEntrySet').value;
+  const wrap = $id('lCardPickerWrap');
+  const picker = $id('lCardPicker');
+  if(COLLECTION_SETS.includes(setName)){
+    // Populate picker with cards from this set
+    picker.innerHTML = '<option value="">— Choose card —</option>';
+    const setData = SETS[setName];
+    if(setData) setData.cards.forEach(c=>{
+      const o = document.createElement('option');
+      o.value = c.num;
+      o.textContent = `${c.num} — ${c.name} (${c.rarity})`;
+      picker.appendChild(o);
+    });
+    wrap.style.display = '';
+  } else {
+    wrap.style.display = 'none';
+    picker.innerHTML = '';
+  }
+}
+
+function onCardPickerChange(){
+  const setName = $id('lEntrySet').value;
+  const num = $id('lCardPicker').value;
+  if(!setName||!num) return;
+  const setData = SETS[setName];
+  if(!setData) return;
+  const cardDef = setData.cards.find(c=>c.num===num);
+  if(!cardDef) return;
+  // Auto-fill name
+  $id('lName').value = `${cardDef.name} ${num}`;
+  // Link to collection
+  $id('ledgerOv')._collectionKey = cardKey(setName, num);
+  // Pre-fill type if card already in collection
+  const colData = getCard(setName, num);
+  if(colData && colData.type) $id('lEntryType').value = colData.type;
 }
 
 // ── Update openAddLedger to include language field ──
@@ -1744,6 +1852,125 @@ function applyAutofill(){
 function dismissAutofill(){
   $id('lAutofillBanner').style.display='none';
   _autofillParsed=null;
+}
+
+
+// ═══════════════════════════════════════════════
+// FINANCE PIN
+// ═══════════════════════════════════════════════
+const FIN_PIN_KEY = 'pokebinder_finpin';
+let finPinBuffer = '', finPinMode = 'enter', finPinFirst = '';
+let finRevealed = false, finBlurTimer = null;
+
+function isFinPinSet(){ return !!localStorage.getItem(FIN_PIN_KEY); }
+
+function blurFinancials(){
+  finRevealed = false;
+  document.querySelectorAll('.fin-blur').forEach(el => {
+    el.closest('.fin-revealed') && el.closest('.fin-revealed').classList.remove('fin-revealed');
+  });
+  document.querySelectorAll('.fin-revealed').forEach(el => el.classList.remove('fin-revealed'));
+  if(finBlurTimer){ clearTimeout(finBlurTimer); finBlurTimer = null; }
+}
+
+function revealFinancials(){
+  finRevealed = true;
+  document.querySelectorAll('.fin-blur').forEach(el => {
+    let p = el;
+    while(p && p !== document.body){ p.classList.add('fin-revealed'); p = p.parentElement; }
+    el.classList.add('fin-revealed');
+  });
+  if(finBlurTimer) clearTimeout(finBlurTimer);
+  finBlurTimer = setTimeout(()=>{ blurFinancials(); }, 10000);
+}
+
+function openFinPin(){
+  finPinBuffer = ''; finPinFirst = '';
+  finPinMode = isFinPinSet() ? 'enter' : 'setup';
+  $id('finPinTitle').textContent = finPinMode === 'setup' ? 'Set Finance PIN' : 'Finance PIN';
+  $id('finPinSub').textContent = finPinMode === 'setup'
+    ? 'Choose a 4-digit PIN to protect your financial data'
+    : 'Enter your finance PIN to reveal figures';
+  $id('finPinMsg').textContent = '';
+  buildFinPinPad();
+  updateFinDots(0, false);
+  $id('finPinOv').classList.add('on');
+}
+
+function closeFinPin(){ $id('finPinOv').classList.remove('on'); finPinBuffer = ''; finPinFirst = ''; }
+
+function buildFinPinPad(){
+  const pad = $id('finPinPad'); pad.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(k => {
+    const btn = document.createElement('div');
+    btn.className = 'pin-key' + (k === '⌫' ? ' del' : '');
+    btn.textContent = k === '' ? '' : String(k);
+    if(k === '') { btn.style.cssText = 'pointer-events:none;opacity:0;'; }
+    else btn.addEventListener('click', () => handleFinPinKey(String(k)));
+    pad.appendChild(btn);
+  });
+}
+
+function updateFinDots(filled, err){
+  const w = $id('finPinDots'); w.innerHTML = '';
+  for(let i = 0; i < 4; i++){
+    const d = document.createElement('div');
+    d.className = 'pin-dot' + (i < filled ? (err ? ' error' : ' filled') : '');
+    w.appendChild(d);
+  }
+}
+
+function handleFinPinKey(k){
+  if(k === '⌫') finPinBuffer = finPinBuffer.slice(0, -1);
+  else if(finPinBuffer.length < 4) finPinBuffer += k;
+  updateFinDots(finPinBuffer.length, false);
+  $id('finPinMsg').textContent = '';
+
+  if(finPinBuffer.length === 4){
+    if(finPinMode === 'enter'){
+      const stored = localStorage.getItem(FIN_PIN_KEY);
+      if(stored && btoa(finPinBuffer) === stored){
+        closeFinPin(); revealFinancials();
+      } else {
+        updateFinDots(4, true);
+        $id('finPinMsg').textContent = 'Incorrect PIN';
+        setTimeout(() => { finPinBuffer = ''; updateFinDots(0, false); $id('finPinMsg').textContent = ''; }, 900);
+      }
+    } else if(finPinMode === 'setup'){
+      finPinFirst = finPinBuffer; finPinBuffer = ''; finPinMode = 'confirm';
+      $id('finPinTitle').textContent = 'Confirm Finance PIN';
+      $id('finPinSub').textContent = 'Enter the same PIN again to confirm';
+      updateFinDots(0, false);
+    } else { // confirm
+      if(finPinBuffer === finPinFirst){
+        localStorage.setItem(FIN_PIN_KEY, btoa(finPinBuffer));
+        closeFinPin(); revealFinancials();
+      } else {
+        updateFinDots(4, true);
+        $id('finPinMsg').textContent = 'PINs don\'t match — try again';
+        setTimeout(() => { finPinBuffer = ''; finPinFirst = ''; finPinMode = 'setup';
+          $id('finPinTitle').textContent = 'Set Finance PIN';
+          $id('finPinSub').textContent = 'Choose a 4-digit PIN to protect your financial data';
+          updateFinDots(0, false); $id('finPinMsg').textContent = ''; }, 900);
+      }
+    }
+  }
+}
+
+
+$id('finPinOv').addEventListener('click',e=>{ if(e.target===$id('finPinOv')) closeFinPin(); });
+
+function resetFinancePin(){
+  if(!confirm('Reset your finance PIN?\n\nYou\'ll need to set a new one next time you reveal figures.')) return;
+  localStorage.removeItem(FIN_PIN_KEY);
+  blurFinancials();
+  alert('Finance PIN cleared.');
+}
+
+// Wrap a value in a blurred span — clicking reveals via PIN
+function finWrap(val, extraStyle){
+  const s = extraStyle || '';
+  return `<span class="fin-blur" style="position:relative;display:inline-block;${s}" onclick="if(!this.classList.contains('fin-revealed'))openFinPin()">${val}</span>`;
 }
 
 // ═══════════════════════════════════════════════
