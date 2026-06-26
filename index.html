@@ -4,178 +4,336 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pokédex Binder</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/* ── GBA POKEMON THEME ── */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
 :root {
-  --bg:#0d0f1a; --s1:#141627; --s2:#1c1f35; --border:#2a2e4a;
-  --red:#e63946; --gold:#f4d03f; --green:#4caf7d; --blue:#5c9de0;
-  --text:#f0ece0; --muted:#8892a4; --r:10px;
+  /* Deep midnight Pokémon blue — GBA night palette */
+  --bg:#0a0c1a;
+  --s1:#111428;
+  --s2:#181b30;
+  --border:#252840;
+  /* Pokémon accent colours */
+  --red:#ff3d4a;        /* Pokédex red */
+  --yellow:#ffe033;     /* Pikachu yellow */
+  --blue:#4fc3f7;       /* Water type */
+  --purple:#b39ddb;     /* Psychic / Mewtwo */
+  --green:#66bb6a;      /* HP bar green */
+  --orange:#ff8a50;     /* Fire / Charizard */
+  /* Text */
+  --text:#eef0ff;
+  --muted:#6b7280;
+  --r:10px;
+  /* Pixel glow effects */
+  --glow-red:0 0 12px rgba(255,61,74,.4);
+  --glow-yellow:0 0 12px rgba(255,224,51,.35);
+  --glow-purple:0 0 12px rgba(179,157,219,.35);
 }
+
 body.light {
-  --bg:#f0ece0; --s1:#ffffff; --s2:#ebe7d8; --border:#d0cab8;
-  --red:#c0272f; --gold:#b8860b; --green:#2d8a5a; --blue:#2c6dba;
-  --text:#1a1814; --muted:#6a6458;
+  --bg:#e8eaf6; --s1:#ffffff; --s2:#f0f0fa; --border:#c5c8e8;
+  --red:#d32f2f; --yellow:#f9a825; --blue:#1976d2; --purple:#7b1fa2;
+  --green:#388e3c; --orange:#e64a19; --text:#1a1c2e; --muted:#6b7280;
 }
+
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
+html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;}
+
+/* ── PIXEL SCANLINES overlay (subtle retro GBA feel) ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+}
+body.light::before{display:none;}
+#appWrap,#authWrap{position:relative;z-index:1;}
+
+/* ── POKÉMON SVG SPRITES (inline CSS art) ── */
+.poke-deco{position:absolute;opacity:.07;pointer-events:none;user-select:none;font-size:120px;line-height:1;}
+.poke-deco.charizard{bottom:-10px;right:-20px;font-size:160px;opacity:.06;}
+.poke-deco.pikachu{top:10px;left:-10px;font-size:80px;opacity:.08;}
+.poke-deco.mewtwo{top:-20px;right:10px;font-size:140px;opacity:.05;}
 
 /* ── AUTH ── */
 #authWrap{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
-.auth-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:36px 28px;max-width:380px;width:100%;text-align:center;}
-.auth-title{font-family:'Playfair Display',serif;font-size:30px;color:var(--red);margin-bottom:4px;}
-.auth-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;}
+.auth-card{
+  background:var(--s1);border:2px solid var(--red);border-radius:16px;
+  padding:36px 28px;max-width:380px;width:100%;text-align:center;
+  position:relative;overflow:hidden;
+  box-shadow:var(--glow-red),inset 0 0 40px rgba(255,61,74,.03);
+}
+.auth-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--red),var(--yellow),var(--purple),var(--blue));
+}
+.auth-title{
+  font-family:'Press Start 2P',monospace;font-size:16px;color:var(--red);
+  margin-bottom:4px;line-height:1.6;text-shadow:var(--glow-red);
+  letter-spacing:1px;
+}
+.auth-sub{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;}
+.auth-pokemon{font-size:52px;margin-bottom:16px;display:block;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
 .pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
-.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);transition:all .15s;}
-.pin-dot.filled{background:var(--red);border-color:var(--red);}
-.pin-dot.error{background:var(--gold);border-color:var(--gold);}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all .15s;}
+.pin-dot.filled{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 8px rgba(255,224,51,.5);}
+.pin-dot.error{background:var(--red);border-color:var(--red);}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto;}
-.pin-key{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:20px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;color:var(--text);text-align:center;user-select:none;}
-.pin-key:hover{border-color:var(--red);color:var(--red);}
-.pin-key:active{transform:scale(.94);}
-.pin-key.del{font-size:16px;color:var(--muted);}
-.pin-msg{font-size:12px;color:var(--muted);min-height:18px;margin-top:10px;}
+.pin-key{
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:14px;font-size:18px;font-family:'Press Start 2P',monospace;
+  cursor:pointer;transition:all .1s;color:var(--text);text-align:center;user-select:none;
+}
+.pin-key:hover{border-color:var(--yellow);color:var(--yellow);box-shadow:0 0 8px rgba(255,224,51,.2);}
+.pin-key:active{transform:scale(.9);}
+.pin-key.del{font-size:14px;color:var(--muted);font-family:'DM Mono',monospace;}
+.pin-msg{font-size:11px;color:var(--muted);min-height:18px;margin-top:10px;font-family:'DM Mono',monospace;}
 
 /* ── LOAD ── */
 #loadWrap{position:fixed;inset:0;background:var(--bg);z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── APP ── */
+/* ── APP SHELL ── */
 #appWrap{display:none;}
-.app{max-width:1100px;margin:0 auto;padding:24px 16px 80px;}
+.app{max-width:1100px;margin:0 auto;padding:0 0 80px;}
 
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
-.logo{font-family:'Playfair Display',serif;font-size:24px;color:var(--red);}
-.logo small{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
-.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.hbtn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.hbtn:hover{border-color:var(--red);color:var(--red);}
-.hbtn.ok{color:var(--green);border-color:rgba(76,175,125,.3);}
-.hbtn.saving{color:var(--gold);border-color:rgba(244,208,63,.3);}
+/* ── HEADER BANNER ── */
+.poke-header{
+  background:linear-gradient(135deg,#0d0f1e 0%,#1a0a0a 40%,#0a0d1a 100%);
+  border-bottom:2px solid var(--border);
+  padding:16px 20px;margin-bottom:0;
+  position:relative;overflow:hidden;
+}
+.poke-header::after{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 80% 50%,rgba(255,61,74,.12) 0%,transparent 60%),
+    radial-gradient(ellipse at 20% 50%,rgba(255,224,51,.06) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 100%,rgba(179,157,219,.08) 0%,transparent 50%);
+  pointer-events:none;
+}
+.header-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:relative;z-index:1;}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo-icon{font-size:32px;animation:float 4s ease-in-out infinite;}
+.logo-text{}
+.logo-title{
+  font-family:'Press Start 2P',monospace;font-size:13px;color:var(--red);
+  display:block;line-height:1.5;text-shadow:var(--glow-red);letter-spacing:1px;
+}
+.logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:3px;display:block;}
+/* Decorative Pokémon silhouettes in header */
+.header-pokes{position:absolute;right:0;top:0;bottom:0;width:220px;pointer-events:none;overflow:hidden;opacity:.12;}
+.header-pokes span{position:absolute;font-size:72px;line-height:1;}
+.header-pokes .hp1{bottom:-8px;right:10px;font-size:88px;}
+.header-pokes .hp2{top:-10px;right:80px;font-size:56px;opacity:.7;}
+.header-pokes .hp3{bottom:0;right:130px;font-size:48px;opacity:.5;}
 
-/* ── TABS ── */
-.tab-bar{display:flex;gap:0;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:4px;margin-bottom:24px;width:fit-content;}
-.tab{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;padding:8px 20px;border-radius:7px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;}
-.tab.on{background:var(--red);color:#fff;font-weight:500;}
+.hbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;position:relative;z-index:1;}
+.hbtn{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;
+  padding:6px 12px;border-radius:6px;border:1px solid var(--border);
+  background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.hbtn:hover{border-color:var(--yellow);color:var(--yellow);background:rgba(255,224,51,.05);}
+.hbtn.ok{color:var(--green);border-color:rgba(102,187,106,.3);}
+.hbtn.saving{color:var(--yellow);border-color:rgba(255,224,51,.3);}
 
-/* ── COLLECTION VIEW ── */
-.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:28px;}
-.set-card{background:var(--s1);border:2px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
-.set-card:hover,.set-card.on{border-color:var(--red);}
-.set-card.on{background:rgba(230,57,70,.06);}
-.set-card-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--text);margin-bottom:6px;}
-.set-card-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px;letter-spacing:1px;}
-.set-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:6px;}
-.set-progress-bar{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease;}
-.set-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--green);}
-.set-badge{position:absolute;top:10px;right:10px;font-size:18px;}
+/* ── TAB BAR ── */
+.tab-wrap{padding:16px 20px 0;background:var(--s1);border-bottom:1px solid var(--border);}
+.tab-bar{display:flex;gap:0;width:fit-content;}
+.tab{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;
+  padding:10px 20px;border:none;background:transparent;color:var(--muted);
+  cursor:pointer;transition:all .15s;text-transform:uppercase;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.tab:hover{color:var(--text);}
+.tab.on{color:var(--yellow);border-bottom-color:var(--yellow);}
+
+/* ── MAIN CONTENT AREA ── */
+.content-area{padding:20px;}
+
+/* ── SET CARDS (type-element inspired) ── */
+.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:24px;}
+.set-card{
+  background:var(--s1);border:1px solid var(--border);border-radius:12px;
+  padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+}
+.set-card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;
+  background:linear-gradient(135deg,rgba(255,224,51,.06),transparent);
+}
+.set-card:hover::before,.set-card.on::before{opacity:1;}
+.set-card:hover{border-color:var(--yellow);transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,224,51,.1);}
+.set-card.on{border-color:var(--yellow);box-shadow:0 0 0 1px var(--yellow),var(--glow-yellow);}
+/* Per-set colour accents */
+.set-card[data-set="Base Set"]{--sc:var(--red);}
+.set-card[data-set="Jungle"]{--sc:var(--green);}
+.set-card[data-set="Fossil"]{--sc:#90a4ae;}
+.set-card[data-set="WOTC Black Star Promos"]{--sc:var(--yellow);}
+.set-card:hover{border-color:var(--sc,var(--yellow));}
+.set-card.on{border-color:var(--sc,var(--yellow));box-shadow:0 0 0 1px var(--sc,var(--yellow));}
+.set-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.set-card-name{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text);}
+.set-badge{font-size:22px;}
+.set-card-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:10px;letter-spacing:1px;}
+.set-progress{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.set-progress-bar{height:100%;background:var(--sc,var(--green));border-radius:3px;transition:width .5s ease;}
+.set-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--sc,var(--green));}
+
+/* ── SECTION LABEL ── */
+.sec{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);
+  text-transform:uppercase;margin:20px 0 12px;display:flex;align-items:center;gap:10px;
+}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* ── COLLECTION FILTERS ── */
 .col-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
-.filter-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;}
-.filter-btn:hover{border-color:var(--red);}
-.filter-btn.on{background:var(--s2);color:var(--text);border-color:var(--muted);}
-.col-search{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;width:180px;}
-.col-search:focus{border-color:var(--red);}
+.filter-btn{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  padding:5px 12px;border-radius:5px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;
+}
+.filter-btn:hover{border-color:var(--yellow);color:var(--yellow);}
+.filter-btn.on{background:rgba(255,224,51,.1);color:var(--yellow);border-color:var(--yellow);}
+.col-search{
+  background:var(--s2);border:1px solid var(--border);border-radius:6px;
+  padding:6px 12px;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:13px;outline:none;transition:border-color .15s;width:160px;
+}
+.col-search:focus{border-color:var(--yellow);}
 
-/* ── CARD GRID (binder style) ── */
-.binder{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
-.card-slot{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:all .15s;position:relative;}
-.card-slot:hover{border-color:var(--red);transform:translateY(-1px);}
-.card-slot.owned{border-color:var(--green);background:rgba(76,175,125,.05);}
-.card-slot.upgrade{border-color:var(--gold);}
-.card-slot.missing{opacity:.55;}
-.card-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:1px;}
-.card-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px;line-height:1.3;}
-.card-rarity{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
-.card-owned-info{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
-.card-cond{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(76,175,125,.15);color:var(--green);}
-.card-cond.lp{background:rgba(244,208,63,.12);color:var(--gold);}
-.card-cond.poor{background:rgba(230,57,70,.12);color:var(--red);}
-.card-price{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px;}
-.card-upgrade-flag{position:absolute;top:6px;right:6px;font-size:12px;}
-.card-type-badge{position:absolute;top:6px;left:6px;font-family:'DM Mono',monospace;font-size:8px;padding:1px 4px;border-radius:3px;background:rgba(92,158,224,.15);color:var(--blue);}
-.card-check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;}
+/* ── BINDER GRID ── */
+.binder{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+.card-slot{
+  background:var(--s1);border:1px solid var(--border);border-radius:8px;
+  padding:11px;cursor:pointer;transition:all .15s;position:relative;
+  min-height:90px;
+}
+.card-slot:hover{border-color:var(--yellow);transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,224,51,.12);}
+.card-slot.owned{border-color:rgba(102,187,106,.6);background:rgba(102,187,106,.04);}
+.card-slot.owned:hover{border-color:var(--green);box-shadow:0 4px 12px rgba(102,187,106,.15);}
+.card-slot.upgrade{border-color:rgba(255,138,80,.6);}
+.card-slot.upgrade:hover{border-color:var(--orange);}
+.card-slot.missing{opacity:.45;}
+.card-num{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;}
+.card-name{font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3;}
+.card-rarity{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);}
+.card-owned-info{margin-top:7px;padding-top:7px;border-top:1px solid var(--border);}
+.card-cond{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:rgba(102,187,106,.15);color:var(--green);}
+.card-cond.lp{background:rgba(255,138,80,.12);color:var(--orange);}
+.card-cond.poor{background:rgba(255,61,74,.12);color:var(--red);}
+.card-price{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+.card-upgrade-flag{position:absolute;top:5px;right:5px;font-size:11px;}
+.card-type-badge{position:absolute;bottom:5px;right:5px;font-family:'DM Mono',monospace;font-size:7px;padding:1px 4px;border-radius:3px;background:rgba(79,195,247,.15);color:var(--blue);}
+.card-check{position:absolute;top:5px;right:5px;width:14px;height:14px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;}
 
-/* ── COLLECTION STATS ── */
-.col-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+/* ── STAT CARDS ── */
+.col-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
 @media(max-width:600px){.col-stats{grid-template-columns:1fr 1fr;}}
-.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
-.stat-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
-.stat-val{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);}
+.stat-card{
+  background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--yellow));}
+.stat-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.stat-val{font-family:'DM Mono',monospace;font-size:20px;color:var(--text);font-weight:500;}
 .stat-val.g{color:var(--green);}
 .stat-val.r{color:var(--red);}
-.stat-val.gold{color:var(--gold);}
+.stat-val.gold{color:var(--yellow);}
 
-/* ── LEDGER VIEW ── */
-.ledger-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
-.ledger-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+/* ── LEDGER ── */
+.ledger-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.ledger-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
 @media(max-width:600px){.ledger-stats{grid-template-columns:1fr 1fr;}}
 
-.ledger-table-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
-.ledger-table{width:100%;border-collapse:collapse;font-size:13px;}
-.ledger-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--s2);white-space:nowrap;cursor:pointer;user-select:none;}
-.ledger-table th:hover{color:var(--text);}
+.ledger-filters{
+  background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  padding:14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
+}
+.ledger-filters .field{margin-bottom:0;}
+.ledger-filters label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.ledger-filters input,.ledger-filters select{
+  background:var(--s2);border:1px solid var(--border);border-radius:6px;
+  padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;
+}
+.ledger-filters input:focus,.ledger-filters select:focus{border-color:var(--yellow);}
+.ledger-filters select option{background:var(--s2);}
+
+.ledger-table-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;overflow-x:auto;}
+.ledger-table{width:100%;border-collapse:collapse;font-size:13px;min-width:750px;}
+.ledger-table th{
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);
+  background:var(--s2);white-space:nowrap;cursor:pointer;user-select:none;
+}
+.ledger-table th:hover{color:var(--yellow);}
 .ledger-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
 .ledger-table tr:last-child td{border-bottom:none;}
-.ledger-table tr:hover td{background:var(--s2);}
-.type-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
-.type-badge.raw{background:rgba(92,158,224,.15);color:var(--blue);}
-.type-badge.slab{background:rgba(244,208,63,.15);color:var(--gold);}
+.ledger-table tr:hover td{background:rgba(255,224,51,.03);}
+.type-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
+.type-badge.raw{background:rgba(79,195,247,.12);color:var(--blue);}
+.type-badge.slab{background:rgba(255,224,51,.12);color:var(--yellow);}
+.type-badge.bulk{background:rgba(179,157,219,.12);color:var(--purple);}
 .profit-pos{color:var(--green);font-family:'DM Mono',monospace;}
 .profit-neg{color:var(--red);font-family:'DM Mono',monospace;}
 .profit-open{color:var(--muted);font-family:'DM Mono',monospace;}
 .ledger-empty{text-align:center;padding:48px;color:var(--muted);font-size:13px;}
 
-/* ── LEDGER FILTERS ── */
-.ledger-filters{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
-.ledger-filters .field{margin-bottom:0;}
-.ledger-filters label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
-.ledger-filters input,.ledger-filters select{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;}
-.ledger-filters input:focus,.ledger-filters select:focus{border-color:var(--red);}
-.ledger-filters select option{background:var(--s2);}
-
 /* ── MODAL ── */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,10,.85);z-index:200;align-items:center;justify-content:center;padding:16px;}
 .ov.on{display:flex;}
-.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:26px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;animation:su .18s ease;}
-@keyframes su{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal h2{font-family:'Playfair Display',serif;font-size:19px;color:var(--red);margin-bottom:4px;}
-.modal-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:18px;}
+.modal{
+  background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:26px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;
+  animation:su .18s ease;position:relative;
+}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--purple));border-radius:14px 14px 0 0;}
+@keyframes su{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal h2{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:var(--yellow);margin-bottom:4px;}
+.modal-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:18px;}
 .field{margin-bottom:14px;}
-.field label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+.field label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
 .field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--yellow);}
 .field select option{background:var(--s2);}
 .field textarea{resize:vertical;min-height:60px;}
 .mbtns{display:flex;gap:8px;margin-top:20px;}
-.mbtn-p{flex:1;background:var(--red);color:#fff;border:none;border-radius:7px;padding:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;}
-.mbtn-p:hover{background:#c0272f;}
+.mbtn-p{flex:1;background:var(--yellow);color:#111;border:none;border-radius:7px;padding:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;}
+.mbtn-p:hover{background:#ffd700;box-shadow:var(--glow-yellow);}
 .mbtn-g{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
 .mbtn-g:hover{border-color:var(--muted);color:var(--text);}
-.mbtn-d{background:transparent;color:var(--red);border:1px solid rgba(230,57,70,.3);border-radius:7px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
-.mbtn-d:hover{border-color:var(--red);}
+.mbtn-d{background:transparent;color:var(--red);border:1px solid rgba(255,61,74,.3);border-radius:7px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;}
+.mbtn-d:hover{border-color:var(--red);background:rgba(255,61,74,.05);}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 input[type="date"],input[type="month"]{color-scheme:dark;}
 body.light input[type="date"],body.light input[type="month"]{color-scheme:light;}
 
-/* ── SECTION DIVIDER ── */
-.sec{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;display:flex;align-items:center;gap:10px;}
-.sec::after{content:'';flex:1;height:1px;background:var(--border);}
-
-/* ── OWNED CHECKBOX STYLE ── */
-.owned-toggle{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--s2);border-radius:8px;}
-.owned-toggle input{width:18px;height:18px;accent-color:var(--red);cursor:pointer;}
+/* ── OWNED TOGGLE ── */
+.owned-toggle{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--border);}
+.owned-toggle input{width:17px;height:17px;accent-color:var(--yellow);cursor:pointer;}
 .owned-toggle span{font-size:13px;color:var(--text);}
 
 /* ── SUMMARY ROW ── */
-.summary-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);}
-.summary-row span{padding:4px 10px;border-radius:6px;background:var(--s2);}
+.summary-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
+.summary-row span{padding:4px 10px;border-radius:6px;background:var(--s2);border:1px solid var(--border);}
+
+/* ── SETTINGS DANGER ZONE ── */
+body.light .poke-header{background:linear-gradient(135deg,#e8eaf6,#fce4ec,#e8eaf6);}
+body.light .auth-card::before{background:linear-gradient(90deg,var(--red),var(--yellow),var(--purple),var(--blue));}
+
+/* ── PIXEL DIVIDER ── */
+.pixel-div{height:2px;background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 4px,transparent 4px,transparent 8px);margin:16px 0;opacity:.25;}
 
 /* scrollbar */
-::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--yellow);}
 </style>
 </head>
 <body>
@@ -183,8 +341,9 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
 <!-- AUTH -->
 <div id="authWrap">
   <div class="auth-card">
-    <div class="auth-title">Pokédex Binder</div>
-    <div class="auth-sub">Collection & Ledger</div>
+    <div class="auth-title">Pokédex<br>Binder</div>
+    <div class="auth-sub">TCG Collection Tracker</div>
+    <span class="auth-pokemon">⚡</span>
     <div id="pinSetupWrap" style="display:none;">
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Set a 4-digit PIN to protect your collection.</p>
       <div class="pin-dots" id="pinDots1"></div>
@@ -216,19 +375,21 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
       <div class="logo">Pokédex Binder <small>TCG Collection Tracker</small></div>
     </div>
     <div class="hbtns">
-      <button class="hbtn" onclick="openImport()" style="color:var(--gold);border-color:rgba(244,208,63,.3);">⬆ Import Spreadsheet</button>
-      <button class="hbtn" onclick="openSettingsModal()">⚙ Settings</button>
+<button class="hbtn" onclick="openSettingsModal()">⚙ Settings</button>
       <button class="hbtn" id="themeBtn" onclick="toggleTheme()">☀</button>
       <button class="hbtn" id="syncBtn" onclick="manualSync()">● Connecting…</button>
       <button class="hbtn" onclick="signOut()">⏻ Sign out</button>
     </div>
   </header>
 
-  <div class="tab-bar">
-    <button class="tab on" id="tabCollection" onclick="showTab('collection')">📦 Collection</button>
-    <button class="tab" id="tabLedger" onclick="showTab('ledger')">💰 Ledger</button>
+  <div class="tab-wrap">
+    <div class="tab-bar">
+      <button class="tab on" id="tabCollection" onclick="showTab('collection')">📦 Collection</button>
+      <button class="tab" id="tabLedger" onclick="showTab('ledger')">💰 Ledger</button>
+    </div>
   </div>
 
+  <div class="content-area">
   <!-- ═══ COLLECTION TAB ═══ -->
   <div id="viewCollection">
     <!-- Set selector -->
@@ -323,34 +484,8 @@ body.light input[type="date"],body.light input[type="month"]{color-scheme:light;
     <div id="ledgerEmpty" class="ledger-empty" style="display:none;">No entries yet — tap + Add Entry to log a purchase.</div>
   </div>
 
+  </div><!-- end content-area -->
 </div>
-</div>
-
-<!-- IMPORT MODAL -->
-<div class="ov" id="importOv">
-  <div class="modal" style="max-width:520px;">
-    <h2>Import Spreadsheet</h2>
-    <div class="modal-sub">One-time import from your master inventory Excel file</div>
-    <div style="background:var(--s2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.9;">
-      Expected sheets:<br>
-      <span style="color:var(--text);">Pokemon Complete Set</span> — Collection data<br>
-      <span style="color:var(--text);">All Purchases</span> — Ledger / purchase log
-    </div>
-    <div style="border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:12px;" id="importDropZone" onclick="$id('importFi').click()" ondragover="event.preventDefault();this.style.borderColor='var(--red)'" ondragleave="this.style.borderColor=''" ondrop="importHandleDrop(event)">
-      <div style="font-size:28px;margin-bottom:8px;">📊</div>
-      <div style="font-size:13px;color:var(--muted);">Tap to choose your .xlsx file</div>
-    </div>
-    <input type="file" id="importFi" accept=".xlsx,.xls" style="display:none;" onchange="importHandleFile(this.files[0])">
-    <div id="importStatus" style="font-size:12px;color:var(--muted);margin-bottom:12px;min-height:18px;"></div>
-    <div id="importPreview" style="display:none;margin-bottom:16px;">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Preview</div>
-      <div id="importPreviewContent" style="background:var(--s2);border-radius:8px;padding:12px;font-size:12px;line-height:2;max-height:200px;overflow-y:auto;"></div>
-    </div>
-    <div class="mbtns">
-      <button class="mbtn-g" onclick="closeImport()">Cancel</button>
-      <button class="mbtn-p" id="importConfirmBtn" onclick="confirmImport()" style="display:none;">✓ Import</button>
-    </div>
-  </div>
 </div>
 
 <!-- SETTINGS MODAL -->
@@ -1073,6 +1208,7 @@ function renderSetGrid(){
     const pct=Math.round(owned/setData.total*100);
     const div=document.createElement('div');
     div.className='set-card'+(activeSet===setName?' on':'');
+    div.setAttribute('data-set',setName);
     div.innerHTML=`
       <div class="set-badge">${setData.icon}</div>
       <div class="set-card-name">${esc(setName)}</div>
@@ -1451,297 +1587,6 @@ function resetAll(){
   alert('✓ All data cleared. You can now re-import your spreadsheet.');
 }
 
-// ═══════════════════════════════════════════════
-// XLSX IMPORT
-// ═══════════════════════════════════════════════
-// Set name normalisation — maps spreadsheet values to app set names
-const SET_MAP = {
-  'base set':           'Base Set',
-  'base set unlimited': 'Base Set',
-  'base set shadowless':'Base Set',
-  'base set 1st edition':'Base Set',
-  'jungle':             'Jungle',
-  'fossil':             'Fossil',
-  'fossil set':         'Fossil',
-  'wotc black star promos': 'WOTC Black Star Promos',
-  'wotc promos':        'WOTC Black Star Promos',
-  'promos':             'WOTC Black Star Promos',
-  'black star promos':  'WOTC Black Star Promos',
-};
-
-function normaliseSet(raw){
-  if(!raw) return null;
-  const key=String(raw).toLowerCase().trim();
-  return SET_MAP[key]||null;
-}
-
-// Card number normalisation — match spreadsheet num like "1/102" or "#1" to SETS card list
-function findCardInSet(setName,numRaw,nameRaw){
-  const setData=SETS[setName]; if(!setData) return null;
-  const numStr=String(numRaw||'').trim();
-  const nameStr=String(nameRaw||'').toLowerCase().trim();
-  // Exact number match first
-  let found=setData.cards.find(c=>c.num===numStr);
-  if(found) return found;
-  // Normalise: "1/102" vs "01/102" etc
-  found=setData.cards.find(c=>c.num.split('/')[0]===numStr.split('/')[0]);
-  if(found) return found;
-  // Name match fallback
-  if(nameStr) found=setData.cards.find(c=>c.name.toLowerCase()===nameStr);
-  return found||null;
-}
-
-// Parse Excel date serial or DD/MM/YYYY string → YYYY-MM-DD
-function parseXlDate(val){
-  if(!val) return null;
-  const s=String(val).trim();
-  // DD/MM/YYYY or D/M/YYYY
-  let m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
-  if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-  // "12 June 2026" or "12-Jun-2026"
-  m=s.match(/^(\d{1,2})[- ]([A-Za-z]+)[- ](\d{4})$/);
-  if(m){
-    const months={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-    const mo=months[m[2].toLowerCase().slice(0,3)];
-    if(mo) return `${m[3]}-${String(mo).padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-  }
-  // YYYY-MM-DD already
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  // Excel serial number
-  if(/^\d+(\.\d+)?$/.test(s)){
-    const d=new Date((parseFloat(s)-25569)*86400*1000);
-    if(!isNaN(d)) return d.toISOString().slice(0,10);
-  }
-  return null;
-}
-
-function parseAmount(val){
-  if(val===null||val===undefined||val==='') return null;
-  const n=parseFloat(String(val).replace(/[£$,\s]/g,''));
-  return isNaN(n)?null:n;
-}
-
-let importParsedData=null;
-
-function openImport(){
-  importParsedData=null;
-  $id('importFi').value='';
-  $id('importStatus').textContent='';
-  $id('importPreview').style.display='none';
-  $id('importConfirmBtn').style.display='none';
-  $id('importOv').classList.add('on');
-}
-function closeImport(){ $id('importOv').classList.remove('on'); }
-$id('importOv').addEventListener('click',e=>{ if(e.target===$id('importOv')) closeImport(); });
-
-function importHandleDrop(e){
-  e.preventDefault();
-  if(e.dataTransfer.files[0]) importHandleFile(e.dataTransfer.files[0]);
-}
-
-async function importHandleFile(file){
-  if(!file) return;
-  $id('importStatus').textContent='Reading '+file.name+'…';
-  $id('importStatus').style.color='var(--muted)';
-  $id('importPreview').style.display='none';
-  $id('importConfirmBtn').style.display='none';
-  try{
-    const buf=await file.arrayBuffer();
-    const wb=XLSX.read(buf,{type:'array',cellDates:false});
-    importParsedData=parseImportWorkbook(wb);
-    showImportPreview(importParsedData);
-    $id('importStatus').textContent='✓ '+file.name+' parsed successfully';
-    $id('importStatus').style.color='var(--green)';
-  }catch(e){
-    $id('importStatus').textContent='✗ '+e.message;
-    $id('importStatus').style.color='var(--red)';
-    console.error('Import error:',e);
-  }
-}
-
-function parseImportWorkbook(wb){
-  const result={ collection:[], ledger:[], errors:[] };
-
-  // ── SHEET 1: Pokémon Complete Set ──
-  // Match flexibly: strip accents, look for "complete set" or "complete"
-  const collSheetName=wb.SheetNames.find(n=>{
-    const norm=n.toLowerCase().replace(/[éèêëe]/g,'e').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
-    return norm.includes('complete set')||norm.includes('pokemon complete');
-  })||wb.SheetNames[0]; // fallback to first sheet
-
-  if(collSheetName){
-    const ws=wb.Sheets[collSheetName];
-    // Read as raw array — no header row, positional columns
-    // Confirmed layout: col0=Id#, col1=CardNum/SetHeader, col2=CardName, col3=Rarity,
-    // col4=Paid, col5=NMPrice£, col8=LPPrice, col12=Condition, col13=Upgrade(Y)
-    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-    let currentSet=null;
-    raw.forEach((row)=>{
-      if(!row||row.length<2) return;
-      const col0=String(row[0]||'').trim(); // Id#
-      const col1=String(row[1]||'').trim(); // Card num OR set header
-      const col2=String(row[2]||'').trim(); // Card name
-      // Detect set header: col1 contains set keyword, col2 is empty
-      const setKey=Object.keys(SET_MAP).find(k=>col1.toLowerCase().replace(/[^a-z0-9 ]/g,' ').trim().includes(k));
-      if(setKey&&col2===''){
-        currentSet=SET_MAP[setKey]; return;
-      }
-      if(!currentSet) return;
-      // Skip header row, blank rows, bulk lot rows, and total rows
-      if(!col2||col2==='Card Name'||col2==='nan') return;
-      if(!col0||isNaN(parseInt(col0))) return;
-      // Skip bulk rows like "All Non-Holos", "Commons/UC" — import as ledger bulk entries instead
-      if(col2.toLowerCase().includes('non-holo')||col2.toLowerCase().includes('common')||col2.toLowerCase().includes('c/uc')){
-        const bulkPaid=parseAmount(row[4]);
-        if(bulkPaid&&currentSet){
-          result.ledger.push({
-            id:Date.now().toString()+'_bulk_'+i+'_'+Math.random().toString(36).slice(2,4),
-            name:col2+' ('+col1+')',set:currentSet,type:'bulk',language:'English',
-            dateBought:null,platform:'',paid:bulkPaid,
-            soldPrice:null,dateSold:null,soldPlatform:null,
-            notes:'Bulk lot imported from collection sheet',slabGrade:'',collectionKey:null
-          });
-        }
-        return;
-      }
-      // For promos: card number may be embedded in col2 (e.g. "Electabuzz #2") and col1 is empty
-      // Extract it and normalise to match SETS format (#2)
-      let cardNum=col1;
-      let cardName=col2;
-      if(!col1||!col1.match(/[\/\-#]/)){
-        // Try to extract #N from col2 name e.g. "Electabuzz #2" → num="#2", name="Electabuzz"
-        const promoMatch=col2.match(/^(.+?)\s+#(\d+)$/);
-        if(promoMatch){ cardName=promoMatch[1].trim(); cardNum='#'+promoMatch[2]; }
-        else if(col2.toLowerCase()==='ancient mew'){ cardName='Ancient Mew'; cardNum='#46'; }
-        else return; // genuinely no number — skip
-      }
-      // Parse fields from confirmed column positions
-      const nmPrice=parseAmount(row[5]);   // col5 = NM Market £
-      const lpPrice=parseAmount(row[8]);   // col8 = Avg Mkt LP(£)
-      const cond=String(row[12]||'').trim(); // col12 = Condition
-      const upgradeRaw=String(row[13]||'').trim().toUpperCase(); // col13 = Upgrade?
-      const upgrade=upgradeRaw==='Y'||upgradeRaw==='YES';
-      // Normalise condition
-      const cu=cond.toUpperCase().replace(/\s/g,'');
-      let condNorm='NM';
-      if(cu==='LP+') condNorm='LP+';
-      else if(cu==='LP-') condNorm='LP-';
-      else if(cu==='LP') condNorm='LP';
-      else if(cu==='MP') condNorm='MP';
-      else if(cu==='HP') condNorm='HP';
-      // Match card by number first, then name
-      const setData=SETS[currentSet];
-      if(!setData) return;
-      let cardDef=setData.cards.find(c=>c.num===cardNum)
-        ||setData.cards.find(c=>c.name.toLowerCase()===cardName.toLowerCase());
-      if(!cardDef) return;
-      const ck=cardKey(currentSet,cardDef.num);
-      result.collection.push({key:ck,owned:true,cond:condNorm,type:'raw',nmPrice,lpPrice,upgrade});
-    });
-    if(!result.collection.length){
-      result.errors.push('Collection sheet found ("'+collSheetName+'") but no cards parsed — check format');
-    }
-  } else {
-    result.errors.push('Could not find collection sheet');
-  }
-
-  // ── SHEET 2: All purchases ──
-  // Confirmed: row 0 is a totals row, row 1 is the header row
-  // Columns: Type, Pokemon, Set, Language, TCG link, Amount paid , Date, Where, Sold Price, Profit/Loss
-  const purchSheetName=wb.SheetNames.find(n=>n.toLowerCase().includes('all purchases')||n.toLowerCase().includes('purchases'))
-    ||wb.SheetNames[1]; // fallback to second sheet
-  if(purchSheetName){
-    const ws=wb.Sheets[purchSheetName];
-    // Skip row 0 (totals), use row 1 as header
-    const rows=XLSX.utils.sheet_to_json(ws,{defval:'',range:1});
-    rows.forEach((row,i)=>{
-      const type=String(row['Type']||'').trim().toLowerCase();
-      const name=String(row['Pokemon']||row['Card Name']||row['Name']||'').trim();
-      const setRaw=String(row['Set']||'').trim();
-      const lang=String(row['Language']||'English').trim()||'English';
-      const paidRaw=row['Amount paid ']||row['Amount paid']||row['Amount Paid']||row['Paid']||'';
-      const dateRaw=row['Date']||'';
-      const platform=String(row['Where']||row['Platform']||'').trim();
-      const soldPriceRaw=row['Sold Price']||'';
-      if(!name||name==='Pokemon'||name==='Card Name') return;
-      const paid=parseAmount(paidRaw);
-      if(paid===null) return;
-      const soldPrice=parseAmount(soldPriceRaw);
-      // Handle date — may already be a JS Date object from XLSX parsing
-      let dateBought=null;
-      if(dateRaw instanceof Date) dateBought=dateRaw.toISOString().slice(0,10);
-      else dateBought=parseXlDate(dateRaw);
-      const setNorm=normaliseSet(setRaw)||setRaw||'Other / Modern';
-      let entryType='raw';
-      if(type==='slab') entryType='slab';
-      else if(type==='other'||type==='bundle'||type==='bulk') entryType='bulk';
-      let platNorm='eBay';
-      const pl=platform.toLowerCase();
-      if(pl.includes('whatnot')) platNorm='Whatnot';
-      else if(pl.includes('local')) platNorm='Local';
-      else if(platform) platNorm=platform;
-      result.ledger.push({
-        id:Date.now().toString()+'_'+i+'_'+Math.random().toString(36).slice(2,4),
-        name,set:setNorm,type:entryType,language:lang,
-        dateBought,platform:platNorm,paid,
-        soldPrice:soldPrice!==null&&soldPrice>0?soldPrice:null,
-        dateSold:null,soldPlatform:null,
-        notes:'',slabGrade:'',collectionKey:null
-      });
-    });
-  } else {
-    result.errors.push('Could not find "All purchases" sheet');
-  }
-
-  return result;
-}
-
-function showImportPreview(data){
-  const lines=[];
-  if(data.collection.length) lines.push(`<div style="color:var(--green);">✓ ${data.collection.length} collection entries found</div>`);
-  else lines.push(`<div style="color:var(--muted);">— No collection data found</div>`);
-  if(data.ledger.length) lines.push(`<div style="color:var(--green);">✓ ${data.ledger.length} ledger/purchase entries found</div>`);
-  else lines.push(`<div style="color:var(--muted);">— No ledger data found</div>`);
-  // Sold count
-  const soldCount=data.ledger.filter(l=>l.soldPrice!==null).length;
-  if(soldCount) lines.push(`<div style="color:var(--blue);">↳ ${soldCount} with sale prices</div>`);
-  if(data.errors.length) data.errors.forEach(e=>lines.push(`<div style="color:var(--red);">⚠ ${esc(e)}</div>`));
-  if(!data.collection.length&&!data.ledger.length){
-    lines.push(`<div style="color:var(--red);">No data found — check the sheet names match exactly.</div>`);
-    $id('importConfirmBtn').style.display='none';
-  } else {
-    $id('importConfirmBtn').style.display='';
-  }
-  $id('importPreviewContent').innerHTML=lines.join('');
-  $id('importPreview').style.display='';
-}
-
-function confirmImport(){
-  if(!importParsedData) return;
-  let collAdded=0, collUpdated=0, ledgerAdded=0;
-  // Merge collection — existing entries kept unless overwritten
-  importParsedData.collection.forEach(entry=>{
-    const existing=D.collection[entry.key];
-    if(existing){
-      // Update prices + condition but don't overwrite manually-set slab grades
-      Object.assign(existing,{owned:entry.owned,cond:entry.cond,nmPrice:entry.nmPrice,lpPrice:entry.lpPrice,upgrade:entry.upgrade});
-      collUpdated++;
-    } else {
-      D.collection[entry.key]={owned:entry.owned,cond:entry.cond,type:entry.type,nmPrice:entry.nmPrice,lpPrice:entry.lpPrice,upgrade:entry.upgrade,notes:'',slabGrade:''};
-      collAdded++;
-    }
-  });
-  // Merge ledger — deduplicate by row index position (not name+date, which breaks identical entries like two Psyduck slabs)
-  // Use a hash of name+date+paid+index to allow genuine duplicates on same day
-  const existingHashes=new Set(D.ledger.map(l=>`${l.name}|${l.dateBought}|${l.paid}|${l._importIdx||''}`));
-  importParsedData.ledger.forEach((entry,idx)=>{
-    const hash=`${entry.name}|${entry.dateBought}|${entry.paid}|${idx}`;
-    if(!existingHashes.has(hash)){ entry._importIdx=idx; D.ledger.push(entry); ledgerAdded++; }
-  });
-  save(); closeImport(); renderAll();
-  alert(`Import complete!\n✓ ${collAdded} collection cards added\n✓ ${collUpdated} updated\n✓ ${ledgerAdded} ledger entries added`);
-}
-
 // ── Update openAddLedger to include language field ──
 const _origOpenAddLedger=openAddLedger;
 openAddLedger=function(){
@@ -1780,7 +1625,6 @@ window.addEventListener('load',()=>{
   },50);
 });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
 <script src="https://accounts.google.com/gsi/client" onload="gsiLoaded()" async defer></script>
 </body>
