@@ -1321,6 +1321,8 @@ let D = {
 
 const PIN_KEY  = 'pokebinder_pin';
 const DATA_KEY = 'pokebinder_cache';
+const BACKUP_PREFIX = 'pokebinder-backup-';
+const MAX_BACKUPS = 7;
 const CLIENT_ID = '259135370683-2kh47mi72o35829gd5e82fqo8hnan56a.apps.googleusercontent.com';
 const API_KEY   = 'AIzaSyB9FjDiIuLwRgQm6bus-VbbWybvjWb4RnM';
 const SCOPES    = 'https://www.googleapis.com/auth/drive.file';
@@ -1333,6 +1335,7 @@ let editingCardKey = null;
 let editingLedgerId = null;
 let lSortCol = 'date', lSortDir = 'desc';
 let folderId = null, fileId = null, tokenClient = null, gapiOk = false, driveReady = false;
+let backupInProgress = false;
 let pinBuffer = '', pinMode = 'login', pinFirst = '';
 
 // ── Helpers ──
@@ -1475,6 +1478,25 @@ async function connectDrive(){
   if(stored){ try{ gapi.client.setToken(JSON.parse(stored)); await syncWithDrive(); return; }catch(e){ localStorage.removeItem('pokebinder_gtoken'); } }
   try{ tokenClient.requestAccessToken({prompt:''}); }catch(e){ setSyncBtn('','● Drive unavailable'); }
 }
+async function restoreFromLatestBackup(){
+  if(!folderId) return;
+  try{
+    const r=await gapi.client.drive.files.list({
+      q:`name contains '${BACKUP_PREFIX}' and '${folderId}' in parents and trashed=false`,
+      fields:'files(id,name)',orderBy:'createdTime desc',spaces:'drive'
+    });
+    const files=r.result.files||[];
+    if(!files.length){ console.warn('No backups found'); return; }
+    const res=await gapi.client.drive.files.get({fileId:files[0].id,alt:'media'});
+    const dd=JSON.parse(res.body);
+    D=Object.assign({collection:{},ledger:[]},dd);
+    localStorage.setItem(DATA_KEY,JSON.stringify(D));
+    renderAll();
+    setSyncBtn('ok','↑ Restored from backup '+files[0].name.replace(BACKUP_PREFIX,''));
+    console.log('Restored from backup:',files[0].name);
+  }catch(e){ console.error('Backup restore failed:',e); }
+}
+
 async function syncWithDrive(){
   setSyncBtn('saving','● Syncing…');
   try{
@@ -1485,7 +1507,15 @@ async function syncWithDrive(){
     if(r.result.files.length){
       fileId=r.result.files[0].id;
       const res=await gapi.client.drive.files.get({fileId,alt:'media'});
-      try{ const dd=JSON.parse(res.body); D=Object.assign({collection:{},ledger:[]},dd); localStorage.setItem(DATA_KEY,JSON.stringify(D)); renderAll(); }catch(e){}
+      try{
+        const dd=JSON.parse(res.body);
+        D=Object.assign({collection:{},ledger:[]},dd);
+        localStorage.setItem(DATA_KEY,JSON.stringify(D));
+        renderAll();
+      }catch(e){
+        console.warn('Main file corrupt, trying latest backup…');
+        await restoreFromLatestBackup();
+      }
     } else {
       const c=await gapi.client.drive.files.create({resource:{name:FILENAME,parents:[folderId],mimeType:'application/json'},fields:'id'});
       fileId=c.result.id; await writeToDrive();
@@ -1503,11 +1533,83 @@ async function writeToDrive(){
   if(!fileId) return;
   await gapi.client.request({path:`/upload/drive/v3/files/${fileId}`,method:'PATCH',params:{uploadType:'media'},headers:{'Content-Type':'application/json'},body:JSON.stringify(D,null,2)});
 }
-async function save(){
+
+async function writeBackup(){
+  if(!driveReady||!folderId||backupInProgress) return;
+  backupInProgress = true;
+  try{
+    const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+    const backupName = `${BACKUP_PREFIX}${today}.json`;
+    const backupData = JSON.stringify({...D, _backedUpAt: new Date().toISOString()}, null, 2);
+
+    // Check if today's backup file already exists
+    const r = await gapi.client.drive.files.list({
+      q:`name='${backupName}' and '${folderId}' in parents and trashed=false`,
+      fields:'files(id)',spaces:'drive'
+    });
+
+    if(r.result.files.length){
+      // Update existing today's backup
+      const bid = r.result.files[0].id;
+      await gapi.client.request({path:`/upload/drive/v3/files/${bid}`,method:'PATCH',params:{uploadType:'media'},headers:{'Content-Type':'application/json'},body:backupData});
+    } else {
+      // Create new backup file
+      await gapi.client.request({path:'/upload/drive/v3/files',method:'POST',params:{uploadType:'multipart'},headers:{'Content-Type':'multipart/related; boundary=boundary123'},body:
+        `--boundary123
+Content-Type: application/json
+
+${JSON.stringify({name:backupName,parents:[folderId],mimeType:'application/json'})}
+--boundary123
+Content-Type: application/json
+
+${backupData}
+--boundary123--`
+      });
+      // Prune old backups — keep only MAX_BACKUPS most recent
+      await pruneOldBackups();
+    }
+
+    // Show backed up indicator briefly
+    const btn = $id('syncBtn');
+    const prev = btn.textContent;
+    btn.textContent = '↑ Backed up ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    btn.className = 'hbtn ok';
+    setTimeout(()=>{ btn.textContent=prev; }, 2500);
+  } catch(e){
+    console.warn('Backup failed:', e);
+  } finally {
+    backupInProgress = false;
+  }
+}
+
+async function pruneOldBackups(){
+  try{
+    const r = await gapi.client.drive.files.list({
+      q:`name contains '${BACKUP_PREFIX}' and '${folderId}' in parents and trashed=false`,
+      fields:'files(id,name,createdTime)',
+      orderBy:'createdTime desc',
+      spaces:'drive'
+    });
+    const files = r.result.files||[];
+    if(files.length > MAX_BACKUPS){
+      // Delete oldest beyond limit
+      const toDelete = files.slice(MAX_BACKUPS);
+      for(const f of toDelete){
+        try{ await gapi.client.drive.files.delete({fileId:f.id}); }catch(e){}
+      }
+    }
+  }catch(e){ console.warn('Prune failed:',e); }
+}
+
+async function save(triggerBackup=false){
   localStorage.setItem(DATA_KEY,JSON.stringify(D));
   setSyncBtn('saving','● Saving…');
   if(driveReady&&fileId){
-    try{ await writeToDrive(); setSyncBtn('ok','● Saved '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})); }
+    try{
+      await writeToDrive();
+      setSyncBtn('ok','● Saved '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
+      if(triggerBackup) writeBackup(); // fire-and-forget, non-blocking
+    }
     catch(e){ setSyncBtn('','● Local only'); }
   } else { setSyncBtn('ok','● Saved locally'); }
 }
@@ -1833,14 +1935,14 @@ function saveLedgerEntry(){
   // Store all keys on entry for reference
   entry.collectionKeys = cks;
   if(cks.length===1) entry.collectionKey = cks[0];
-  save(); closeLedgerModal(); renderSetGrid(); renderCollectionBody(); renderLedger();
+  save(true); closeLedgerModal(); renderSetGrid(); renderCollectionBody(); renderLedger();
 }
 
 function deleteLedgerEntry(){
   if(!editingLedgerId) return;
   if(!confirm('Delete this ledger entry?')) return;
   D.ledger=D.ledger.filter(l=>l.id!==editingLedgerId);
-  save(); closeLedgerModal(); renderLedger();
+  save(true); closeLedgerModal(); renderLedger();
 }
 
 function lSort(col){
