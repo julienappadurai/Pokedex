@@ -2453,16 +2453,16 @@ function renderLedgerDOM(){
       const plM=isSoldM?(parseFloat(l.soldPrice)||0)-(l.paid||0):null;
       const card=document.createElement('div');
       card.className='ledger-card-row';
-      const bar=document.createElement('div');
-      bar.className=isSoldM?'lcr-sold-bar':'lcr-open-bar';
-      card.appendChild(bar);
       const pkSprite=getPokemonSprite(l.name);
-      card.innerHTML+=`
+      // Build all HTML at once — avoids innerHTML+= destroying appended children
+      card.innerHTML=`
+        <div class="${isSoldM?'lcr-sold-bar':'lcr-open-bar'}"></div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
-          ${pkSprite?`<img src="${pkSprite}" width="32" height="32" style="image-rendering:pixelated;flex-shrink:0;" onerror="this.style.display='none'">`:'<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px;">🎴</div>'}
+          ${pkSprite
+            ? `<img src="${pkSprite}" width="32" height="32" style="image-rendering:pixelated;flex-shrink:0;border-radius:4px;" onerror="this.style.display='none'">`
+            : `<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px;">🎴</div>`}
           <div class="lcr-name">${esc(l.name)}</div>
-        </div>`;
-      card.innerHTML+=`
+        </div>
         <div class="lcr-meta">
           <span>${esc(l.set||'—')}</span>
           <span>${esc(l.language||'')}</span>
