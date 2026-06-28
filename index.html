@@ -872,6 +872,28 @@ body.dark .timeline-chart{background:rgba(36,34,30,.97);border-color:rgba(200,18
 /* ── DARK MODE OVERLAY — lighter so pattern shows ── */
 body.dark::after{background:rgba(18,16,14,.75);}
 
+
+/* ── SORT BAR ── */
+.sort-bar{
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
+  padding:10px 0 4px;
+}
+.sort-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0;}
+.sort-btn{
+  background:rgba(255,255,255,.7);border:1.5px solid rgba(184,150,12,.2);
+  border-radius:20px;padding:5px 12px;
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:700;
+  color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;
+  display:flex;align-items:center;gap:4px;
+}
+.sort-btn:hover{border-color:var(--yellow);color:var(--yellow);}
+.sort-btn.active{
+  background:var(--yellow);color:#111;border-color:var(--yellow);
+}
+body.dark .sort-btn{background:rgba(36,34,30,.8);border-color:rgba(200,180,120,.15);color:var(--text2);}
+body.dark .sort-btn.active{background:var(--yellow);color:#111;}
+.sort-arrow{font-size:10px;opacity:.8;}
+
 /* ── FINANCE BLUR ── */
 .fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
 .fin-blur:hover{filter:blur(4px);}
@@ -1035,17 +1057,33 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
       <div class="field"><label>Status</label><select id="lStatus" onchange="renderLedger()" style="width:110px;"><option value="">All</option><option value="open">Open</option><option value="sold">Sold</option></select></div>
       <button onclick="clearLedgerFilters()" class="hbtn" style="align-self:flex-end;">Clear</button>
     </div>
+    <!-- Sort bar -->
+    <div class="sort-bar" id="sortBar">
+      <span class="sort-label">Sort</span>
+      <button class="sort-btn active" id="sortBtnDate" onclick="lSort('date')">
+        <span>Date</span><span class="sort-arrow" id="lSortDate">↓</span>
+      </button>
+      <button class="sort-btn" id="sortBtnName" onclick="lSort('name')">
+        <span>Name</span><span class="sort-arrow" id="lSortName"></span>
+      </button>
+      <button class="sort-btn" id="sortBtnPaid" onclick="lSort('paid')">
+        <span>Price</span><span class="sort-arrow" id="lSortPaid"></span>
+      </button>
+      <button class="sort-btn" id="sortBtnProfit" onclick="lSort('profit')">
+        <span>P&amp;L</span><span class="sort-arrow" id="lSortProfit"></span>
+      </button>
+    </div>
     <div class="summary-row" id="ledgerSummaryRow"></div>
     <div class="ledger-table-wrap">
       <table class="ledger-table">
         <thead><tr>
-          <th onclick="lSort('date')">Date <span id="lSortDate"></span></th>
-          <th onclick="lSort('name')">Card <span id="lSortName"></span></th>
+          <th onclick="lSort('date')">Date</th>
+          <th onclick="lSort('name')">Card</th>
           <th>Set</th><th>Lang</th><th>Type</th>
-          <th onclick="lSort('paid')" style="text-align:right;">Paid <span id="lSortPaid"></span></th>
+          <th onclick="lSort('paid')" style="text-align:right;">Paid</th>
           <th>Platform</th>
           <th style="text-align:right;">Sold</th>
-          <th onclick="lSort('profit')" style="text-align:right;">P&amp;L <span id="lSortProfit"></span></th>
+          <th onclick="lSort('profit')" style="text-align:right;">P&amp;L</th>
           <th></th>
         </tr></thead>
         <tbody id="ledgerBody"></tbody>
@@ -2346,7 +2384,19 @@ function deleteLedgerEntry(){
 function lSort(col){
   if(lSortCol===col) lSortDir=lSortDir==='asc'?'desc':'asc';
   else { lSortCol=col; lSortDir='desc'; }
+  updateSortBar();
   renderLedger();
+}
+
+function updateSortBar(){
+  const cols=['date','name','paid','profit'];
+  const btnIds=['sortBtnDate','sortBtnName','sortBtnPaid','sortBtnProfit'];
+  const arrowIds=['lSortDate','lSortName','lSortPaid','lSortProfit'];
+  cols.forEach((c,i)=>{
+    const btn=$id(btnIds[i]); const arr=$id(arrowIds[i]);
+    if(btn) btn.classList.toggle('active', lSortCol===c);
+    if(arr) arr.textContent = lSortCol===c ? (lSortDir==='asc'?'↑':'↓') : '';
+  });
 }
 
 function clearLedgerFilters(){
@@ -2359,6 +2409,7 @@ function renderLedger(){
   renderLedgerDOM();
 }
 function renderLedgerDOM(){
+  updateSortBar();
   // Stats
   const totalSpent=D.ledger.reduce((s,l)=>s+(l.paid||0),0);
   const sold=D.ledger.filter(l=>l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='');
@@ -2400,10 +2451,7 @@ function renderLedgerDOM(){
   });
 
   // Sort indicators
-  ['date','name','paid','profit'].forEach(c=>{
-    const el=$id('lSort'+c.charAt(0).toUpperCase()+c.slice(1));
-    if(el) el.textContent=lSortCol===c?(lSortDir==='asc'?'↑':'↓'):'';
-  });
+  updateSortBar();
 
   // Summary row
   const filtSpent=filtered.reduce((s,l)=>s+(l.paid||0),0);
