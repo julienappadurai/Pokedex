@@ -894,6 +894,68 @@ body.dark .sort-btn{background:rgba(36,34,30,.8);border-color:rgba(200,180,120,.
 body.dark .sort-btn.active{background:var(--yellow);color:#111;}
 .sort-arrow{font-size:10px;opacity:.8;}
 
+
+/* ── EXCLUDED CARD SLOTS ── */
+.card-slot.excluded{
+  opacity:.35;
+  filter:grayscale(.8);
+  border-style:dashed;
+  border-color:rgba(0,0,0,.12)!important;
+  background:rgba(0,0,0,.03)!important;
+}
+body.dark .card-slot.excluded{
+  border-color:rgba(255,255,255,.08)!important;
+  background:rgba(0,0,0,.15)!important;
+}
+.card-slot.excluded::after{content:'✕';position:absolute;top:4px;right:6px;font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;}
+.exclude-toggle{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:rgba(255,61,71,.06);border:1.5px solid rgba(255,61,71,.2);
+  border-radius:10px;cursor:pointer;margin-top:10px;
+  font-size:13px;font-weight:700;color:var(--red);transition:all .15s;
+}
+.exclude-toggle input{width:16px;height:16px;accent-color:var(--red);flex-shrink:0;cursor:pointer;}
+.exclude-toggle.excluded-on{background:rgba(255,61,71,.12);border-color:rgba(255,61,71,.4);}
+
+
+/* ── EXCLUDED CARDS ── */
+.card-slot.excluded{
+  opacity:.35;
+  filter:grayscale(.8);
+  border-style:dashed !important;
+  border-color:rgba(0,0,0,.12) !important;
+  background:rgba(0,0,0,.02) !important;
+  position:relative;
+}
+body.dark .card-slot.excluded{
+  border-color:rgba(255,255,255,.08) !important;
+  background:rgba(255,255,255,.02) !important;
+}
+.card-slot.excluded::before{content:none !important;} /* no sheen */
+.card-excluded-badge{
+  position:absolute;top:4px;right:4px;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:.5px;
+  padding:2px 5px;border-radius:4px;text-transform:uppercase;
+  background:rgba(0,0,0,.12);color:var(--muted);
+}
+body.dark .card-excluded-badge{background:rgba(255,255,255,.08);}
+
+/* Exclude toggle in card modal */
+.exclude-toggle{
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  padding:10px 12px;border-radius:10px;
+  border:1.5px solid rgba(0,0,0,.08);
+  background:rgba(0,0,0,.02);
+  transition:all .15s;margin-top:10px;
+}
+.exclude-toggle:hover{border-color:rgba(230,59,46,.3);background:rgba(230,59,46,.04);}
+.exclude-toggle input{width:16px;height:16px;accent-color:var(--red);cursor:pointer;flex-shrink:0;}
+.exclude-toggle span{font-size:12px;font-weight:700;color:var(--muted);}
+.exclude-toggle.is-excluded{border-color:rgba(230,59,46,.4);background:rgba(230,59,46,.06);}
+.exclude-toggle.is-excluded span{color:var(--red);}
+body.dark .exclude-toggle{border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.02);}
+body.dark .exclude-toggle.is-excluded{border-color:rgba(255,61,71,.4);background:rgba(255,61,71,.08);}
+
 /* ── FINANCE BLUR ── */
 .fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
 .fin-blur:hover{filter:blur(4px);}
@@ -1203,6 +1265,11 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
     </div>
     <!-- Hidden LP price kept for data compatibility -->
     <input type="hidden" id="cardLPPrice">
+    <!-- Exclude from collection goal -->
+    <label class="exclude-toggle" id="cardExcludeWrap" style="margin-top:12px;">
+      <input type="checkbox" id="cardExclude" onchange="toggleExcludeUI()">
+      <span id="cardExcludeLabel">Exclude from collection goal</span>
+    </label>
 
     <div style="margin-top:8px;padding:10px 12px;background:var(--navy3);border-radius:10px;font-size:11px;color:var(--muted);display:none;" id="cardLedgerHint"></div>
     <div class="mbtns" id="cardModalBtns">
@@ -1961,10 +2028,11 @@ function renderSetsOverview(){
   let totalOwned=0,totalCards=0,totalNM=0,setsComplete=0;
   Object.keys(SETS).forEach(sn=>{
     const sd=SETS[sn];
-    const oc=sd.cards.filter(c=>{ const d=getCard(sn,c.num); return d&&d.owned; });
-    totalOwned+=oc.length; totalCards+=sd.total;
+    const gc=sd.cards.filter(c=>{ const d=getCard(sn,c.num); return !(d&&d.exclude); });
+    const oc=gc.filter(c=>{ const d=getCard(sn,c.num); return d&&d.owned; });
+    totalOwned+=oc.length; totalCards+=gc.length;
     totalNM+=oc.reduce((s,c)=>{ const d=getCard(sn,c.num); return s+(d&&d.nmPrice?parseFloat(d.nmPrice):0); },0);
-    if(oc.length===sd.total&&sd.total>0) setsComplete++;
+    if(oc.length===gc.length&&gc.length>0) setsComplete++;
   });
   const overallPct=totalCards>0?Math.round(totalOwned/totalCards*100):0;
   const hero=$id('heroDashboard');
@@ -2000,8 +2068,10 @@ function renderSetsOverview(){
   const list=$id('setListRows'); if(!list) return; list.innerHTML='';
   Object.keys(SETS).forEach(setName=>{
     const sd=SETS[setName];
-    const owned=sd.cards.filter(c=>{ const d=getCard(setName,c.num); return d&&d.owned; }).length;
-    const pct=Math.round(owned/sd.total*100);
+    const goalCards2=sd.cards.filter(c=>{ const d=getCard(setName,c.num); return !(d&&d.exclude); });
+    const owned=goalCards2.filter(c=>{ const d=getCard(setName,c.num); return d&&d.owned; }).length;
+    const goalTotal=goalCards2.length;
+    const pct=goalTotal>0?Math.round(owned/goalTotal*100):0;
     const accent=accentMap[setName]||'#b8960c';
     const icon=iconMap[setName]||'📦';
     const barCol=pct===100?'#ffd700':pct>=67?'#56d364':pct>=34?'#ff8c42':'#e63b2e';
@@ -2013,14 +2083,14 @@ function renderSetsOverview(){
       <div class="set-list-icon"><img src="${SPRITE_URI[icon]()}" width="40" height="40" style="image-rendering:pixelated;image-rendering:crisp-edges;" alt="${esc(setName)}"></div>
       <div class="set-list-info">
         <div class="set-list-name">${esc(setName)}</div>
-        <div class="set-list-sub">${owned} owned · ${sd.total-owned} missing${needsUpgrade?` · <span style="color:var(--orange);">↑${needsUpgrade} upgrade</span>`:''}${pct===100?' · <span style="color:#ffd700;">✓ Complete</span>':''}</div>
+        <div class="set-list-sub">${owned} owned · ${goalTotal-owned} missing${needsUpgrade?` · <span style="color:var(--orange);">↑${needsUpgrade} upgrade</span>`:''}${sd.total!==goalTotal?` · <span style="color:var(--muted);">${sd.total-goalTotal} excl.</span>`:''}${pct===100?' · <span style="color:#ffd700;">✓ Complete</span>':''}</div>
         <div class="set-list-progress-track">
           <div class="set-list-progress-bar" data-w="${pct}" style="width:0%;background:${accent};"></div>
         </div>
       </div>
       <div class="set-list-right">
         <div class="set-list-pct" style="color:${pct===100?'#ffd700':accent};">${pct}%</div>
-        <div class="set-list-count">${owned}/${sd.total}</div>
+        <div class="set-list-count">${owned}/${goalTotal}</div>
       </div>
       <div class="set-list-arrow">›</div>`;
     row.onclick=()=>openSetDetail(setName);
@@ -2132,7 +2202,8 @@ function renderBinder(){
     const condClass=data&&data.cond?(data.cond.startsWith('NM')?'':'lp'):'' ;
     // Rarity header strip class
     const raritySlotClass=c.rarity.toLowerCase().includes('holo')?'rarity-holo-slot':c.rarity==='Rare'?'rarity-rare-slot':c.rarity==='Uncommon'?'rarity-uncommon-slot':c.rarity==='Promo'?'rarity-promo-slot':c.rarity==='Trainer'?'rarity-trainer-slot':'';
-    slot.className='card-slot'+(owned?' owned':'')+(needsUpgrade?' upgrade':'')+(!owned?' missing':'')+' '+(raritySlotClass);
+    const isExcluded=!!(data&&data.exclude);
+    slot.className='card-slot'+(owned?' owned':'')+(needsUpgrade?' upgrade':'')+(!owned&&!isExcluded?' missing':'')+(isExcluded?' excluded':'')+' '+(raritySlotClass);
     // Stagger animation delay
     slot.style.animationDelay=(shown*30)+'ms';
     let inner=`<div class="card-num">${esc(c.num)}</div><div class="card-name">${esc(c.name)}</div>`;
@@ -2147,9 +2218,10 @@ function renderBinder(){
       const ck=cardKey(activeSet,c.num);
       const linkedLedger=D.ledger.find(l=>l.collectionKey===ck);
       const cardSold=linkedLedger&&linkedLedger.soldPrice;
-      if(cardSold) inner+=`<div style="position:absolute;top:5px;right:5px;font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:4px;background:rgba(255,61,71,.15);color:var(--red);text-transform:uppercase;letter-spacing:1px;">Sold</div>`;
+      if(isExcluded) inner+=`<div class="card-excluded-badge">excl.</div>`;
+      else if(cardSold) inner+=`<div style="position:absolute;top:5px;right:5px;font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:4px;background:rgba(255,61,71,.15);color:var(--red);text-transform:uppercase;letter-spacing:1px;">Sold</div>`;
       else if(needsUpgrade) inner+=`<div class="card-upgrade-flag" title="Needs upgrade">⬆</div>`;
-      else inner+=`<div class="card-check">✓</div>`;
+      else if(owned) inner+=`<div class="card-check">✓</div>`;
       if(data.type==='slab') inner+=`<div class="card-type-badge">SLAB</div>`;
     }
     slot.innerHTML=inner;
@@ -2199,8 +2271,17 @@ function openCardModal(setName,num){
   $id('cardNotes').value=data.notes||'';
   $id('cardUpgrade').checked=!!(data.upgrade);
   toggleSlabUI();
+  // Exclude toggle
+  const excluded=!!(data.exclude);
+  $id('cardExclude').checked=excluded;
+  const wrap=$id('cardExcludeWrap');
+  if(wrap) wrap.classList.toggle('is-excluded',excluded);
   // NM price always visible
   $id('cardNMPrice').value=data.nmPrice||'';
+  // Exclude toggle
+  const excl=!!(data.exclude);
+  $id('cardExclude').checked=excl;
+  toggleExcludeUI();
   // Ledger hint
   const hint=$id('cardLedgerHint');
   if(linkedEntry){
@@ -2230,6 +2311,18 @@ function markCardOwned(){
 function toggleSlabUI(){
   $id('cardSlabGradeField').style.display=$id('cardType').value==='slab'?'':'none';
 }
+function toggleExcludeUI(){
+  const excluded=$id('cardExclude').checked;
+  const wrap=$id('cardExcludeWrap');
+  if(wrap) wrap.classList.toggle('is-excluded',excluded);
+}
+function toggleExcludeUI(){
+  const excl=$id('cardExclude').checked;
+  const wrap=$id('cardExcludeWrap');
+  const lbl=$id('cardExcludeLabel');
+  if(wrap) wrap.classList.toggle('excluded-on', excl);
+  if(lbl) lbl.textContent=excl?'✕ Excluded from collection goal':'Exclude from collection goal';
+}
 
 function saveCard(){
   if(!editingCardKey) return;
@@ -2241,7 +2334,8 @@ function saveCard(){
     slabGrade:$id('cardSlabGrade').value.trim(),
     nmPrice:parseFloat($id('cardNMPrice').value)||null,
     notes:$id('cardNotes').value.trim(),
-    upgrade:$id('cardUpgrade').checked
+    upgrade:$id('cardUpgrade').checked,
+    exclude:$id('cardExclude').checked
   };
   D.collection[editingCardKey]=entry;
   save();
@@ -2254,8 +2348,9 @@ function saveCard(){
     // Check for set completion
     const setData=SETS[activeSet];
     if(setData){
-      const ownedCount=setData.cards.filter(c=>{const d=getCard(activeSet,c.num);return d&&d.owned;}).length;
-      if(ownedCount===setData.total) showSetComplete(activeSet);
+      const goalC=setData.cards.filter(c=>{const d=getCard(activeSet,c.num);return !(d&&d.exclude);});
+      const ownedCount=goalC.filter(c=>{const d=getCard(activeSet,c.num);return d&&d.owned;}).length;
+      if(ownedCount===goalC.length&&goalC.length>0) showSetComplete(activeSet);
     }
   }
   renderSetsOverview();
@@ -2598,7 +2693,9 @@ function onLedgerSetChange(){
   const wrap = $id('lCardPickerWrap');
   if(COLLECTION_SETS.includes(setName)){
     _pickerSetName = setName;
-    _pickerCards = (SETS[setName]||{cards:[]}).cards.map(c=>({...c, checked:false}));
+    _pickerCards = (SETS[setName]||{cards:[]}).cards
+      .filter(c=>{ const d=getCard(setName,c.num); return !(d&&d.exclude); })
+      .map(c=>({...c, checked:false}));
     renderPickerList();
     wrap.style.display = '';
     $id('lName').value = '';
