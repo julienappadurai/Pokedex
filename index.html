@@ -2377,8 +2377,37 @@ function saveLedgerEntry(){
 function deleteLedgerEntry(){
   if(!editingLedgerId) return;
   if(!confirm('Delete this ledger entry?')) return;
-  D.ledger=D.ledger.filter(l=>l.id!==editingLedgerId);
-  save(true); closeLedgerModal(); renderLedger();
+
+  // Find the entry before removing it
+  const entry = D.ledger.find(l=>l.id===editingLedgerId);
+  D.ledger = D.ledger.filter(l=>l.id!==editingLedgerId);
+
+  // Check if it was linked to a collection card
+  const linkedKeys = (entry&&entry.collectionKeys&&entry.collectionKeys.length)
+    ? entry.collectionKeys
+    : (entry&&entry.collectionKey ? [entry.collectionKey] : []);
+
+  if(linkedKeys.length){
+    // Build readable card name(s) for the prompt
+    const cardNames = linkedKeys.map(k=>{
+      const parts=k.split('|'); return parts.length>1?`${parts[0]} ${parts[1]}`:k;
+    });
+    const nameStr = cardNames.length===1 ? cardNames[0] : `${cardNames.length} cards`;
+    const removeOwned = confirm(
+      `This entry is linked to "${nameStr}" in your collection.
+
+Remove owned status too?`
+    );
+    if(removeOwned){
+      linkedKeys.forEach(k=>{
+        if(D.collection[k]){
+          D.collection[k].owned = false;
+        }
+      });
+    }
+  }
+
+  save(true); closeLedgerModal(); renderSetsOverview(); renderLedger();
 }
 
 function lSort(col){
