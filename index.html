@@ -1973,7 +1973,7 @@ function setFilter(f){
 }
 
 function renderBinder(){
-  if(!$id('collectionBody').style.display===false) return;
+  // Guard removed — setDetail visibility is checked by caller
   const setData=SETS[activeSet];
   if(!setData) return;
   const search=($id('colSearch').value||'').toLowerCase().trim();
