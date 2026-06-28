@@ -863,11 +863,7 @@ body.dark .card-slot.owned{background:linear-gradient(160deg,rgba(86,170,100,.15
 #soundBtn{font-size:16px;padding:6px 10px;opacity:.8;}
 #soundBtn.muted{opacity:.4;}
 
-/* ── TIMELINE CHART ── */
-#timelineSection{margin-top:24px;}
-.timeline-chart{background:rgba(255,255,255,.95);border:1.5px solid rgba(184,150,12,.15);border-radius:14px;padding:16px;overflow-x:auto;}
-body.dark .timeline-chart{background:rgba(36,34,30,.97);border-color:rgba(200,180,120,.1);}
-.timeline-canvas{height:120px;min-width:100%;display:block;}
+
 
 /* ── DARK MODE OVERLAY — lighter so pattern shows ── */
 body.dark::after{background:rgba(18,16,14,.75);}
@@ -955,6 +951,29 @@ body.dark .card-excluded-badge{background:rgba(255,255,255,.08);}
 .exclude-toggle.is-excluded span{color:var(--red);}
 body.dark .exclude-toggle{border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.02);}
 body.dark .exclude-toggle.is-excluded{border-color:rgba(255,61,71,.4);background:rgba(255,61,71,.08);}
+
+
+/* ── LEDGER PAGINATION ── */
+.ledger-pagination{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 4px;gap:12px;
+}
+.page-btn{
+  background:rgba(255,255,255,.8);border:1.5px solid rgba(184,150,12,.2);
+  border-radius:20px;padding:8px 18px;
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:700;
+  color:var(--text2);cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:6px;
+}
+.page-btn:hover:not(:disabled){border-color:var(--yellow);color:var(--yellow);background:rgba(184,150,12,.06);}
+.page-btn:disabled{opacity:.3;cursor:default;}
+body.dark .page-btn{background:rgba(36,34,30,.8);border-color:rgba(200,180,120,.15);}
+body.dark .page-btn:hover:not(:disabled){background:rgba(255,215,0,.06);}
+.page-info{
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);
+  text-align:center;line-height:1.6;
+}
+.page-info strong{color:var(--text2);font-weight:700;}
 
 /* ── FINANCE BLUR ── */
 .fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
@@ -1112,11 +1131,11 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
     </div>
     <div class="ledger-stats" id="ledgerStats"></div>
     <div class="ledger-filters">
-      <div class="field"><label>Search</label><input id="lSearch" placeholder="Card name…" oninput="renderLedger()" style="width:150px;"></div>
-      <div class="field"><label>Type</label><select id="lType" onchange="renderLedger()" style="width:100px;"><option value="">All</option><option value="raw">Raw</option><option value="slab">Slab</option></select></div>
-      <div class="field"><label>Set</label><select id="lSet" onchange="renderLedger()" style="width:140px;"><option value="">All sets</option></select></div>
-      <div class="field"><label>Platform</label><select id="lPlatform" onchange="renderLedger()" style="width:120px;"><option value="">All</option><option>eBay</option><option>Whatnot</option><option>Local</option><option>Other</option></select></div>
-      <div class="field"><label>Status</label><select id="lStatus" onchange="renderLedger()" style="width:110px;"><option value="">All</option><option value="open">Open</option><option value="sold">Sold</option></select></div>
+      <div class="field"><label>Search</label><input id="lSearch" placeholder="Card name…" oninput="lPage=0;renderLedger()" style="width:150px;"></div>
+      <div class="field"><label>Type</label><select id="lType" onchange="lPage=0;renderLedger()" style="width:100px;"><option value="">All</option><option value="raw">Raw</option><option value="slab">Slab</option></select></div>
+      <div class="field"><label>Set</label><select id="lSet" onchange="lPage=0;renderLedger()" style="width:140px;"><option value="">All sets</option></select></div>
+      <div class="field"><label>Platform</label><select id="lPlatform" onchange="lPage=0;renderLedger()" style="width:120px;"><option value="">All</option><option>eBay</option><option>Whatnot</option><option>Local</option><option>Other</option></select></div>
+      <div class="field"><label>Status</label><select id="lStatus" onchange="lPage=0;renderLedger()" style="width:110px;"><option value="">All</option><option value="open">Open</option><option value="sold">Sold</option></select></div>
       <button onclick="clearLedgerFilters()" class="hbtn" style="align-self:flex-end;">Clear</button>
     </div>
     <!-- Sort bar -->
@@ -1152,15 +1171,17 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
       </table>
     </div>
     <div id="ledgerCardList" class="ledger-card-list"></div>
+    <div class="ledger-pagination" id="ledgerPagination" style="display:none;">
+      <button class="page-btn" id="pagePrev" onclick="lPageChange(-1)">← Prev</button>
+      <div class="page-info" id="pageInfo"></div>
+      <button class="page-btn" id="pageNext" onclick="lPageChange(1)">Next →</button>
+    </div>
     <div id="ledgerEmpty" class="ledger-empty" style="display:none;">
       <div style="font-size:48px;margin-bottom:16px;">📭</div>
       No entries yet — tap <strong style="color:var(--yellow);">+ Add Entry</strong> to log a purchase.
     </div>
   </div>
-
-  <div id="timelineSection" style="display:none;">
-    <div class="sec" style="margin-top:8px;">📈 Acquisition Timeline</div>
-    <div class="timeline-chart">
+<div class="timeline-chart">
       <canvas id="timelineCanvas" class="timeline-canvas"></canvas>
     </div>
   </div>
@@ -1702,6 +1723,8 @@ let activeFilter = 'all';
 let editingCardKey = null;
 let editingLedgerId = null;
 let lSortCol = 'date', lSortDir = 'desc';
+let lPage = 0;
+const L_PAGE_SIZE = 20;
 let folderId = null, fileId = null, tokenClient = null, gapiOk = false, driveReady = false;
 let backupInProgress = false;
 let pinBuffer = '', pinMode = 'login', pinFirst = '';
@@ -2002,7 +2025,7 @@ function showTab(tab){
   const bnC=$id('bnCollection'); const bnL=$id('bnLedger');
   if(bnC) bnC.classList.toggle('on',tab==='collection');
   if(bnL) bnL.classList.toggle('on',tab==='ledger');
-  if(tab==='ledger'){ renderLedger(); setTimeout(renderTimeline, 100); }
+  if(tab==='ledger'){ renderLedger();  }
 }
 
 // ═══════════════════════════════════════════════
@@ -2460,7 +2483,7 @@ function saveLedgerEntry(){
   // Store all keys on entry for reference
   entry.collectionKeys = cks;
   if(cks.length===1) entry.collectionKey = cks[0];
-  save(true); playSaveSound(); closeLedgerModal(); renderSetsOverview(); renderLedger(); renderTimeline(); prefetchLedgerSprites();
+  save(true); playSaveSound(); closeLedgerModal(); renderSetsOverview(); renderLedger(); prefetchLedgerSprites();
   // Check set completion for any linked sets
   new Set(cks.map(k=>k.split('|')[0])).forEach(sn=>{
     const sd=SETS[sn]; if(!sd) return;
@@ -2505,9 +2528,18 @@ Remove owned status too?`
   save(true); closeLedgerModal(); renderSetsOverview(); renderLedger();
 }
 
+function lPageChange(dir){
+  lPage += dir;
+  renderLedger();
+  // Scroll to top of ledger content
+  const lv=$id('viewLedger'); if(lv) lv.scrollTop=0;
+  window.scrollTo(0,0);
+}
+
 function lSort(col){
   if(lSortCol===col) lSortDir=lSortDir==='asc'?'desc':'asc';
   else { lSortCol=col; lSortDir='desc'; }
+  lPage=0;
   updateSortBar();
   renderLedger();
 }
@@ -2526,10 +2558,12 @@ function updateSortBar(){
 function clearLedgerFilters(){
   $id('lSearch').value=''; $id('lType').value=''; $id('lSet').value='';
   $id('lPlatform').value=''; $id('lStatus').value='';
+  lPage=0;
   renderLedger();
 }
 
-function renderLedger(){
+function renderLedger(resetPage){
+  if(resetPage) lPage=0;
   renderLedgerDOM();
 }
 function renderLedgerDOM(){
@@ -2574,6 +2608,21 @@ function renderLedgerDOM(){
     return lSortDir==='asc'?cmp:-cmp;
   });
 
+  // ── PAGINATION ──
+  const totalFiltered=filtered.length;
+  const totalPages=Math.max(1,Math.ceil(totalFiltered/L_PAGE_SIZE));
+  if(lPage>=totalPages) lPage=totalPages-1;
+  if(lPage<0) lPage=0;
+  const paginated=filtered.slice(lPage*L_PAGE_SIZE,(lPage+1)*L_PAGE_SIZE);
+  const pag=$id('ledgerPagination');
+  if(pag){
+    pag.style.display=totalFiltered>L_PAGE_SIZE?'':'none';
+    const prev=$id('pagePrev'); const next=$id('pageNext'); const info=$id('pageInfo');
+    if(prev) prev.disabled=lPage===0;
+    if(next) next.disabled=lPage>=totalPages-1;
+    if(info) info.innerHTML=`Page <strong>${lPage+1}</strong> of <strong>${totalPages}</strong>&nbsp;&nbsp;·&nbsp;&nbsp;${totalFiltered} entries`;
+  }
+
   // Sort indicators
   updateSortBar();
 
@@ -2581,7 +2630,7 @@ function renderLedgerDOM(){
   const filtSpent=filtered.reduce((s,l)=>s+(l.paid||0),0);
   const filtSold=filtered.filter(l=>l.soldPrice);
   const filtPL=filtSold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0)-(l.paid||0),0);
-  $id('ledgerSummaryRow').innerHTML=`<span>${filtered.length} entries</span><span style="color:var(--red);">spent ${finWrap(fmt(filtSpent))}</span>${filtSold.length?`<span style="color:${filtPL>=0?'var(--green)':'var(--red)'};">P&L ${finWrap(fmtSign(filtPL))}</span>`:''}`;
+  $id('ledgerSummaryRow').innerHTML=`<span>${totalFiltered} entries</span><span style="color:var(--red);">spent ${finWrap(fmt(filtSpent))}</span>${filtSold.length?`<span style="color:${filtPL>=0?'var(--green)':'var(--red)'};">P&L ${finWrap(fmtSign(filtPL))}</span>`:''}`;
 
   const tbody=$id('ledgerBody');
   const cardList=$id('ledgerCardList');
@@ -2591,7 +2640,7 @@ function renderLedgerDOM(){
   tbody.innerHTML='';
   if(cardList)cardList.innerHTML='';
 
-  filtered.forEach(l=>{
+  paginated.forEach(l=>{
     const isSold=l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='';
     const pl=isSold?(parseFloat(l.soldPrice)||0)-(l.paid||0):null;
     const dateStr=l.dateBought?new Date(l.dateBought+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}):'—';
@@ -3524,91 +3573,6 @@ function closeSetComplete(){
   if(overlay) overlay.style.display = 'none';
 }
 
-// ═══════════════════════════════════════════════
-// ACQUISITION TIMELINE CHART
-// ═══════════════════════════════════════════════
-function renderTimeline(){
-  const section = $id('timelineSection');
-  const canvas = $id('timelineCanvas');
-  if(!section || !canvas) return;
-
-  // Collect all ledger entries with dates, sorted by date
-  const entries = D.ledger
-    .filter(l => l.dateBought)
-    .map(l => ({ date: new Date(l.dateBought + 'T00:00:00'), count: 1 }))
-    .sort((a, b) => a.date - b.date);
-
-  if(entries.length < 2){ section.style.display = 'none'; return; }
-  section.style.display = '';
-
-  // Group by month
-  const byMonth = {};
-  entries.forEach(e => {
-    const key = e.date.toISOString().slice(0, 7); // YYYY-MM
-    byMonth[key] = (byMonth[key] || 0) + 1;
-  });
-
-  const months = Object.keys(byMonth).sort();
-  const counts = months.map(m => byMonth[m]);
-
-  // Draw chart
-  const dpr = window.devicePixelRatio || 1;
-  const W = canvas.offsetWidth || canvas.parentElement.offsetWidth || 300;
-  const H = 120;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  const pad = { top: 12, right: 12, bottom: 28, left: 32 };
-  const cw = W - pad.left - pad.right;
-  const ch = H - pad.top - pad.bottom;
-  const maxCount = Math.max(...counts, 1);
-  const isDark = document.body.classList.contains('dark');
-  const textCol = isDark ? '#9a9080' : '#9a8e80';
-  const barCol = isDark ? '#ffd700' : '#b8960c';
-  const gridCol = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
-
-  ctx.clearRect(0, 0, W, H);
-
-  // Grid lines
-  ctx.strokeStyle = gridCol; ctx.lineWidth = 1;
-  [0, .25, .5, .75, 1].forEach(frac => {
-    const y = pad.top + ch * (1 - frac);
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
-    if(frac > 0){
-      ctx.fillStyle = textCol; ctx.font = `${9 * dpr / dpr}px DM Mono, monospace`; ctx.textAlign = 'right';
-      ctx.fillText(Math.round(maxCount * frac), pad.left - 4, y + 3);
-    }
-  });
-
-  // Bars
-  const barW = Math.max(4, Math.min(24, cw / months.length - 3));
-  months.forEach((m, i) => {
-    const x = pad.left + (i / (months.length - 1 || 1)) * cw;
-    const barH = (counts[i] / maxCount) * ch;
-    const y = pad.top + ch - barH;
-    ctx.fillStyle = barCol;
-    const r = Math.min(3, barW / 2);
-    ctx.beginPath();
-    ctx.moveTo(x - barW/2 + r, y);
-    ctx.arcTo(x + barW/2, y, x + barW/2, y + barH, r);
-    ctx.arcTo(x + barW/2, y + barH, x - barW/2, y + barH, 0);
-    ctx.arcTo(x - barW/2, y + barH, x - barW/2, y, 0);
-    ctx.arcTo(x - barW/2, y, x + barW/2, y, r);
-    ctx.closePath();
-    ctx.fill();
-    // Month label (show every Nth label to avoid overlap)
-    const step = Math.ceil(months.length / 6);
-    if(i % step === 0){
-      ctx.fillStyle = textCol; ctx.font = `${8 * dpr / dpr}px DM Mono, monospace`; ctx.textAlign = 'center';
-      const label = m.slice(2).replace('-', '/'); // YY/MM
-      ctx.fillText(label, x, H - 6);
-    }
-  });
-}
 
 // ═══════════════════════════════════════════════
 // INIT
