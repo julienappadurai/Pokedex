@@ -2718,7 +2718,7 @@ function triggerConfetti(){
 // Register service worker for PWA
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/Poke/service-worker.js')
+    navigator.serviceWorker.register('/Pokedex/service-worker.js')
       .catch(e=>console.log('SW reg failed (local preview only):',e));
   });
 }

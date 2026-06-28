@@ -1,11 +1,10 @@
 // Pokédex Binder Service Worker
 const CACHE_NAME = 'pokebinder-v1';
 const ASSETS = [
-  '/Poke/',
-  '/Poke/index.html'
+  '/Pokedex/',
+  '/Pokedex/index.html'
 ];
 
-// Install — cache core assets
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
@@ -13,7 +12,6 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activate — clean up old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -23,7 +21,6 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch — cache first, network fallback
 self.addEventListener('fetch', event => {
   if(event.request.method !== 'GET') return;
   event.respondWith(
