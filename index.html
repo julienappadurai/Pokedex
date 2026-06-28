@@ -796,6 +796,88 @@ body.dark .set-list-progress-track{background:rgba(255,255,255,.08);}
 .set-list-count{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
 .set-list-arrow{font-size:14px;color:var(--muted);flex-shrink:0;}
 
+
+/* ── PIXEL SPRITES ── */
+.poke-sprite{image-rendering:pixelated;image-rendering:crisp-edges;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));}
+.poke-sprite-btn{background:none;border:none;padding:0;cursor:pointer;position:relative;display:inline-block;}
+.poke-sprite-btn:active{transform:scale(.9);}
+
+/* ── PIKACHU CORNER BUDDY ── */
+#pikachuBuddy{
+  position:fixed;right:16px;bottom:80px;z-index:50;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+#pikachuBubble{
+  background:rgba(255,255,255,.97);border:2px solid #b8960c;border-radius:12px;
+  padding:8px 12px;font-size:10px;font-weight:700;color:#1a1610;
+  max-width:160px;text-align:center;line-height:1.5;
+  box-shadow:0 4px 16px rgba(0,0,0,.15);
+  animation:bubble-in .2s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+}
+#pikachuBubble::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:#b8960c;}
+body.dark #pikachuBubble{background:rgba(36,34,30,.97);color:#e8e0d0;border-color:#ffd700;}
+body.dark #pikachuBubble::after{border-top-color:#ffd700;}
+@keyframes bubble-in{from{opacity:0;transform:scale(.8) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes pika-hop{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.pika-hop{animation:pika-hop .4s ease-in-out 2;}
+
+/* ── WALKING SPRITE ── */
+#walkerWrap{
+  position:fixed;bottom:68px;z-index:49;pointer-events:none;
+  transition:left 8s linear;
+}
+@keyframes walk-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+#walkerSprite{animation:walk-bob .5s ease-in-out infinite;}
+
+/* ── SET COMPLETION SPRITE ── */
+#setCompleteOverlay{
+  position:fixed;inset:0;z-index:300;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+#setCompleteCard{
+  background:rgba(255,255,255,.97);border:2px solid #b8960c;
+  border-radius:20px;padding:24px 32px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  animation:complete-pop .4s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:auto;
+}
+body.dark #setCompleteCard{background:rgba(36,34,30,.97);}
+@keyframes complete-pop{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+@keyframes victory-bounce{0%,100%{transform:translateY(0);}25%{transform:translateY(-16px);}75%{transform:translateY(-8px);}}
+#setCompleteSprite{animation:victory-bounce .6s ease-in-out 3;}
+.complete-title{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--yellow);margin:12px 0 6px;line-height:1.6;}
+.complete-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+
+/* ── CARD SLOT RARITY GRADIENTS (owned) ── */
+.card-slot.owned.rarity-holo-slot{background:linear-gradient(160deg,rgba(255,215,0,.12) 0%,rgba(255,255,255,.97) 40%);}
+.card-slot.owned.rarity-rare-slot{background:linear-gradient(160deg,rgba(192,192,192,.15) 0%,rgba(255,255,255,.97) 40%);}
+.card-slot.owned.rarity-uncommon-slot{background:linear-gradient(160deg,rgba(205,127,50,.12) 0%,rgba(255,255,255,.97) 40%);}
+.card-slot.owned.rarity-trainer-slot{background:linear-gradient(160deg,rgba(79,195,247,.1) 0%,rgba(255,255,255,.97) 40%);}
+.card-slot.owned.rarity-promo-slot{background:linear-gradient(160deg,rgba(192,132,252,.12) 0%,rgba(255,255,255,.97) 40%);}
+.card-slot.owned{background:linear-gradient(160deg,rgba(86,170,100,.1) 0%,rgba(255,255,255,.97) 40%);} /* default */
+body.dark .card-slot.owned.rarity-holo-slot{background:linear-gradient(160deg,rgba(255,215,0,.15) 0%,rgba(36,34,30,.97) 40%);}
+body.dark .card-slot.owned.rarity-rare-slot{background:linear-gradient(160deg,rgba(192,192,192,.12) 0%,rgba(36,34,30,.97) 40%);}
+body.dark .card-slot.owned.rarity-uncommon-slot{background:linear-gradient(160deg,rgba(205,127,50,.15) 0%,rgba(36,34,30,.97) 40%);}
+body.dark .card-slot.owned.rarity-trainer-slot{background:linear-gradient(160deg,rgba(79,195,247,.12) 0%,rgba(36,34,30,.97) 40%);}
+body.dark .card-slot.owned.rarity-promo-slot{background:linear-gradient(160deg,rgba(192,132,252,.15) 0%,rgba(36,34,30,.97) 40%);}
+body.dark .card-slot.owned{background:linear-gradient(160deg,rgba(86,170,100,.15) 0%,rgba(36,34,30,.97) 40%);}
+
+/* ── SOUND BUTTON ── */
+#soundBtn{font-size:16px;padding:6px 10px;opacity:.8;}
+#soundBtn.muted{opacity:.4;}
+
+/* ── TIMELINE CHART ── */
+#timelineSection{margin-top:24px;}
+.timeline-chart{background:rgba(255,255,255,.95);border:1.5px solid rgba(184,150,12,.15);border-radius:14px;padding:16px;overflow-x:auto;}
+body.dark .timeline-chart{background:rgba(36,34,30,.97);border-color:rgba(200,180,120,.1);}
+.timeline-canvas{height:120px;min-width:100%;display:block;}
+
+/* ── DARK MODE OVERLAY — lighter so pattern shows ── */
+body.dark::after{background:rgba(18,16,14,.75);}
+
 /* ── FINANCE BLUR ── */
 .fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
 .fin-blur:hover{filter:blur(4px);}
@@ -883,6 +965,7 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
   <div class="theme-track"></div>
   <div class="theme-knob"></div>
 </label>
+        <button class="hbtn" id="soundBtn" onclick="toggleSound()" title="Toggle sounds">🔊</button>
         <button class="hbtn" id="syncBtn" onclick="manualSync()">● Connecting…</button>
         <button class="hbtn" onclick="signOut()">⏻ Sign out</button>
       </div>
@@ -981,6 +1064,12 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
     </div>
   </div>
 
+  <div id="timelineSection" style="display:none;">
+    <div class="sec" style="margin-top:8px;">📈 Acquisition Timeline</div>
+    <div class="timeline-chart">
+      <canvas id="timelineCanvas" class="timeline-canvas"></canvas>
+    </div>
+  </div>
   </div><!-- content-area -->
 </div>
 </div>
@@ -1621,6 +1710,12 @@ function enterApp(){
     setSyncBtn('saving','● Connecting…');
     renderAll();
     connectDrive();
+    // Init sprites and features
+    setTimeout(()=>{
+      initPikachu();
+      initSoundBtn();
+      scheduleWalker();
+    }, 500);
   }, 600);
 }
 function showPokeballAnim(id){
@@ -1653,6 +1748,7 @@ function gapiLoaded(){
 }
 function gsiLoaded(){}
 async function connectDrive(){
+  setSyncBtn('saving','⚙ Connecting…');
   if(!gapiOk){ let w=0; const wait=()=>new Promise(r=>setTimeout(r,200)); while(!gapiOk&&w<5000){await wait();w+=200;} if(!gapiOk){setSyncBtn('','● Drive unavailable');return;} }
   const stored=localStorage.getItem('pokebinder_gtoken');
   if(stored){ try{ gapi.client.setToken(JSON.parse(stored)); await syncWithDrive(); return; }catch(e){ localStorage.removeItem('pokebinder_gtoken'); } }
@@ -1807,7 +1903,7 @@ function showTab(tab){
   const bnC=$id('bnCollection'); const bnL=$id('bnLedger');
   if(bnC) bnC.classList.toggle('on',tab==='collection');
   if(bnL) bnL.classList.toggle('on',tab==='ledger');
-  if(tab==='ledger') renderLedger();
+  if(tab==='ledger'){ renderLedger(); setTimeout(renderTimeline, 100); }
 }
 
 // ═══════════════════════════════════════════════
@@ -2042,11 +2138,7 @@ function renderBinder(){
       <div class="empty-sub">${sub}</div>
     </div>`;
   }
-  // Check for set completion — trigger confetti if 100%
-  const owned100=setData.cards.filter(c=>getCard(activeSet,c.num)&&getCard(activeSet,c.num).owned);
-  if(owned100.length===setData.cards.length&&setData.cards.length>0&&activeFilter==='all'&&!search){
-    triggerConfetti();
-  }
+  // Completion check handled by showSetComplete (called on save)
   },60);
 }
 
@@ -2121,11 +2213,18 @@ function saveCard(){
   };
   D.collection[editingCardKey]=entry;
   save();
+  playOwnedSound();
   closeCardModal();
   // Stay on detail view if it was open
   if($id('setDetail')&&$id('setDetail').style.display!=='none'){
     renderColStats();
     renderBinder();
+    // Check for set completion
+    const setData=SETS[activeSet];
+    if(setData){
+      const ownedCount=setData.cards.filter(c=>{const d=getCard(activeSet,c.num);return d&&d.owned;}).length;
+      if(ownedCount===setData.total) showSetComplete(activeSet);
+    }
   }
   renderSetsOverview();
 }
@@ -2234,7 +2333,13 @@ function saveLedgerEntry(){
   // Store all keys on entry for reference
   entry.collectionKeys = cks;
   if(cks.length===1) entry.collectionKey = cks[0];
-  save(true); closeLedgerModal(); renderSetsOverview(); renderLedger();
+  save(true); playSaveSound(); closeLedgerModal(); renderSetsOverview(); renderLedger(); renderTimeline();
+  // Check set completion for any linked sets
+  new Set(cks.map(k=>k.split('|')[0])).forEach(sn=>{
+    const sd=SETS[sn]; if(!sd) return;
+    const oc=sd.cards.filter(c=>{const d=getCard(sn,c.num);return d&&d.owned;}).length;
+    if(oc===sd.total) showSetComplete(sn);
+  });
 }
 
 function deleteLedgerEntry(){
@@ -2864,6 +2969,271 @@ function triggerConfetti(){
   },{passive:true});
 })();
 
+
+// ═══════════════════════════════════════════════
+// OFFICIAL POKÉMON SPRITES (PokeAPI Gen 1)
+// ═══════════════════════════════════════════════
+const SPRITE_URI = {
+  pikachu:    ()=>'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAKlBMVEUAAAAAAAApKSlBQUpiMQhzc4OcUgDFIBjelADmWkH2vSD25lL/9qT////Vai+KAAAAAXRSTlMAQObYZgAAAdlJREFUWMPtlsFqwkAQhjclhB6ztRRReqiHXnoSbz0piLX2JcwliD6A0JsgEuoDlNJTQKzsnkJpSDN9A3PpG3U2ST12J4dCKftjNML/MTObndkwZmRkZPTX5Vb0Wxe/DrQq5nRSHehWBK4PQKtFAWpiU9wctTodygI0SsCZQqfTJgK+P3ZmgAClfltsJ9k+Qf8bKQACQZZlgHptqwC+lhh+ZNleAVz5HRjrAEwGUi4Tr/wX61JaSMzm8wrygo9BD5wjENVKYI3hNDnZbRiqlHJfAHrAuVQmeH9eqooJwB3AABN5egyL+rVF3MrldDtJ5/OwDKADbkSuHJAVgJf7kE1FTmg2lCNKheoOCa7froU2OSo5owLSHeG33s+aJQCuTfKzJhQBsNjRlpEAJHZSrY4tKBNkHeNSqk3XZXUKYEFSApH18D1BfgYAmwZ7CKJhsOsRgHUB7CAMgj5lGM9AIfgJ6wtGA2Ko45UK7lPmUjPGmRThlQr3zCMAM/BxhXz1MLhPAKyiBwCkEH2PkJIlCn+apiKklGDlPQBCYoSQdKBMxUG0o6hx8O9oh53VEAHnqndIj42x/kotpjWYrGgB7Djp5c6R8GgR+Gn5G0cVXwl41bcUIyMjo/+qLw92FGczGN4XAAAAAElFTkSuQmCC',
+  charmander: ()=>'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAALVBMVEUAAAAIOYsQEBAYi7QxrO6LKQDeUjnmOQDmrFr2pAD/lEH/xWL/1Qj/1Xv///8NIPGPAAAAAXRSTlMAQObYZgAAAchJREFUWMPtlb9Lw0AUx49A7FwQB6dyYggdOol/h8ulpaDDQY4QF7dQ6FSwHILgFgouFsxwgoOj/gFFyCwi3CJ08a/wXX6s3ouTyH2HJMP75N67+753hDg5OTk5/UntxKxbfKpUJ+JcgQYdFnh5/g2wxgPpg1JFJwD+n6oCn9OeAfoCDxwDcNeP8MAXAI8HHYChAXZb4MIa7+8DcH/U1jC3A9UxiC6A2dS4AXq39hqmsEAccfgCB/bKGytAwasjwQlj3KywsWV0QijNIhEzpQywebUAXsyCmIkADFJAHVlWWjbWSxUfFlQI2ChKSJbP85+BACI5xINM3fNNaSnCC0QjbjZ2VtoAQ8SJFIJVBzFblTmxErGUy7TuoF6+yqwH4UVav7ctl43t9iMTrXXbcv4YYfBTAzRzw39CA3VOPmIa+NcAXDXAFANAvP6oAWYMZRMzwJspwmeYceMXJqUlmJVBayQIQCVaS3DrGhyYLDBTYyKlAQqwlRxggHUNiEDIBWouFaGUEfRPKBeYceZBQ4QyAoOHlyeo0Qepc3oID4aLB8D0TiQ4crZ6dXNOFRYYnVVTL0LfKR6l1Wu7/ex2vVM6IE5OTk7/Ud/V9spBc5Q2fAAAAABJRU5ErkJggg==',
+  gengar:     ()=>'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAJ1BMVEUAAAAQEBBKKUpaSpxqYnt7YqSUc7S0i729rL3e1d7/Wlr/lJT/9v8XUOCgAAAAAXRSTlMAQObYZgAAAqlJREFUWMPtlr2Om0AQx8G8gLElLKWycYSj6IqDjXHk7vrrkK5nVwy9T9qtU0bKI6RJrru8QagcuUixD5UZcDhOMrtQRvG/QDKeH/O1M+A4V1111f8kb6z9bjrSXg4Fkvq6U8VAwON0ZUpmA4GUAE8piE1WrH720ls6HnAn8XZKFiZgAuwWgYN3cFLgHt8pJYUZKB/Z7USt5RqAp1xhROYUIlDqMVEcUkAJJSUwI4AulDqUAhqVJRRDAGglITMDGJPsAgAsNlcfXZQSvZRn+8IGoAugYmK2tUQDLE0AFbP1kLEZ3nS5KaYFAW0KlLMb9ACug/9GXaBgLHHchYTwYlCb2cFxVpiykh3AX1DdLhZ3o1TouNDap5gzo0Jvovxy/GgaBm0LQioSwzor1QcAnuYgak6F5M+1B2w3xjjt60EpIl4DSr5HoCAP+KPPARUe9rULlVcIpOQBdRlwQioL7L/T2VZ+9TOFKGMPVKxpb5szBKoZ2iTfEOCYBNL9UzrJWAKieoNBiap6ghUCW+NIrFksxI+KYto/p/wTlYmZDuyExRz2T00f+LtjDcSmEQpj6tfZXgcEJHPjzK3gY0OEb3UDMLY0AS6IU0j6ctJHmochgD5pfa9/fz3SPNgA7MWHBtD3wSAA48aH689a39XzMACAG3z+Sf+KoMnZAuAR5DcIkH2Tc2IGXGoBVilqdgABiXUzwctIE8DCpSUJaLcSac3M6899eO3ADmxfOyCZVz7bdu0TZnGAM8FoLut4CJ2bzzcByd9Iale5xZ48hGcgpf2U217sFJLfABgZ7mUbMKFs/Tna0/YYBCCRuL7v02Yr7QCdjfPbPKpfpFYPQoCYvixPK+BGUe53DmJu/fDx/Wl3P8fOCCGQilGffKuA++M+Kt2R9lddddU/pz9lOUF//A0VQQAAAABJRU5ErkJggg==',
+  mew:        ()=>'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAJFBMVEUAAAAAAAAYOWopYuZaKVKDrPa0YpTNzc3ug7T/tNX/1e7///9GVzdWAAAAAXRSTlMAQObYZgAAAbZJREFUWMPtlc2K2zAUhU9AZC1BGGaeoetCoRubCtd+jIAR8TN05RLMdXYGY3Syns34DebtukjSpD+25Xars/X5uD+SjoGoqKioqP+Us3adn74xK/xbdsZmOhyoOg3YfbBfUQNAeImiu3DBJfJkEbAA4G4dybWX6Z623pVJxuQK1FgEBrKnv35Xx0VAnUhSfgemh1DjSPLWEnK9DLyR5PHXLd2H+XPxo/fuDtyMM8D59P1byy4c4Onr5/cVwDPPHz6+MwGSR2M2DbT88qntNezrI5BPn0NLktLsWD9uaQYgBzYi9K2+G3/eqb9One4O0rLePRinZwaUUbkIyxQANrcR5t6DyoUkqQFkewCwVuZeXCZSkWSnYZ0GtlaknivgxeQkydq6PeAqymwBvBgokqTPnMb2PNLXs894AyiSLX1qgGoc35pkOVw4kP4IIB9Hny5nRcGBl05UanYBaZRLL5Q6OO+KXuRZVgCKT1IfpAwOSCVHY4xz4RmcSpPCuDIJJowrgafDMRjYZGWCnH34jyRzGuoeaGEAihUlNi4BimFFTwZANoQv9nIeVboOQKoRFRUVFfUP+gEAyZwxpBis3QAAAABJRU5ErkJggg==',
+  scyther:    ()=>'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAJ1BMVEUAAAAQEBBBWiBanEpzc3OLzXOcizG9vb295nPe3t7m1az/9tX///+m8VWgAAAAAXRSTlMAQObYZgAAAr1JREFUWMPt1zFr20AUAODT/QJdhIIxHWyropeQRToMHTqI4m5eJPuZFDokS4d4DYSAl9Ao3NAlXkogixYP56lLB3tK62IC+lF9sh03dDidhgwF32LLvM/v3enuySZkN3ZjN/7D0agYT68qAt6smODm+wsDPtwC2qgGWjwxqWgwn9vreDn4bApO1vHDEwPgI9ifIJQ3wx8mU/CH83kdAb8Zzk3BDAGVCE0qojCcKgT+8dQQDGYzBBaczWZGFdGBUpmauAM1nZ4yY5DBmVKsnhkDTKCYUnYVcKrMgLWvVB0rmmB8eUWUkNoGnBkl4A0qC+AOigQmIOHp/moKZhUhkBCrLINDs4oI5wBQd8IVMLkJXKYAMWMJVpQZJKCyAEiSTDG3WSpoS8oiXjg+Y2E7icvi/eQ4hTaIWAiIhZeAre8aPiRt6IEHjmi1wPGEF3BtVfzjGEHyG+Kg3fOdUHih1AGa3hXgCIGLd8MJmcO1XRnBJVb1CoC9lWnPCRWT2mnzT9/ufJyzFwTHuLrOYXZVBi7HuKaJYAHg6jKVfUltA9ALKGvjS1PV9ICmy8f3kIBne6Fb7I/DmoQSsCBuO2bEE7istlXcRVtbEQKL2YQK0WCMWMWe0k9hFK1TIfACQtxScL5+4wnBHASWC3XbAGACBnERaTHV1IJokyCA/ofVV9M93aw3gI6F2+/+XAPQAfp1BQ7GQdpdjp5AXAboXbN2nY9ye3NCdOvEVxmaNdld5ounI6WdRAGsmuznyzzaAO3moKv4tNPFiqJt1ylpBDzt5Pm2IgT6E4F9qY/xoy3wpX7/4Tp28wuM72yuPTwX+jPUzy/yvBM9+Xvx692ttjPhiuadvwnzg8ejB+0Z6o4WnWfXDwePe1pwvVxEzx93Nr0lTAtG0T8f6Rs47Z9X/HVYFZA30UuD17u/HbuxG+bjD/6wCNqVWEdRAAAAAElFTkSuQmCC',
+};
+
+// Set → sprite mapping
+const SET_SPRITE = {
+  'Base Set':'charmander',
+  'Jungle':'scyther',
+  'Fossil':'gengar',
+  'WOTC Black Star Promos':'mew',
+};
+
+// Pokémon facts/quotes for tap interaction
+const POKE_FACTS = [
+  "Pikachu stores electricity in its cheeks! ⚡",
+  "The Base Set Charizard sold for $420,000 in 2022! 🔥",
+  "Scyther's arms are natural blades — never blunted! 🌿",
+  "Gengar is said to be the shadow of Clefable! 👻",
+  "Mew's DNA contains the genes of all Pokémon! ✨",
+  "The first TCG sets launched in Japan in 1996! 🇯🇵",
+  "A 1st Edition Base Set booster box can sell for over $100,000! 💰",
+  "Fossil set introduced the first Ghost-type cards! 💀",
+  "Pikachu was nearly replaced by Clefairy as the mascot! 😮",
+  "There are only 102 cards in Base Set — can you catch 'em all? 🎴",
+];
+
+// ═══════════════════════════════════════════════
+// SOUND ENGINE
+// ═══════════════════════════════════════════════
+const SOUND_KEY = 'pokebinder_sound';
+let soundOn = localStorage.getItem(SOUND_KEY) !== 'off';
+
+function toggleSound(){
+  soundOn = !soundOn;
+  localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off');
+  const btn = $id('soundBtn');
+  if(btn){ btn.textContent = soundOn ? '🔊' : '🔇'; btn.classList.toggle('muted', !soundOn); }
+}
+
+function initSoundBtn(){
+  const btn = $id('soundBtn');
+  if(btn){ btn.textContent = soundOn ? '🔊' : '🔇'; btn.classList.toggle('muted', !soundOn); }
+}
+
+function playTone(freq, duration, type='sine', vol=0.15){
+  if(!soundOn) return;
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  } catch(e){}
+}
+
+function playSaveSound(){
+  // Pokéball click: short thud + high ping
+  playTone(80, 0.08, 'square', 0.1);
+  setTimeout(() => playTone(880, 0.12, 'sine', 0.08), 80);
+}
+
+function playOwnedSound(){
+  // Satisfying "got it" chime — ascending 3 notes
+  [523, 659, 784].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.1), i * 80));
+}
+
+function playCompleteSound(){
+  // Level-up fanfare — 5 ascending notes
+  [523, 587, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.12), i * 100));
+}
+
+// ═══════════════════════════════════════════════
+// PIKACHU BUDDY
+// ═══════════════════════════════════════════════
+let pikachuFactIdx = Math.floor(Math.random() * POKE_FACTS.length);
+let pikachuBubbleTimer = null;
+
+function initPikachu(){
+  const img = $id('pikachuImg');
+  if(img) img.src = SPRITE_URI.pikachu();
+  const buddy = $id('pikachuBuddy');
+  if(buddy) buddy.style.display = '';
+}
+
+function pikachuTapped(){
+  const btn = $id('pikachuBtn');
+  const bubble = $id('pikachuBubble');
+  if(!btn || !bubble) return;
+  // Hop animation
+  btn.querySelector('img').classList.remove('pika-hop');
+  void btn.querySelector('img').offsetWidth; // reflow
+  btn.querySelector('img').classList.add('pika-hop');
+  // Show fact bubble
+  const fact = POKE_FACTS[pikachuFactIdx % POKE_FACTS.length];
+  pikachuFactIdx++;
+  bubble.textContent = fact;
+  bubble.style.display = '';
+  if(pikachuBubbleTimer) clearTimeout(pikachuBubbleTimer);
+  pikachuBubbleTimer = setTimeout(() => { bubble.style.display = 'none'; }, 3500);
+  playTone(740, 0.1, 'sine', 0.08);
+  setTimeout(() => playTone(880, 0.1, 'sine', 0.06), 100);
+}
+
+// ═══════════════════════════════════════════════
+// WALKING SPRITE
+// ═══════════════════════════════════════════════
+const WALKER_SPRITES = ['pikachu','charmander','gengar','mew','scyther'];
+let walkerActive = false;
+
+function startWalker(){
+  if(walkerActive) return;
+  walkerActive = true;
+  const wrap = $id('walkerWrap');
+  const img = $id('walkerSprite');
+  if(!wrap || !img) return;
+  // Pick random sprite
+  const name = WALKER_SPRITES[Math.floor(Math.random() * WALKER_SPRITES.length)];
+  img.src = SPRITE_URI[name]();
+  img.alt = name;
+  // Walk left to right
+  const startX = -80;
+  const endX = window.innerWidth + 20;
+  wrap.style.left = startX + 'px';
+  wrap.style.display = '';
+  // CSS transition handles movement
+  setTimeout(() => {
+    wrap.style.left = endX + 'px';
+  }, 50);
+  // Hide after walk completes (8s transition)
+  setTimeout(() => {
+    wrap.style.display = 'none';
+    wrap.style.left = '-80px';
+    walkerActive = false;
+  }, 8500);
+}
+
+function scheduleWalker(){
+  // Walk every 45-90 seconds randomly
+  const delay = 45000 + Math.random() * 45000;
+  setTimeout(() => { startWalker(); scheduleWalker(); }, delay);
+}
+
+// ═══════════════════════════════════════════════
+// SET COMPLETION CELEBRATION
+// ═══════════════════════════════════════════════
+let completedSets = new Set();
+
+function showSetComplete(setName){
+  if(completedSets.has(setName)) return;
+  completedSets.add(setName);
+  const spriteName = SET_SPRITE[setName] || 'pikachu';
+  const img = $id('setCompleteSprite');
+  if(img) img.src = SPRITE_URI[spriteName]();
+  const title = $id('setCompleteTitle');
+  const sub = $id('setCompleteSub');
+  if(title) title.textContent = setName.toUpperCase() + ' COMPLETE!';
+  if(sub) sub.textContent = `You caught all ${SETS[setName]?.total || ''} cards!`;
+  const overlay = $id('setCompleteOverlay');
+  if(overlay){ overlay.style.display = 'flex'; }
+  playCompleteSound();
+  triggerConfetti();
+}
+
+function closeSetComplete(){
+  const overlay = $id('setCompleteOverlay');
+  if(overlay) overlay.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════
+// ACQUISITION TIMELINE CHART
+// ═══════════════════════════════════════════════
+function renderTimeline(){
+  const section = $id('timelineSection');
+  const canvas = $id('timelineCanvas');
+  if(!section || !canvas) return;
+
+  // Collect all ledger entries with dates, sorted by date
+  const entries = D.ledger
+    .filter(l => l.dateBought)
+    .map(l => ({ date: new Date(l.dateBought + 'T00:00:00'), count: 1 }))
+    .sort((a, b) => a.date - b.date);
+
+  if(entries.length < 2){ section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  // Group by month
+  const byMonth = {};
+  entries.forEach(e => {
+    const key = e.date.toISOString().slice(0, 7); // YYYY-MM
+    byMonth[key] = (byMonth[key] || 0) + 1;
+  });
+
+  const months = Object.keys(byMonth).sort();
+  const counts = months.map(m => byMonth[m]);
+
+  // Draw chart
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || canvas.parentElement.offsetWidth || 300;
+  const H = 120;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { top: 12, right: 12, bottom: 28, left: 32 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+  const maxCount = Math.max(...counts, 1);
+  const isDark = document.body.classList.contains('dark');
+  const textCol = isDark ? '#9a9080' : '#9a8e80';
+  const barCol = isDark ? '#ffd700' : '#b8960c';
+  const gridCol = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = gridCol; ctx.lineWidth = 1;
+  [0, .25, .5, .75, 1].forEach(frac => {
+    const y = pad.top + ch * (1 - frac);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
+    if(frac > 0){
+      ctx.fillStyle = textCol; ctx.font = `${9 * dpr / dpr}px DM Mono, monospace`; ctx.textAlign = 'right';
+      ctx.fillText(Math.round(maxCount * frac), pad.left - 4, y + 3);
+    }
+  });
+
+  // Bars
+  const barW = Math.max(4, Math.min(24, cw / months.length - 3));
+  months.forEach((m, i) => {
+    const x = pad.left + (i / (months.length - 1 || 1)) * cw;
+    const barH = (counts[i] / maxCount) * ch;
+    const y = pad.top + ch - barH;
+    ctx.fillStyle = barCol;
+    const r = Math.min(3, barW / 2);
+    ctx.beginPath();
+    ctx.moveTo(x - barW/2 + r, y);
+    ctx.arcTo(x + barW/2, y, x + barW/2, y + barH, r);
+    ctx.arcTo(x + barW/2, y + barH, x - barW/2, y + barH, 0);
+    ctx.arcTo(x - barW/2, y + barH, x - barW/2, y, 0);
+    ctx.arcTo(x - barW/2, y, x + barW/2, y, r);
+    ctx.closePath();
+    ctx.fill();
+    // Month label (show every Nth label to avoid overlap)
+    const step = Math.ceil(months.length / 6);
+    if(i % step === 0){
+      ctx.fillStyle = textCol; ctx.font = `${8 * dpr / dpr}px DM Mono, monospace`; ctx.textAlign = 'center';
+      const label = m.slice(2).replace('-', '/'); // YY/MM
+      ctx.fillText(label, x, H - 6);
+    }
+  });
+}
+
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
@@ -2888,6 +3258,29 @@ window.addEventListener('load',()=>{
 </script>
 <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
 <script src="https://accounts.google.com/gsi/client" onload="gsiLoaded()" async defer></script>
+<!-- PIKACHU BUDDY -->
+<div id="pikachuBuddy" style="display:none;">
+  <div id="pikachuBubble" style="display:none;"></div>
+  <button class="poke-sprite-btn" onclick="pikachuTapped()" id="pikachuBtn" title="Tap Pikachu!">
+    <img id="pikachuImg" class="poke-sprite" width="64" height="64" alt="Pikachu">
+  </button>
+</div>
+
+<!-- WALKING SPRITE -->
+<div id="walkerWrap" style="display:none;left:-80px;">
+  <img id="walkerSprite" class="poke-sprite" width="64" height="64" alt="">
+</div>
+
+<!-- SET COMPLETE OVERLAY -->
+<div id="setCompleteOverlay" style="display:none;">
+  <div id="setCompleteCard">
+    <img id="setCompleteSprite" class="poke-sprite" width="96" height="96" alt="" style="display:block;margin:0 auto;">
+    <div class="complete-title" id="setCompleteTitle">SET COMPLETE!</div>
+    <div class="complete-sub" id="setCompleteSub"></div>
+    <button onclick="closeSetComplete()" style="background:linear-gradient(135deg,#c8a010,#b8960c);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;">Awesome! 🎉</button>
+  </div>
+</div>
+
 <!-- BOTTOM NAV (mobile) -->
 <div class="bottom-nav" id="bottomNav">
   <button class="bottom-nav-btn on" id="bnCollection" onclick="showTab('collection')">
