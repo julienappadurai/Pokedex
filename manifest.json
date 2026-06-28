@@ -2,21 +2,21 @@
   "name": "Pokédex Binder",
   "short_name": "Binder",
   "description": "TCG Collection Tracker",
-  "start_url": "/Pokedex/",
-  "scope": "/Pokedex/",
+  "start_url": "https://julienappadurai.github.io/Pokedex/",
+  "scope": "https://julienappadurai.github.io/Pokedex/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f5f0eb",
+  "background_color": "#1a1a1a",
   "theme_color": "#b8960c",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://julienappadurai.github.io/Pokedex/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://julienappadurai.github.io/Pokedex/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
