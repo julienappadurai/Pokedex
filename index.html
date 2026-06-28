@@ -750,6 +750,52 @@ body.dark .ptr-indicator{background:rgba(36,34,30,.96);border-color:rgba(200,180
 .stat-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;letter-spacing:-.5px;}
 .ledger-card-row .lcr-amount{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;}
 
+
+/* ── HERO DASHBOARD + SET LIST ── */
+#heroDashboard{
+  background:rgba(255,255,255,.95);
+  border:1.5px solid rgba(184,150,12,.2);
+  border-radius:18px;padding:20px;
+  position:relative;overflow:hidden;
+}
+body.dark #heroDashboard{background:rgba(36,34,30,.97);border-color:rgba(200,180,120,.15);}
+#heroDashboard::after{content:'🎴';position:absolute;right:-10px;bottom:-16px;font-size:80px;opacity:.06;pointer-events:none;}
+.hero-title{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--yellow);letter-spacing:1px;margin-bottom:14px;}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.hero-stat{text-align:center;}
+.hero-stat-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--text);line-height:1;}
+.hero-stat-val span{font-size:12px;color:var(--muted);}
+.hero-stat-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+.hero-progress-wrap{margin-top:4px;}
+.hero-progress-track{background:rgba(0,0,0,.08);border-radius:99px;height:8px;overflow:hidden;}
+body.dark .hero-progress-track{background:rgba(255,255,255,.08);}
+.hero-progress-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--yellow),#d4aa14);transition:width .8s cubic-bezier(.4,0,.2,1);}
+.hero-progress-pct{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--yellow);margin-top:6px;text-align:right;}
+
+/* ── SET LIST ROWS ── */
+.set-list-row{
+  background:rgba(255,255,255,.95);
+  border:1.5px solid rgba(184,150,12,.15);
+  border-radius:14px;padding:14px 16px;
+  display:flex;align-items:center;gap:14px;
+  cursor:pointer;transition:all .18s;
+  margin-bottom:10px;position:relative;overflow:hidden;
+}
+body.dark .set-list-row{background:rgba(36,34,30,.97);border-color:rgba(200,180,120,.1);}
+.set-list-row:hover,.set-list-row:active{transform:translateX(3px);border-color:rgba(184,150,12,.4);}
+.set-list-left-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:14px 0 0 14px;}
+.set-list-icon{font-size:28px;flex-shrink:0;width:36px;text-align:center;}
+.set-list-info{flex:1;min-width:0;}
+.set-list-name{font-weight:800;font-size:14px;color:var(--text);margin-bottom:2px;}
+.set-list-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px;}
+.set-list-progress-track{background:rgba(0,0,0,.08);border-radius:99px;height:5px;overflow:hidden;}
+body.dark .set-list-progress-track{background:rgba(255,255,255,.08);}
+.set-list-progress-bar{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.set-list-right{text-align:right;flex-shrink:0;}
+.set-list-pct{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;line-height:1;}
+.set-list-count{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+.set-list-arrow{font-size:14px;color:var(--muted);flex-shrink:0;}
+
 /* ── FINANCE BLUR ── */
 .fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
 .fin-blur:hover{filter:blur(4px);}
@@ -863,10 +909,24 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
 
   <!-- COLLECTION TAB -->
   <div id="viewCollection">
-    <div class="sec">Sets</div>
-    <div class="set-grid" id="setGrid"></div>
-    <div id="collectionBody" style="display:none;">
-      <div class="sec" id="collectionSetTitle">Base Set</div>
+
+    <!-- SCREEN 1: SETS OVERVIEW -->
+    <div id="setsOverview">
+      <!-- Hero dashboard card -->
+      <div id="heroDashboard" style="margin-bottom:16px;"></div>
+      <!-- Set list -->
+      <div id="setListRows"></div>
+    </div>
+
+    <!-- SCREEN 2: SET DETAIL (binder) -->
+    <div id="setDetail" style="display:none;">
+      <!-- Back button + set header -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <button onclick="closeSetDetail()" style="background:none;border:1.5px solid rgba(184,150,12,.25);border-radius:10px;padding:8px 14px;color:var(--yellow);cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;transition:all .15s;" onmouseover="this.style.background='rgba(184,150,12,.08)'" onmouseout="this.style.background='none'">← Back</button>
+        <div>
+          <div id="collectionSetTitle" style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--yellow);"></div>
+        </div>
+      </div>
       <div class="col-stats" id="colStats"></div>
       <div class="col-filters">
         <button class="filter-btn on" id="filterAll" onclick="setFilter('all')">All</button>
@@ -877,6 +937,10 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
       </div>
       <div class="binder" id="binderGrid"></div>
     </div>
+
+    <!-- Legacy div kept for compat -->
+    <div id="collectionBody" style="display:none;"></div>
+    <div class="set-grid" id="setGrid" style="display:none;"></div>
   </div>
 
   <!-- LEDGER TAB -->
@@ -1759,30 +1823,114 @@ function renderAll(){
   populateLedgerSetFilter();
 }
 
-function renderSetGrid(){
-  const grid=$id('setGrid'); grid.innerHTML='';
-  Object.entries(SETS).forEach(([setName,setData])=>{
-    const owned=setData.cards.filter(c=>{ const cd=getCard(setName,c.num); return cd&&cd.owned; }).length;
-    const pct=Math.round(owned/setData.total*100);
-    const div=document.createElement('div');
-    div.className='set-card'+(activeSet===setName?' on':'');
-    div.setAttribute('data-set',setName);
-    div.innerHTML=`
-      <div class="set-badge">${setData.icon}</div>
-      <div class="set-card-name">${esc(setName)}</div>
-      <div class="set-card-meta">${setData.total} cards</div>
-      <div class="set-progress"><div class="set-progress-bar" style="width:${pct}%"></div></div>
-      <div class="set-pct">${owned}/${setData.total} — ${pct}%</div>`;
-    div.onclick=()=>{ activeSet=setName; activeFilter='all'; $id('colSearch').value=''; renderSetGrid(); renderCollectionBody(); };
-    grid.appendChild(div);
+function renderSetGrid(){ renderSetsOverview(); }
+
+function renderSetsOverview(){
+  const accentMap={'Base Set':'#e63b2e','Jungle':'#56d364','Fossil':'#90a4ae','WOTC Black Star Promos':'#ffd700'};
+  const iconMap={'Base Set':'🔴','Jungle':'🌿','Fossil':'🦴','WOTC Black Star Promos':'⭐'};
+
+  // ── Hero dashboard ──
+  let totalOwned=0,totalCards=0,totalNM=0,setsComplete=0;
+  Object.keys(SETS).forEach(sn=>{
+    const sd=SETS[sn];
+    const oc=sd.cards.filter(c=>{ const d=getCard(sn,c.num); return d&&d.owned; });
+    totalOwned+=oc.length; totalCards+=sd.total;
+    totalNM+=oc.reduce((s,c)=>{ const d=getCard(sn,c.num); return s+(d&&d.nmPrice?parseFloat(d.nmPrice):0); },0);
+    if(oc.length===sd.total&&sd.total>0) setsComplete++;
   });
+  const overallPct=totalCards>0?Math.round(totalOwned/totalCards*100):0;
+  const hero=$id('heroDashboard');
+  if(hero) hero.innerHTML=`
+    <div class="hero-title">MY COLLECTION</div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">${totalOwned}<span> / ${totalCards}</span></div>
+        <div class="hero-stat-label">Cards Owned</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" style="position:relative;">${finWrap(fmt(totalNM))}</div>
+        <div class="hero-stat-label">NM Value</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">${setsComplete}<span> / ${Object.keys(SETS).length}</span></div>
+        <div class="hero-stat-label">Sets Complete</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">${overallPct}<span>%</span></div>
+        <div class="hero-stat-label">Overall</div>
+      </div>
+    </div>
+    <div class="hero-progress-wrap">
+      <div class="hero-progress-track">
+        <div class="hero-progress-bar" id="heroBar" style="width:0%;"></div>
+      </div>
+      <div class="hero-progress-pct">${overallPct}% complete</div>
+    </div>`;
+  setTimeout(()=>{ const b=$id('heroBar'); if(b){ b.style.transition='width .8s cubic-bezier(.4,0,.2,1)'; b.style.width=overallPct+'%'; }},80);
+
+  // ── Set list rows ──
+  const list=$id('setListRows'); if(!list) return; list.innerHTML='';
+  Object.keys(SETS).forEach(setName=>{
+    const sd=SETS[setName];
+    const owned=sd.cards.filter(c=>{ const d=getCard(setName,c.num); return d&&d.owned; }).length;
+    const pct=Math.round(owned/sd.total*100);
+    const accent=accentMap[setName]||'#b8960c';
+    const icon=iconMap[setName]||'📦';
+    const barCol=pct===100?'#ffd700':pct>=67?'#56d364':pct>=34?'#ff8c42':'#e63b2e';
+    const needsUpgrade=sd.cards.filter(c=>{ const d=getCard(setName,c.num); return d&&d.owned&&d.upgrade; }).length;
+    const row=document.createElement('div');
+    row.className='set-list-row';
+    row.innerHTML=`
+      <div class="set-list-left-bar" style="background:${barCol};"></div>
+      <div class="set-list-icon">${icon}</div>
+      <div class="set-list-info">
+        <div class="set-list-name">${esc(setName)}</div>
+        <div class="set-list-sub">${owned} owned · ${sd.total-owned} missing${needsUpgrade?` · <span style="color:var(--orange);">↑${needsUpgrade} upgrade</span>`:''}${pct===100?' · <span style="color:#ffd700;">✓ Complete</span>':''}</div>
+        <div class="set-list-progress-track">
+          <div class="set-list-progress-bar" data-w="${pct}" style="width:0%;background:${accent};"></div>
+        </div>
+      </div>
+      <div class="set-list-right">
+        <div class="set-list-pct" style="color:${pct===100?'#ffd700':accent};">${pct}%</div>
+        <div class="set-list-count">${owned}/${sd.total}</div>
+      </div>
+      <div class="set-list-arrow">›</div>`;
+    row.onclick=()=>openSetDetail(setName);
+    list.appendChild(row);
+  });
+  setTimeout(()=>{
+    if(!list) return;
+    list.querySelectorAll('.set-list-progress-bar').forEach(b=>{
+      b.style.transition='width .8s cubic-bezier(.4,0,.2,1)';
+      b.style.width=b.getAttribute('data-w')+'%';
+    });
+  },80);
+}
+
+function openSetDetail(setName){
+  activeSet=setName; activeFilter='all';
+  if($id('colSearch')) $id('colSearch').value='';
+  $id('setsOverview').style.display='none';
+  $id('setDetail').style.display='';
+  $id('collectionSetTitle').textContent=setName;
+  renderColStats(); renderBinder();
+}
+
+function closeSetDetail(){
+  $id('setDetail').style.display='none';
+  $id('setsOverview').style.display='';
+  renderSetsOverview();
 }
 
 function renderCollectionBody(){
-  $id('collectionBody').style.display='';
-  $id('collectionSetTitle').textContent=activeSet;
-  renderColStats();
-  renderBinder();
+  // Called when returning from card modal — just refresh if detail is open
+  if($id('setDetail').style.display!=='none'){
+    $id('collectionSetTitle').textContent=activeSet;
+    renderColStats();
+    renderBinder();
+  } else {
+    renderSetsOverview();
+  }
   // Animate progress bars with smooth fill
   setTimeout(()=>{
     document.querySelectorAll('.set-progress-bar').forEach(b=>{
@@ -1974,8 +2122,12 @@ function saveCard(){
   D.collection[editingCardKey]=entry;
   save();
   closeCardModal();
-  renderSetGrid();
-  renderCollectionBody();
+  // Stay on detail view if it was open
+  if($id('setDetail')&&$id('setDetail').style.display!=='none'){
+    renderColStats();
+    renderBinder();
+  }
+  renderSetsOverview();
 }
 
 // ═══════════════════════════════════════════════
@@ -2082,7 +2234,7 @@ function saveLedgerEntry(){
   // Store all keys on entry for reference
   entry.collectionKeys = cks;
   if(cks.length===1) entry.collectionKey = cks[0];
-  save(true); closeLedgerModal(); renderSetGrid(); renderCollectionBody(); renderLedger();
+  save(true); closeLedgerModal(); renderSetsOverview(); renderLedger();
 }
 
 function deleteLedgerEntry(){
