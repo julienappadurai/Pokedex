@@ -975,6 +975,22 @@ body.dark .page-btn:hover:not(:disabled){background:rgba(255,215,0,.06);}
 }
 .page-info strong{color:var(--text2);font-weight:700;}
 
+
+/* ── LEDGER STATS TOGGLE ── */
+.stats-toggle{
+  display:flex;gap:6px;margin-bottom:12px;
+}
+.stats-toggle-btn{
+  flex:1;background:rgba(255,255,255,.7);border:1.5px solid rgba(184,150,12,.2);
+  border-radius:20px;padding:6px 10px;text-align:center;
+  font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.5px;
+  color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;
+}
+.stats-toggle-btn:hover{border-color:var(--yellow);color:var(--text2);}
+.stats-toggle-btn.active{background:var(--yellow);color:#111;border-color:var(--yellow);}
+body.dark .stats-toggle-btn{background:rgba(36,34,30,.8);border-color:rgba(200,180,120,.15);}
+body.dark .stats-toggle-btn.active{background:var(--yellow);color:#111;}
+
 /* ── FINANCE BLUR ── */
 .fin-blur{filter:blur(6px);user-select:none;cursor:pointer;transition:filter .3s;}
 .fin-blur:hover{filter:blur(4px);}
@@ -1128,6 +1144,11 @@ body.light .hbtn{color:rgba(255,255,255,.8);}
     <div class="ledger-top">
       <div class="ledger-title">Purchase &amp; Sales Log</div>
       <button class="hbtn" onclick="openAddLedger()" style="color:var(--yellow);border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.07);font-weight:800;">＋ Add Entry</button>
+    </div>
+    <div class="stats-toggle">
+      <button class="stats-toggle-btn active" id="stAll" onclick="setLStatsFilter('all')">All</button>
+      <button class="stats-toggle-btn" id="stCol" onclick="setLStatsFilter('collection')">Collection</button>
+      <button class="stats-toggle-btn" id="stOth" onclick="setLStatsFilter('other')">Other</button>
     </div>
     <div class="ledger-stats" id="ledgerStats"></div>
     <div class="ledger-filters">
@@ -1725,6 +1746,7 @@ let editingLedgerId = null;
 let lSortCol = 'date', lSortDir = 'desc';
 let lPage = 0;
 const L_PAGE_SIZE = 20;
+let lStatsFilter = 'all'; // 'all' | 'collection' | 'other'
 let folderId = null, fileId = null, tokenClient = null, gapiOk = false, driveReady = false;
 let backupInProgress = false;
 let pinBuffer = '', pinMode = 'login', pinFirst = '';
@@ -2528,6 +2550,16 @@ Remove owned status too?`
   save(true); closeLedgerModal(); renderSetsOverview(); renderLedger();
 }
 
+function setLStatsFilter(f){
+  lStatsFilter = f;
+  ['stAll','stCol','stOth'].forEach(id=>{
+    const btn=$id(id); if(btn) btn.classList.remove('active');
+  });
+  const map={all:'stAll',collection:'stCol',other:'stOth'};
+  const active=$id(map[f]); if(active) active.classList.add('active');
+  renderLedgerDOM();
+}
+
 function lPageChange(dir){
   lPage += dir;
   renderLedger();
@@ -2568,12 +2600,21 @@ function renderLedger(resetPage){
 }
 function renderLedgerDOM(){
   updateSortBar();
-  // Stats
-  const totalSpent=D.ledger.reduce((s,l)=>s+(l.paid||0),0);
-  const sold=D.ledger.filter(l=>l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='');
+  // Stats — filtered by lStatsFilter
+  const COLLECTION_KEYS = Object.values(SETS).flatMap(s=>s.cards.map(c=>c._setName+'|'+c.num));
+  const isCollectionEntry = l => !!(l.collectionKey || (l.collectionKeys && l.collectionKeys.length));
+  const statsLedger = lStatsFilter==='all' ? D.ledger
+    : lStatsFilter==='collection' ? D.ledger.filter(isCollectionEntry)
+    : D.ledger.filter(l=>!isCollectionEntry(l));
+  const totalSpent=statsLedger.reduce((s,l)=>s+(l.paid||0),0);
+  const sold=statsLedger.filter(l=>l.soldPrice!==null&&l.soldPrice!==undefined&&l.soldPrice!=='');
   const totalRevenue=sold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0),0);
   const totalProfit=sold.reduce((s,l)=>s+(parseFloat(l.soldPrice)||0)-(l.paid||0),0);
-  const open=D.ledger.filter(l=>!l.soldPrice).length;
+  const open=statsLedger.filter(l=>!l.soldPrice).length;
+  // Update toggle button states
+  ['stAll','stCol','stOth'].forEach(id=>{const b=$id(id);if(b)b.classList.remove('active');});
+  const activeMap={all:'stAll',collection:'stCol',other:'stOth'};
+  const activeBtn=$id(activeMap[lStatsFilter]); if(activeBtn) activeBtn.classList.add('active');
   $id('ledgerStats').innerHTML=`
     <div class="stat-card stat-spent"><div class="stat-label">Total Spent</div><div class="stat-val">${finWrap(fmt(totalSpent))}</div></div>
     <div class="stat-card stat-revenue"><div class="stat-label">Total Revenue</div><div class="stat-val">${finWrap(fmt(totalRevenue))}</div></div>
